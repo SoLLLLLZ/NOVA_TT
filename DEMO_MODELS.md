@@ -2,7 +2,7 @@
 
 Updated November 7, 2026. Repository: https://github.com/SoLLLLLZ/NOVA_TT
 
-Build the model picker and results UI against [endpoint.md](endpoint.md), contract v0.1. This document supplies the three demo model identities, supported Wright layouts and reference configurations. It does not change the API contract or prove that a backend endpoint has been implemented. Use [OPTIMIZER_AGENT.md](OPTIMIZER_AGENT.md) for agent behavior and [CANON.csv](CANON.csv) with [CANON_GUIDE.md](CANON_GUIDE.md) for evidence.
+Build the model picker and results UI against [endpoint.md](endpoint.md), contract v2.0. This document supplies the three demo model identities, supported Wright layouts and reference configurations. It does not change the API contract or prove that a backend endpoint has been implemented. Use [OPTIMIZER_AGENT.md](OPTIMIZER_AGENT.md) for agent behavior and [CANON.csv](CANON.csv) with [CANON_GUIDE.md](CANON_GUIDE.md) for evidence.
 
 ## Model picker
 
@@ -20,7 +20,7 @@ Suggested starting selection: ByteShape Qwen 3.8 27B, preset `fastest`. Present 
 
 ### `/status` model catalog example
 
-This is the `models` fragment of a response, not a replacement for the full `/status` response:
+This is an illustrative v2 `models` fragment with downloaded files but no active allocation. IDs prefixed `example-` are placeholders; it is not a live `/status` response:
 
 ```json
 {
@@ -29,19 +29,82 @@ This is the `models` fragment of a response, not a replacement for the full `/st
       "id": "qwen3.8-27b",
       "display_name": "ByteShape Qwen 3.8 27B",
       "installed": true,
-      "database_coverage": "verified"
+      "database_coverage": "verified",
+      "quant": "IQ3_S hybrid 3.23bpw",
+      "artifact_id": "example-qwen3.8-27b-target",
+      "loaded": false,
+      "requirements": {
+        "gpu_type": "L40",
+        "gpu_count": 1,
+        "same_node": true,
+        "context_per_slot": 65536
+      },
+      "ready": false,
+      "readiness_reasons": [
+        "Example: no active GPU allocation"
+      ],
+      "race": {
+        "simultaneous_available": false,
+        "sequential_available": false,
+        "required_gpus_simultaneous": 2,
+        "reasons": [
+          "Example: allocate GPUs before running"
+        ]
+      }
     },
     {
       "id": "qwen3.8-flash-next",
       "display_name": "Qwen 3.8 Flash Next",
       "installed": true,
-      "database_coverage": "verified"
+      "database_coverage": "verified",
+      "quant": "UD-Q4_K_XL",
+      "artifact_id": "example-qwen3.8-flash-next-target",
+      "loaded": false,
+      "requirements": {
+        "gpu_type": "L40",
+        "gpu_count": 3,
+        "same_node": true,
+        "context_per_slot": 131072
+      },
+      "ready": false,
+      "readiness_reasons": [
+        "Example: no active GPU allocation"
+      ],
+      "race": {
+        "simultaneous_available": false,
+        "sequential_available": false,
+        "required_gpus_simultaneous": 6,
+        "reasons": [
+          "Example: allocate GPUs before running"
+        ]
+      }
     },
     {
       "id": "muse-glimmer",
       "display_name": "Muse Glimmer 30B",
       "installed": true,
-      "database_coverage": "verified"
+      "database_coverage": "verified",
+      "quant": "UD-Q4_K_XL",
+      "artifact_id": "example-muse-glimmer-target",
+      "loaded": false,
+      "requirements": {
+        "gpu_type": "L40",
+        "gpu_count": 1,
+        "same_node": true,
+        "context_per_slot": 262144
+      },
+      "ready": false,
+      "readiness_reasons": [
+        "Example: no active GPU allocation"
+      ],
+      "race": {
+        "simultaneous_available": false,
+        "sequential_available": false,
+        "required_gpus_simultaneous": 2,
+        "reasons": [
+          "Example: allocate GPUs before running"
+        ]
+      }
     }
   ]
 }
@@ -76,46 +139,150 @@ All three historical profiles used 12 allocated logical CPUs and 64 GiB host RAM
 
 ByteShape fallback: `cfg_aee1c8396d18230b`, temperature 1 and MTP3, with the other listed settings unchanged. Glimmer fallback: `cfg_91cf36411e6d4895`, temperature 1 and DFlash11. Glimmer's short-prompt candidate is faster in the recorded evidence, but long-prompt results vary and do not establish a reliable general advantage. The saved Glimmer runtime caps drafts at 15; there is no tested draft17 profile. Flash has one supported optimized L40 profile in this comparison.
 
-### Public `config` projections
+### V2 `config` examples
 
-The following mapping is documentation, keyed by model ID. Each value is an example of the existing API's `config` object, suitable for a mock **after optimization**, not a new endpoint payload. Here `threads` projects the decode-thread count; detailed prefill threads and draft settings remain in the backend profile. `speculative_mode` values come from CANON; render MTP and DFlash as friendly labels.
+This mapping is documentation keyed by model ID, not a new endpoint payload. It uses the v2 config envelope and explicit settings so the frontend can show MTP/DFlash draft depth, separate thread counts and sampling changes. IDs prefixed `example-` are fixture identifiers; use the real IDs returned by `/profiles` and `/capabilities`. These examples include the important CANON settings; the backend's complete profile also resolves runtime/template details and effective placement. Do not submit example IDs to a live backend or guess missing settings from them.
 
 ```json
 {
   "qwen3.8-27b": {
-    "engine": "llama.cpp",
-    "threads": 2,
-    "context_tokens": 65536,
-    "batch_size": 2048,
-    "kv_type": "q8_0",
-    "flash_attention": true,
+    "profile_id": "example-cfg_549fe546f2fd44a6",
+    "model": "qwen3.8-27b",
+    "artifact_id": "example-qwen3.8-27b-target",
     "quant": "IQ3_S hybrid 3.23bpw",
-    "speculative_mode": "draft-mtp"
+    "engine": "llama.cpp",
+    "runtime_id": "example-llamacpp-b10820-sm89",
+    "settings": {
+      "context_tokens": 65536,
+      "context_per_slot": 65536,
+      "parallel_slots_per_process": 1,
+      "replicas": 1,
+      "batch_size": 2048,
+      "microbatch_size": 512,
+      "threads_decode": 2,
+      "threads_prefill": 6,
+      "draft_tokens": 5,
+      "draft_gpu_layers": 99,
+      "prompt_cache_ram_mib": 1024,
+      "kv_type_k": "q8_0",
+      "kv_type_v": "q8_0",
+      "flash_attention": "on",
+      "fit": "off",
+      "speculative_mode": "draft-mtp",
+      "draft_kv_k": "q8_0",
+      "draft_kv_v": "q8_0",
+      "split_mode": "none",
+      "reasoning_effort": "medium",
+      "temperature": 0.75,
+      "top_p": 0.95,
+      "min_p": 0.0,
+      "top_k": 20,
+      "draft_device": [
+        "CUDA0"
+      ],
+      "backend_sampling": true,
+      "checkpoint_min_step": 512,
+      "gpu_layers": 99,
+      "main_gpu": 0,
+      "tensor_overrides": [
+        {
+          "pattern": "token_embd.weight",
+          "buffer": "CUDA0"
+        }
+      ],
+      "draft_model": null
+    }
   },
   "qwen3.8-flash-next": {
-    "engine": "llama.cpp",
-    "threads": 8,
-    "context_tokens": 131072,
-    "batch_size": 2048,
-    "kv_type": "f16",
-    "flash_attention": true,
+    "profile_id": "example-cfg_22bd103c1aadb59c",
+    "model": "qwen3.8-flash-next",
+    "artifact_id": "example-qwen3.8-flash-next-target",
     "quant": "UD-Q4_K_XL",
-    "speculative_mode": "draft-mtp"
+    "engine": "llama.cpp",
+    "runtime_id": "example-llamacpp-b10820-sm89",
+    "settings": {
+      "context_tokens": 131072,
+      "context_per_slot": 131072,
+      "parallel_slots_per_process": 1,
+      "replicas": 1,
+      "batch_size": 2048,
+      "microbatch_size": 1024,
+      "threads_decode": 8,
+      "threads_prefill": 12,
+      "draft_tokens": 2,
+      "draft_gpu_layers": 99,
+      "prompt_cache_ram_mib": 4096,
+      "kv_type_k": "f16",
+      "kv_type_v": "f16",
+      "flash_attention": "on",
+      "fit": "on",
+      "speculative_mode": "draft-mtp",
+      "draft_kv_k": "f16",
+      "draft_kv_v": "f16",
+      "split_mode": "layer",
+      "reasoning_effort": "medium",
+      "temperature": 1.0,
+      "top_p": 0.95,
+      "min_p": 0.0,
+      "top_k": 20,
+      "draft_device": [
+        "CUDA2"
+      ],
+      "fit_target_mib": [
+        1024,
+        1024,
+        4096
+      ],
+      "backend_sampling": true,
+      "force_mmq_runtime": true,
+      "load_mode": "none",
+      "lazy_mode": "on",
+      "draft_probability_min": 0.5,
+      "draft_model": "example-qwen3.8-flash-next-draft"
+    }
   },
   "muse-glimmer": {
-    "engine": "llama.cpp",
-    "threads": 8,
-    "context_tokens": 262144,
-    "batch_size": 4096,
-    "kv_type": "f16",
-    "flash_attention": true,
+    "profile_id": "example-cfg_0956f7625217646c",
+    "model": "muse-glimmer",
+    "artifact_id": "example-muse-glimmer-target",
     "quant": "UD-Q4_K_XL",
-    "speculative_mode": "draft-dflash"
+    "engine": "llama.cpp",
+    "runtime_id": "example-glimmer-patched-sm89",
+    "settings": {
+      "context_tokens": 262144,
+      "context_per_slot": 262144,
+      "parallel_slots_per_process": 1,
+      "replicas": 1,
+      "batch_size": 4096,
+      "microbatch_size": 512,
+      "threads_decode": 8,
+      "threads_prefill": 12,
+      "draft_tokens": 15,
+      "draft_gpu_layers": 99,
+      "prompt_cache_ram_mib": 4096,
+      "kv_type_k": "f16",
+      "kv_type_v": "f16",
+      "flash_attention": "on",
+      "fit": "off",
+      "speculative_mode": "draft-dflash",
+      "draft_kv_k": "f16",
+      "draft_kv_v": "f16",
+      "split_mode": "none",
+      "reasoning_effort": "high",
+      "temperature": 0.75,
+      "top_p": 0.95,
+      "min_p": 0.0,
+      "top_k": 64,
+      "draft_device": [
+        "CUDA0"
+      ],
+      "draft_model": "example-muse-glimmer-draft"
+    }
   }
 }
 ```
 
-Contract v0.1 does not expose draft depth, temperature, prefill threads, microbatch, profile ID or GPU-group selection as public `config` fields. Do not add these fields to requests or assume the frontend can set them. The backend must retain the complete validated profile internally and apply it with supported tools. Treat the table as reference information, not executable launch arguments.
+Only edit fields advertised writable by `/capabilities`. The backend resolves the complete saved profile and reports proposed/effective config and any changes. Keep most settings in the details panel; ordinary users still choose model and GPU resources and click Optimize.
 
 ## Default Ollama lane
 
@@ -135,26 +302,40 @@ Quantization is the same as each model's optimized profile. The 128 threads were
 
 ## Requests, progress and results
 
-Example ByteShape request:
+Example ByteShape request (send `X-Pairing-Token` and an `Idempotency-Key`):
 
 ```json
 {
   "model": "qwen3.8-27b",
   "preset": "fastest",
+  "objective": "decode",
+  "workload": "short",
+  "mode": "sequential_compare",
+  "resources": {
+    "target_id": "wright",
+    "gpu_type": "L40",
+    "gpu_count": 1,
+    "same_node": true
+  },
   "constraints": {
     "min_context_tokens": 32768,
-    "quant": "IQ3_S hybrid 3.23bpw"
+    "quant": "IQ3_S hybrid 3.23bpw",
+    "allow_sampling_change": true
+  },
+  "budget": {
+    "deadline_seconds": 180,
+    "max_repair_attempts": 2
   }
 }
 ```
 
-For the other two choices, replace `model` with the exact catalog ID and `quant` with `UD-Q4_K_XL`. The demo can keep this 32K minimum requirement; the optimized profiles retain their larger contexts. Do not imply that Flash's optimized 128K profile satisfies a caller who explicitly requires 256K. Use `gpu_index` only when supplied by the live backend; a historical physical index is not reusable.
+For Glimmer use model `muse-glimmer` and quant `UD-Q4_K_XL`. For Flash use `qwen3.8-flash-next`, quant `UD-Q4_K_XL`, and resources.gpu_count=3 with same_node=true. Obtain target/allocation/GPU IDs from the backend; never hardcode historical physical GPU indices. This 32K minimum lets the tested optimized profiles retain their larger contexts. A caller explicitly requiring 256K cannot be served by Flash's 128K profile without changing that request. `allow_sampling_change: true` permits the documented candidate temperatures; false preserves the active/baseline sampler.
 
-- Use the existing `X-Pairing-Token` header and POST streaming format from endpoint.md. The frontend never receives the OpenRouter API key.
-- Follow `step` events for `detect_gpu`, `check_database`, `ask_ai`, `test_configs`, and `apply`. Put loading/queue details in the existing `detail` text; do not invent new step enum values or fake progress with a completion timer.
-- Render returned `config`, `changed`, `reasoning` and `confidence`. Do not announce success until the terminal `done` event has `applied: true`. Render terminal `error` events and the existing diagnose/action flow when applicable.
-- Drive the main speed display from live `benchmark`/`done` data. Show an empty/pending state until results arrive. Use `decode_tps` as primary, `prefill_tps` as secondary and the returned `speedup`; do not seed live meters with CANON values.
-- Keep selection locked during an active operation, or require backend-supported cancellation before switching. There is no cancellation endpoint in v0.1. The backend retains service ownership and handles rollback through `/revert`.
+- Check contract_version=2.0 before mutations. Follow the v2 POST SSE envelope and keep run_id for reconnect/cancel. The frontend never receives the OpenRouter key.
+- Render step events including allocation, loading, verification and repair. Progress may be null; show the actual detail instead of a fake percentage.
+- Render full config.settings, `changes` with dotted paths, evidence and independent validation. Announce success only on a terminal successful done result with applied=true and passed verification.
+- Use live benchmark measurement.decode_tps as primary and prefill_tps as secondary. Before/speedup are null in verify_only. Do not seed live meters with CANON values.
+- Use `/runs/{run_id}` after a lost stream instead of reposting the operation. Lock conflicting model changes while active; use `/runs/{run_id}/cancel` if cancellation is requested. `/revert` is streaming and takes the returned rollback_id.
 
 ### Multiple GPUs and race availability
 
@@ -162,7 +343,7 @@ One ByteShape or Glimmer engine needs one L40. A simultaneous race needs **two s
 
 The planned live presentation is a **sequential** default-then-optimized comparison, which only needs one profile's allocation (1 / 3 / 1 L40s). Do not label a sequential comparison as a simultaneous race or replay saved text as live output.
 
-Contract v0.1 has one optional `gpu_index`, no GPU-group selector, and no `race_available` field. The backend must validate the whole required allocation and choose the group; selecting one GPU does not make Flash ready. Render allocation failures using the existing error mechanism. Do not invent extra request fields or infer race readiness solely from `installed: true`. If a richer readiness/group-selection API is needed, coordinate a versioned contract change separately.
+V2 exposes resource groups and model/race readiness through `/status`, `/capabilities` and structured `resources`. The backend validates actual allocation, not only the count visible in a widget. Show readiness reasons when Flash or simultaneous race resources are unavailable. `installed: true` alone never enables a race.
 
 ## Historical speed reference (not live UI values)
 
