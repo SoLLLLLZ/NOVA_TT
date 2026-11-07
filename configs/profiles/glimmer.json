@@ -1,0 +1,308 @@
+{
+  "model": "muse-glimmer",
+  "gpu_count": 1,
+  "target_layers": 53,
+  "asset_root": "/home/export/taeholee/nova/wright-glimmer-1l40-20261105/assets",
+  "shared_root": "/home/export/taeholee/nova/byteshape-20261103/assets",
+  "runtime_dir": "/home/export/taeholee/nova/wright-glimmer-1l40-20261105/runtime/bin",
+  "runtime_env": {},
+  "profiles": [
+    {
+      "label": "Glimmer conservative DFlash11",
+      "source_config_ids": [
+        "cfg_91cf36411e6d4895"
+      ],
+      "config": {
+        "model": "muse-glimmer",
+        "artifact_id": "glimmer-udq4-82bece30",
+        "quant": "UD-Q4_K_XL",
+        "engine": "llama.cpp",
+        "runtime_id": "glimmer-patched-l40-b10820",
+        "settings": {
+          "context_tokens": 262144,
+          "context_per_slot": 262144,
+          "parallel_slots_per_process": 1,
+          "replicas": 1,
+          "batch_size": 4096,
+          "microbatch_size": 512,
+          "threads_decode": 8,
+          "threads_prefill": 12,
+          "draft_tokens": 11,
+          "draft_gpu_layers": 99,
+          "prompt_cache_ram_mib": 4096,
+          "kv_type_k": "f16",
+          "kv_type_v": "f16",
+          "flash_attention": "on",
+          "fit": "off",
+          "speculative_mode": "draft-dflash",
+          "draft_kv_k": "f16",
+          "draft_kv_v": "f16",
+          "split_mode": "none",
+          "reasoning_effort": "high",
+          "temperature": 1.0,
+          "top_p": 0.95,
+          "min_p": 0.0,
+          "top_k": 64,
+          "draft_device": [
+            "CUDA0"
+          ],
+          "draft_model": "glimmer-draft-27d9a805",
+          "repeat_penalty": 1.0,
+          "presence_penalty": 0.0,
+          "jinja": true,
+          "reasoning_format": "deepseek",
+          "reasoning_preserve": true,
+          "mps": false,
+          "tensor_split": [],
+          "chat_template_id": "muse-glimmer-embedded",
+          "chat_template_kwargs": {
+            "reasoning_strength": "high"
+          },
+          "vision_projector": null,
+          "gpu_layers": 99,
+          "main_gpu": 0,
+          "backend_sampling": false,
+          "tensor_overrides": [
+            {
+              "pattern": "token_embd.weight",
+              "buffer": "CUDA0"
+            }
+          ],
+          "draft_tensor_overrides": [
+            {
+              "pattern": "token_embd.weight",
+              "buffer": "CUDA0"
+            }
+          ],
+          "context_override": {
+            "muse-glimmer.context_length": 262144,
+            "dflash.context_length": 262144
+          }
+        },
+        "unresolved_fields": [],
+        "profile_id": "profile_b0992299198b4bf335d64412"
+      }
+    },
+    {
+      "label": "Glimmer DFlash15 temperature 0.75",
+      "source_config_ids": [
+        "cfg_0956f7625217646c"
+      ],
+      "config": {
+        "model": "muse-glimmer",
+        "artifact_id": "glimmer-udq4-82bece30",
+        "quant": "UD-Q4_K_XL",
+        "engine": "llama.cpp",
+        "runtime_id": "glimmer-patched-l40-b10820",
+        "settings": {
+          "context_tokens": 262144,
+          "context_per_slot": 262144,
+          "parallel_slots_per_process": 1,
+          "replicas": 1,
+          "batch_size": 4096,
+          "microbatch_size": 512,
+          "threads_decode": 8,
+          "threads_prefill": 12,
+          "draft_tokens": 15,
+          "draft_gpu_layers": 99,
+          "prompt_cache_ram_mib": 4096,
+          "kv_type_k": "f16",
+          "kv_type_v": "f16",
+          "flash_attention": "on",
+          "fit": "off",
+          "speculative_mode": "draft-dflash",
+          "draft_kv_k": "f16",
+          "draft_kv_v": "f16",
+          "split_mode": "none",
+          "reasoning_effort": "high",
+          "temperature": 0.75,
+          "top_p": 0.95,
+          "min_p": 0.0,
+          "top_k": 64,
+          "draft_device": [
+            "CUDA0"
+          ],
+          "draft_model": "glimmer-draft-27d9a805",
+          "repeat_penalty": 1.0,
+          "presence_penalty": 0.0,
+          "jinja": true,
+          "reasoning_format": "deepseek",
+          "reasoning_preserve": true,
+          "mps": false,
+          "tensor_split": [],
+          "chat_template_id": "muse-glimmer-embedded",
+          "chat_template_kwargs": {
+            "reasoning_strength": "high"
+          },
+          "vision_projector": null,
+          "gpu_layers": 99,
+          "main_gpu": 0,
+          "backend_sampling": false,
+          "tensor_overrides": [
+            {
+              "pattern": "token_embd.weight",
+              "buffer": "CUDA0"
+            }
+          ],
+          "draft_tensor_overrides": [
+            {
+              "pattern": "token_embd.weight",
+              "buffer": "CUDA0"
+            }
+          ],
+          "context_override": {
+            "muse-glimmer.context_length": 262144,
+            "dflash.context_length": 262144
+          }
+        },
+        "unresolved_fields": [],
+        "profile_id": "profile_d51bab500a564f8d9e79ccb8"
+      }
+    },
+    {
+      "label": "Standalone untouched Ollama baseline",
+      "source_config_ids": [
+        "cfg_7bc565a253127cc7"
+      ],
+      "config": {
+        "model": "muse-glimmer",
+        "artifact_id": "glimmer-udq4-82bece30",
+        "quant": "UD-Q4_K_XL",
+        "engine": "ollama",
+        "runtime_id": "ollama-0.40.13",
+        "settings": {
+          "context_tokens": 32768,
+          "context_per_slot": 32768,
+          "parallel_slots_per_process": 1,
+          "replicas": 1,
+          "temperature": 0.8,
+          "top_p": 0.9,
+          "top_k": 40,
+          "min_p": 0.0,
+          "speculative_mode": "none"
+        },
+        "unresolved_fields": [],
+        "profile_id": "profile_f19b07b669d7f961a5b49f09"
+      }
+    }
+  ],
+  "llama_argv": [
+    "--model",
+    "/home/export/taeholee/nova/wright-glimmer-1l40-20261105/assets/Muse-Glimmer-30B-UD-Q4_K_XL.gguf",
+    "--alias",
+    "muse-glimmer-30b-q4-4agent",
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "45267",
+    "--ctx-size",
+    "262144",
+    "--parallel",
+    "1",
+    "--n-gpu-layers",
+    "99",
+    "--split-mode",
+    "none",
+    "--fit",
+    "off",
+    "--override-tensor",
+    "token_embd.weight=CUDA0",
+    "--threads",
+    "8",
+    "--threads-batch",
+    "12",
+    "--batch-size",
+    "4096",
+    "--ubatch-size",
+    "512",
+    "--flash-attn",
+    "on",
+    "--cache-type-k",
+    "f16",
+    "--cache-type-v",
+    "f16",
+    "--cache-ram",
+    "4096",
+    "--jinja",
+    "--reasoning-format",
+    "deepseek",
+    "--reasoning-effort",
+    "high",
+    "--reasoning-preserve",
+    "--chat-template-kwargs",
+    "{\"reasoning_strength\":\"high\"}",
+    "--temp",
+    "1.0",
+    "--top-p",
+    "0.95",
+    "--top-k",
+    "64",
+    "--min-p",
+    "0.0",
+    "--repeat-penalty",
+    "1.0",
+    "--presence-penalty",
+    "0.0",
+    "--verbosity",
+    "4",
+    "--override-kv",
+    "muse-glimmer.context_length=int:262144,dflash.context_length=int:262144",
+    "--spec-type",
+    "draft-dflash",
+    "--spec-draft-n-max",
+    "11",
+    "--spec-draft-device",
+    "CUDA0",
+    "--spec-draft-ngl",
+    "99",
+    "--spec-draft-override-tensor",
+    "token_embd.weight=CUDA0",
+    "--spec-draft-type-k",
+    "f16",
+    "--spec-draft-type-v",
+    "f16",
+    "--spec-draft-model",
+    "/home/export/taeholee/nova/wright-glimmer-1l40-20261105/assets/dflash-kquant.gguf",
+    "--metrics",
+    "--slots",
+    "--verbosity",
+    "4"
+  ],
+  "artifact": {
+    "id": "glimmer-udq4-82bece30",
+    "model": "muse-glimmer",
+    "kind": "target",
+    "quant": "UD-Q4_K_XL",
+    "files": [
+      {
+        "name": "Muse-Glimmer-30B-UD-Q4_K_XL.gguf",
+        "size_bytes": 15878222368,
+        "sha256": "82bece304887a313ece08400bc030f6066c7bff5b906b0cd40308ec8a409fd38",
+        "role": "target"
+      },
+      {
+        "name": "dflash-kquant.gguf",
+        "size_bytes": 1631205312,
+        "sha256": "27d9a805fa29b943cfb6ad4843367cd4eaaaf06bd452d8cc3e00a2cd18a677bc",
+        "role": "draft"
+      }
+    ]
+  },
+  "runtime_features": {
+    "cuda_graphs_build": true,
+    "force_mmq_build": false,
+    "force_cublas_build": false
+  },
+  "runtime_hashes": {
+    "libggml-base.so.0.23.0": "8a891840a43680d72742767df78f986679a2ce4b910e3cfb7dd552d774814fa1",
+    "libggml-cpu.so.0.23.0": "16f35bac24a6f837aa8fc1b3dac7096b89aaf0d7c1e7b9cc6389a6bfa0ca80f7",
+    "libggml-cuda.so.0.23.0": "9d9491cf0f1e4a32c18900dc84aeef8b395de18bf081fc03bdbdedc4eeda3267",
+    "libggml.so.0.23.0": "4b407c1eb9e06dc609bfb526f709ba848f596fc4f80a177e0dd2e8b06bb4e3cd",
+    "libllama.so.0.4.0": "c08e722d134fe69113c43cdae327e7f1e195f7006aac50d237fe579d3f81cb72",
+    "libllama-common.so.0.4.0": "4ce94587a2bcbae8aaeaff5970d562a67d1e94f77f1ec6ed294c7d862f3d88d5",
+    "libmtmd.so.0.4.0": "3126f325b04cb4666ea9bd2a4051b4481a67400a614f76919bf190d464fbb57b",
+    "libllama-server-impl.so": "2d852ba67f59907a93a12d8f7c12592ba33ea0415f21fa107fcb75e9ea795739",
+    "llama-server": "97e81fb144ffd1ca974de7e2c6bec6afd55220b86749a2171dcead64111c71f7",
+    "ollama": "ac31348ce57115579d57d16c7d914829199dfb281b5d43b943817cfe82f19fc1"
+  }
+}

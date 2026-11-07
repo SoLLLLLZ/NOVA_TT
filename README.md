@@ -1,10 +1,14 @@
 # NOVA
 
-A simple model/GPU setup tool that uses CANON evidence and an OpenRouter agent to select a conservative inference configuration, verify it, and show decode performance against default Ollama. The demo targets Wright L40 GPUs with ByteShape Qwen 3.8 27B, Qwen 3.8 Flash Next Q4 and Muse Glimmer Q4.
+A simple model/GPU setup tool that uses CANON evidence and an OpenRouter agent to select a conservative inference configuration, verify it, and show live decode performance. Default Ollama is a separate demo baseline, outside all production optimization pipelines. The demo targets Wright L40 GPUs with ByteShape Qwen 3.8 27B, Qwen 3.8 Flash Next Q4 and Muse Glimmer Q4.
 
 Shared repository: https://github.com/SoLLLLLZ/NOVA_TT
 
-**Current status:** The Python FastAPI backend, explicit frontend mock mode, registered ByteShape profiles and Wright Slurm worker are implemented. Start with [backend setup and usage](backend/README.md). ByteShape is the first enabled model; Glimmer and Flash execution remain deferred. The widget frontend is in [frontend/](frontend/README.md); a standalone stdlib mock for frontend work is in [tests/mocks/](tests/mocks/README.md). Contract v2.1 adds `GET /live`, which the backend does not implement yet.
+**Current status:** The Python FastAPI backend, explicit frontend mock mode, registered profiles for all three models and Wright Slurm worker are implemented. Start with [backend setup and usage](backend/README.md). All three models are enabled; Glimmer uses one L40 and its patched runtime, and Flash requires three L40s on one node.
+
+[Latest hardware validation](docs/demo/GLIMMER_FLASH_VALIDATION.md): Glimmer and Flash both passed the real Astra production path, generation and live feed. Flash decoded at 71.33 tokens/s versus the reused standalone Ollama baseline of 15.18 tokens/s (4.70×); see the report for configuration and allocation differences.
+
+The widget frontend (floating desktop widget and Chrome extension) is in [frontend/](frontend/README.md); a standalone stdlib mock for frontend work is in [tests/mocks/](tests/mocks/README.md).
 
 ## Start here
 
@@ -34,8 +38,8 @@ NOVA_TT/
 ├── data/
 │   └── canon/                  # CSV, interpretation guide, validation and lessons
 ├── configs/
-│   └── profiles/               # Pinned ByteShape model/runtime configurations
-├── scripts/                    # Opt-in live ByteShape rehearsal
+│   └── profiles/               # Pinned model/runtime configurations
+├── scripts/                    # Terminal generation and standalone comparison tests
 ├── deploy/
 │   └── wright/                 # Private Slurm worker
 ├── tests/
@@ -52,7 +56,7 @@ Frontend placeholders remain for the partner's implementation. Backend package a
 | Area | Owner / purpose |
 | --- | --- |
 | backend, prompts, profiles, Wright deployment | Taeho: selection, OpenRouter, execution, benchmarking and lifecycle |
-| frontend | Partner: model/GPU selection, progress, comparison, error states and API client |
+| frontend | Partner: model/GPU selection, progress, live speed, default-vs-tuned comparison, error states and API client |
 | API contract and integration mocks | Shared: both sides must use contract version 2.1 |
 | CANON evidence | Shared source of truth; preserve provenance and keep measured hardware distinct |
 

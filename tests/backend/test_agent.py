@@ -87,3 +87,19 @@ async def test_total_deadline_includes_secret_access():
         await agent.chat("hello", {}, time.time() + 0.03)
     assert error.value.error["code"] == "ai_unavailable"
     assert time.monotonic() - start < 0.5
+
+
+async def test_key_limit_error_is_actionable_without_provider_details(monkeypatch):
+    saved = httpx.AsyncClient
+    transport = httpx.MockTransport(lambda request: httpx.Response(403, json={
+        'error': {'message': 'private account URL', 'metadata': {'limit_source': 'openrouter_key_limit'}}}))
+    monkeypatch.setattr('nova_backend.agent.httpx.AsyncClient', lambda **kw: saved(transport=transport, **kw))
+    agent = Agent()
+    async def key():
+        return 'test-placeholder'
+    agent.key = key
+    with pytest.raises(Problem) as error:
+        await agent.chat('hello', {}, time.time() + 1)
+    assert 'spending limit reached' in error.value.error['message']
+    assert 'private account URL' not in str(error.value.error)
+    assert agent.available is False

@@ -1,0 +1,252 @@
+{
+  "model": "qwen3.8-flash-next",
+  "gpu_count": 3,
+  "target_layers": 49,
+  "asset_root": "/home/export/taeholee/nova/wright-flash-next-3l40-20261104/assets",
+  "shared_root": "/home/export/taeholee/nova/byteshape-20261103/assets",
+  "runtime_dir": "/home/export/taeholee/nova/byteshape-20261103/assets/build-l40/bin",
+  "runtime_env": {
+    "FLASH_NEXT_FORCE_MMQ": "1"
+  },
+  "profiles": [
+    {
+      "label": "Flash Next MTP2 three L40s",
+      "source_config_ids": [
+        "cfg_22bd103c1aadb59c"
+      ],
+      "config": {
+        "model": "qwen3.8-flash-next",
+        "artifact_id": "flash-udq4-44481862",
+        "quant": "UD-Q4_K_XL",
+        "engine": "llama.cpp",
+        "runtime_id": "llama-l40-b10820",
+        "settings": {
+          "context_tokens": 131072,
+          "context_per_slot": 131072,
+          "parallel_slots_per_process": 1,
+          "replicas": 1,
+          "batch_size": 2048,
+          "microbatch_size": 1024,
+          "threads_decode": 8,
+          "threads_prefill": 12,
+          "draft_tokens": 2,
+          "draft_gpu_layers": 99,
+          "prompt_cache_ram_mib": 4096,
+          "kv_type_k": "f16",
+          "kv_type_v": "f16",
+          "flash_attention": "on",
+          "fit": "on",
+          "speculative_mode": "draft-mtp",
+          "draft_kv_k": "f16",
+          "draft_kv_v": "f16",
+          "split_mode": "layer",
+          "reasoning_effort": "medium",
+          "temperature": 1.0,
+          "top_p": 0.95,
+          "min_p": 0.0,
+          "top_k": 20,
+          "draft_device": [
+            "CUDA2"
+          ],
+          "fit_target_mib": [
+            1024,
+            1024,
+            4096
+          ],
+          "backend_sampling": true,
+          "force_mmq_runtime": true,
+          "load_mode": "none",
+          "lazy_mode": "on",
+          "draft_probability_min": 0.5,
+          "draft_model": "flash-draft-5ff54097",
+          "repeat_penalty": 1.0,
+          "presence_penalty": 0.0,
+          "jinja": true,
+          "reasoning_format": "deepseek",
+          "reasoning_preserve": true,
+          "mps": false,
+          "tensor_split": [],
+          "chat_template_id": "qwen3.8-flash-next-embedded",
+          "chat_template_kwargs": {
+            "enable_thinking": true,
+            "reasoning_effort": "medium"
+          },
+          "vision_projector": "flash-projector-1f7b7f0b",
+          "gpu_layers": "auto",
+          "main_gpu": 0,
+          "tensor_overrides": []
+        },
+        "unresolved_fields": [],
+        "profile_id": "profile_e2faa2ae2dc646404a56a088"
+      }
+    },
+    {
+      "label": "Standalone untouched Ollama baseline",
+      "source_config_ids": [
+        "cfg_d93b6fcfd7905833"
+      ],
+      "config": {
+        "model": "qwen3.8-flash-next",
+        "artifact_id": "flash-udq4-44481862",
+        "quant": "UD-Q4_K_XL",
+        "engine": "ollama",
+        "runtime_id": "ollama-0.40.13",
+        "settings": {
+          "context_tokens": 262144,
+          "context_per_slot": 262144,
+          "parallel_slots_per_process": 1,
+          "replicas": 1,
+          "temperature": 1.0,
+          "top_p": 0.95,
+          "top_k": 20,
+          "min_p": 0.0,
+          "speculative_mode": "none"
+        },
+        "unresolved_fields": [],
+        "profile_id": "profile_8013d5f78b03b89776d94c48"
+      }
+    }
+  ],
+  "llama_argv": [
+    "--model",
+    "/home/export/taeholee/nova/wright-flash-next-3l40-20261104/assets/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+    "--mmproj",
+    "/home/export/taeholee/nova/wright-flash-next-3l40-20261104/assets/mmproj-F16.gguf",
+    "--alias",
+    "qwen3.8-flash-next",
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "54439",
+    "--ctx-size",
+    "131072",
+    "--parallel",
+    "1",
+    "--split-mode",
+    "layer",
+    "--fit",
+    "on",
+    "--fit-target",
+    "1024,1024,4096",
+    "--load-mode",
+    "none",
+    "--lazy-mode",
+    "on",
+    "--threads",
+    "8",
+    "--threads-batch",
+    "12",
+    "--batch-size",
+    "2048",
+    "--ubatch-size",
+    "1024",
+    "--flash-attn",
+    "on",
+    "--cache-type-k",
+    "f16",
+    "--cache-type-v",
+    "f16",
+    "--cache-ram",
+    "4096",
+    "--jinja",
+    "--reasoning-format",
+    "deepseek",
+    "--reasoning-effort",
+    "medium",
+    "--reasoning-preserve",
+    "--temp",
+    "1.0",
+    "--top-p",
+    "0.95",
+    "--top-k",
+    "20",
+    "--min-p",
+    "0.0",
+    "--repeat-penalty",
+    "1.0",
+    "--presence-penalty",
+    "0.0",
+    "--backend-sampling",
+    "--spec-type",
+    "draft-mtp",
+    "--spec-draft-model",
+    "/home/export/taeholee/nova/wright-flash-next-3l40-20261104/assets/mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf",
+    "--spec-draft-device",
+    "CUDA2",
+    "--spec-draft-ngl",
+    "99",
+    "--spec-draft-n-max",
+    "2",
+    "--spec-draft-p-min",
+    "0.5",
+    "--cache-type-k-draft",
+    "f16",
+    "--cache-type-v-draft",
+    "f16",
+    "--metrics",
+    "--slots",
+    "--verbosity",
+    "4"
+  ],
+  "artifact": {
+    "id": "flash-udq4-44481862",
+    "model": "qwen3.8-flash-next",
+    "kind": "target",
+    "quant": "UD-Q4_K_XL",
+    "files": [
+      {
+        "name": "Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+        "size_bytes": 10946624,
+        "sha256": "4448186216b3af4cc558bbce2c3213f01608f8f8b2e5267a9767971dd3ec8082",
+        "role": "target"
+      },
+      {
+        "name": "Qwen3.8-Flash-Next-UD-Q4_K_XL-00002-of-00004.gguf",
+        "size_bytes": 49859583136,
+        "sha256": "3f342f1c1580473f1ee94ddd5b28206e8c07a70fa1a366f59d1d6c922919a6c9",
+        "role": "target"
+      },
+      {
+        "name": "Qwen3.8-Flash-Next-UD-Q4_K_XL-00003-of-00004.gguf",
+        "size_bytes": 49376141504,
+        "sha256": "56758f40269cad5cd9b0d3d6fbae0f40f6d5be6de49e4ab392dbe83157d9cbd3",
+        "role": "target"
+      },
+      {
+        "name": "Qwen3.8-Flash-Next-UD-Q4_K_XL-00004-of-00004.gguf",
+        "size_bytes": 12087983520,
+        "sha256": "753bda48b98ba4f1636134a90a967de1b2d3908a236c026e464777342e53510a",
+        "role": "target"
+      },
+      {
+        "name": "mmproj-F16.gguf",
+        "size_bytes": 904004000,
+        "sha256": "1f7b7f0b984cf065c604360c29c8098362ed61b290db0ff12c6f360bb1a8a980",
+        "role": "projector"
+      },
+      {
+        "name": "mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf",
+        "size_bytes": 2786568256,
+        "sha256": "5ff54097406a905cf3a724c709124ceb0e3e10235ee862298969e91c96fa96e6",
+        "role": "draft"
+      }
+    ]
+  },
+  "runtime_features": {
+    "cuda_graphs_build": true,
+    "force_mmq_build": false,
+    "force_cublas_build": false
+  },
+  "runtime_hashes": {
+    "libggml-base.so.0.23.0": "8a891840a43680d72742767df78f986679a2ce4b910e3cfb7dd552d774814fa1",
+    "libggml-cpu.so.0.23.0": "16f35bac24a6f837aa8fc1b3dac7096b89aaf0d7c1e7b9cc6389a6bfa0ca80f7",
+    "libggml-cuda.so.0.23.0": "9d9491cf0f1e4a32c18900dc84aeef8b395de18bf081fc03bdbdedc4eeda3267",
+    "libggml.so.0.23.0": "4b407c1eb9e06dc609bfb526f709ba848f596fc4f80a177e0dd2e8b06bb4e3cd",
+    "libllama.so.0.4.0": "50b5180749e38ea815a1bf61be6aee7b9bdc45701f3c80cadc3f524a0ec6905f",
+    "libllama-common.so.0.4.0": "4ce94587a2bcbae8aaeaff5970d562a67d1e94f77f1ec6ed294c7d862f3d88d5",
+    "libmtmd.so.0.4.0": "3126f325b04cb4666ea9bd2a4051b4481a67400a614f76919bf190d464fbb57b",
+    "libllama-server-impl.so": "2d852ba67f59907a93a12d8f7c12592ba33ea0415f21fa107fcb75e9ea795739",
+    "llama-server": "97e81fb144ffd1ca974de7e2c6bec6afd55220b86749a2171dcead64111c71f7",
+    "ollama": "ac31348ce57115579d57d16c7d914829199dfb281b5d43b943817cfe82f19fc1"
+  }
+}

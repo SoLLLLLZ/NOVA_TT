@@ -8,15 +8,15 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import ValidationError
 from .common import ROOT, MODEL, VERSION, Problem, now
-from .catalog import PROFILES, REVISION, capabilities, evidence, model_check
-from .schemas import Optimize, Race, Revert, Chat, Diagnose, Action, Benchmark, Empty
+from .catalog import PROFILES, REVISION, profiles_for, gpu_count, capabilities, evidence, model_check
+from .schemas import Optimize, Race, Revert, Chat, Diagnose, Action, Benchmark, Empty, Generate, Resources
 from .store import Store, TERMINAL
 from .driver import WrightDriver, MockDriver
 from .agent import Agent
 from .engine import Engine
 
 
-def create_app(state_dir=None, mock=None, driver=None, agent=None):
+def create_app(state_dir=None, mock=None, driver=None, agent=None, prepare_model=None):
     state_dir = Path(
         state_dir or os.environ.get("NOVA_STATE_DIR", ROOT / "var/backend")
     )
@@ -51,8 +51,18 @@ def create_app(state_dir=None, mock=None, driver=None, agent=None):
             or (MockDriver(state_dir) if simulation else WrightDriver(state_dir)),
             agent or Agent(simulation),
         )
-        await app.state.engine.recover()
         try:
+            await app.state.engine.recover()
+            preparing = prepare_model or os.environ.get("NOVA_PREPARE_MODEL")
+            if preparing:
+                model_check(preparing)
+                if app.state.engine.recovery_error:
+                    raise app.state.engine.recovery_error
+                async with asyncio.timeout(600):
+                    await app.state.engine.driver.ensure(
+                        Resources(gpu_count=gpu_count(preparing)),
+                        time.time() + 600, model=preparing,
+                    )
             yield
         finally:
             try:
@@ -169,15 +179,31 @@ def create_app(state_dir=None, mock=None, driver=None, agent=None):
             "simulation": simulation,
         }
 
+    @app.get("/live")
+    async def live(model: str):
+        e = engine()
+        queue = e.observe_live(model)
+
+        async def observe():
+            async for event in e.live.events(queue):
+                yield ("data: " + json.dumps(event, allow_nan=False) + "\n\n") if event else ": keepalive\n\n"
+
+        return StreamingResponse(observe(), media_type="text/event-stream",
+            headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+    @app.post("/generate")
+    async def generate(req: Generate, request: Request):
+        return start("generate", req, request)
+
     @app.get("/profiles")
     async def profiles(model: str = MODEL, target_id: str = "wright"):
         model_check(model)
         if target_id != "wright":
             raise Problem("not_found", "Unknown target.", 404)
-        registered = PROFILES + [
+        registered = profiles_for(model) + [
             {"config": c, "label": "Verified session profile"}
             for c in engine().store.profiles()
-            if c["profile_id"] not in {p["config"]["profile_id"] for p in PROFILES}
+            if c["model"] == model and c["engine"] == "llama.cpp" and c["profile_id"] not in {p["config"]["profile_id"] for p in PROFILES}
         ]
         return {
             "contract_version": VERSION,
@@ -188,7 +214,7 @@ def create_app(state_dir=None, mock=None, driver=None, agent=None):
                     "config": p["config"],
                     "resource_requirements": {
                         "gpu_type": "L40",
-                        "gpu_count": 1,
+                        "gpu_count": gpu_count(model),
                         "same_node": True,
                         "context_per_slot": p["config"]["settings"]["context_per_slot"],
                     },
@@ -206,7 +232,7 @@ def create_app(state_dir=None, mock=None, driver=None, agent=None):
     ):
         if target_id != "wright":
             raise Problem("not_found", "Unknown target.", 404)
-        if runtime_id and runtime_id != PROFILES[0]["config"]["runtime_id"]:
+        if runtime_id and runtime_id != profiles_for(model)[0]["config"]["runtime_id"]:
             raise Problem(
                 "runtime_unavailable", "No writable adapter for this runtime.", 409
             )
@@ -238,7 +264,7 @@ def create_app(state_dir=None, mock=None, driver=None, agent=None):
                 "node_ids": list({g["node_id"] for g in obs["gpus"]}),
                 "gpu_ids": [g["id"] for g in obs["gpus"]],
                 "cpus_per_task": s.get("resources", {}).get("cpus_per_task", 12)
-                * s["gpu_count"],
+                * (s["gpu_count"] // s.get("gpus_per_engine", 1)),
                 "host_memory_mib": s.get("resources", {}).get("host_memory_mib", 65536)
                 * s["gpu_count"],
                 "expires_at": e.service()["expires_at"] if e.service() else None,
@@ -255,10 +281,11 @@ def create_app(state_dir=None, mock=None, driver=None, agent=None):
             ("qwen3.8-flash-next", "Qwen 3.8 Flash Next", 3),
             ("muse-glimmer", "Muse Glimmer 30B", 1),
         ]:
-            enabled = mid == MODEL
-            loaded = enabled and current_live
+            model_config = profiles_for(mid)[0]["config"]
+            allocated = bool(s and s.get("model", MODEL) == mid)
+            loaded = current_live and e.current["model"] == mid
             ready = (
-                enabled
+                allocated
                 and connection == "connected"
                 and bool(obs["artifact_verified"])
                 and bool(obs["gpus"])
@@ -268,8 +295,6 @@ def create_app(state_dir=None, mock=None, driver=None, agent=None):
             reasons = (
                 []
                 if ready
-                else ["Execution deferred to a later phase."]
-                if not enabled
                 else [
                     "Owned allocation and installed assets must be checked; Optimize performs preparation."
                 ]
@@ -280,34 +305,24 @@ def create_app(state_dir=None, mock=None, driver=None, agent=None):
                 {
                     "id": mid,
                     "display_name": name,
-                    "quant": PROFILES[0]["config"]["quant"]
-                    if enabled
-                    else "UD-Q4_K_XL",
-                    "artifact_id": PROFILES[0]["config"]["artifact_id"]
-                    if enabled
-                    else None,
-                    "installed": True if enabled and obs["artifact_verified"] else None,
+                    "quant": model_config["quant"],
+                    "artifact_id": model_config["artifact_id"],
+                    "installed": True if allocated and obs["artifact_verified"] else None,
                     "loaded": loaded,
                     "database_coverage": "verified",
                     "requirements": {
                         "gpu_type": "L40",
                         "gpu_count": count,
                         "same_node": True,
-                        "context_per_slot": 65536
-                        if enabled
-                        else 131072
-                        if mid == "qwen3.8-flash-next"
-                        else 262144,
+                        "context_per_slot": model_config["settings"]["context_per_slot"],
                     },
                     "ready": bool(ready),
                     "readiness_reasons": reasons,
                     "race": {
-                        "simultaneous_available": bool(
-                            loaded and s and s["gpu_count"] >= 2
-                        ),
-                        "sequential_available": bool(loaded),
+                        "simultaneous_available": False,
+                        "sequential_available": False,
                         "required_gpus_simultaneous": 2 * count,
-                        "reasons": [] if loaded else ["Optimize and verify first."],
+                        "reasons": ["Ollama comparison is a standalone demo test."],
                     },
                 }
             )
@@ -431,7 +446,7 @@ def create_app(state_dir=None, mock=None, driver=None, agent=None):
         context = {
             "current_config": e.current,
             "run": e.store.get(req.run_id) if req.run_id else None,
-            "profiles": PROFILES,
+            "profiles": [p for p in PROFILES if p["config"]["engine"] == "llama.cpp"],
             "history": req.history,
         }
 

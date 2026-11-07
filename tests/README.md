@@ -1,7 +1,7 @@
 # Backend validation
 
-Run `uv run pytest -q`. Tests cover authentication, strict settings, idempotency, profile selection, context and sampling constraints, quality failure, resource locking, cancellation, rollback, race and actions using an explicitly simulated driver. They do not claim GPU performance.
+Run `uv run pytest -q`. Tests cover authentication, strict model-specific settings, profile/evidence isolation, no-Ollama production paths for all three models, idempotency, context/sampling constraints, quality failures, resource locks, cancellation, rollback, model-channel parsing and native live telemetry. Mock measurements are explicitly simulated, not performance evidence.
 
-`scripts/live_byteshape.py` is the opt-in real Wright rehearsal. It runs ByteShape only; Glimmer and Flash are deferred. Test output goes to ignored `var/`.
+`scripts/check_live_models.py --model <id>` performs opt-in Wright tests with a separate Ollama reference and the real OpenRouter/Astra production pipeline. Private receipts go under ignored `var/`; sanitized hardware validation belongs in `docs/demo/`. The former in-tool baseline/race features are intentionally disabled and regression-tested as rejected requests.
 
 The standalone frontend mock has its own suite: `python3 -m unittest tests/mocks/test_mock_server.py`. Frontend unit tests run with `npm test` in `frontend/`.

@@ -1,5 +1,8 @@
-# Developer scripts
+# Developer and demo scripts
 
-`live_byteshape.py` runs the actual API against Wright: default Ollama, an OpenRouter-selected optimized profile, sequential race, and rollback/release. It writes private receipts under `var/live-byteshape/`. `--profile-only` bypasses OpenRouter and requests the registered MTP5 profile explicitly. Run only when GPU work is intended; see `backend/README.md`.
+- `generate.py --model <id>` sends a prompt through the already optimized Wright service, driving `/live` without another agent call or model load. Default prompt: `Write a short essay explaining the causes of the Industrial Revolution`. Default output cap: 2048, with natural stopping.
+- `check_live_models.py --model <id>` runs a standalone Ollama comparison, stops it, then calls the real production OpenRouter/Astra `/optimize` path and tests `/generate` plus `/live`. No explicit profile override. It releases the owned allocation and saves private receipts under `var/production-<model>-<timestamp>/`. Model IDs: `qwen3.8-27b`, `muse-glimmer`, `qwen3.8-flash-next`.
+- `live_byteshape.py` wraps the preceding test for ByteShape. Historical race/profile-only flags no longer apply.
+- `check_live_byteshape.py` retains the explicit-profile ByteShape `/live` transport test; it does not call OpenRouter.
 
-The default speed probe and rehearsal race use the exact demo prompt: `Write a short essay explaining the causes of the Industrial Revolution`. Optimize measures a capped 256-token probe; the rehearsal race permits natural completion up to 2048 tokens, including reasoning. The separate arithmetic check verifies basic runtime correctness. The workload selection does not repeat or change the demo prompt. Use `--output-dir var/live-industrial-revolution` to preserve earlier receipts; `--simultaneous` allocates two L40s for the race.
+GPU tests are opt-in. Ollama runs only in these separate developer/demo comparisons, never in any production optimization pipeline. Prepare large Flash artifacts before the presentation timer. Reused standalone baseline receipts are explicitly identified; they are not fresh measurements.

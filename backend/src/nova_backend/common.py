@@ -6,7 +6,7 @@ from pathlib import Path
 ROOT = Path(
     os.environ.get("NOVA_REPO_ROOT", Path(__file__).resolve().parents[3])
 ).resolve()
-VERSION = "2.0"
+VERSION = "2.1"
 MODEL = "qwen3.8-27b"
 
 

@@ -1,6 +1,6 @@
 # NOVA API Contract v2.1
 
-Updated November 7, 2026. This replaces v0.1. Frontend and backend must both report/use `contract_version: "2.1"`. v2.1 only adds `GET /live` (section 9b) and the `apply_default` action (section 11) to v2.0; every v2.0 shape is unchanged. The endpoint names are retained where practical; the richer configuration and run objects are a breaking schema change. The ByteShape implementation is now in `backend/src/nova_backend`; see `backend/README.md` for run commands and current adapter limits. Glimmer and Flash execution remain deferred.
+Updated November 7, 2026. v2.1 adds the live observation stream (section 9b) and the frontend's `apply_default` action (section 11) to v2.0 without changing existing response shapes. The original v2 contract replaces v0.1. Frontend and backend must both report/use `contract_version: "2.1"`. The endpoint names are retained where practical; the richer configuration and run objects are a breaking schema change. The three-model implementation is now in `backend/src/nova_backend`; see `backend/README.md` for run commands and current adapter limits. ByteShape, Glimmer and Flash execution are enabled. Production Optimize is verify_only for all three; Ollama comparisons are standalone tests.
 
 Repository: https://github.com/SoLLLLLZ/NOVA_TT
 
@@ -183,7 +183,7 @@ Example descriptor fragment for the pinned Glimmer runtime (illustrative respons
 
 ### GET /profiles?model=...&target_id=...
 
-Returns `profiles`: each has `profile_id`, `label`, `config`, `resource_requirements`, `evidence`, `compatibility` (`compatible`, `incompatible`, `unknown`), and `reasons` string array. Resolve complete saved launch/template settings through registered assets. Listing is read-only and does not apply profiles. Include the three models in DEMO_MODELS.md; represent production and tested candidate variants separately.
+Returns `profiles`: each has `profile_id`, `label`, `config`, `resource_requirements`, `evidence`, `compatibility` (`compatible`, `incompatible`, `unknown`), and `reasons` string array. Resolve complete saved launch/template settings through registered assets. Listing is read-only and does not apply profiles. Production listings contain only llama.cpp profiles for the requested model; Ollama profiles remain internal to standalone comparison scripts. Include the three models in DEMO_MODELS.md; represent production and tested candidate variants separately.
 
 ### GET /status
 
@@ -199,9 +199,9 @@ Download presence does not imply loaded, allocated or ready. Database confidence
 
 ## 4. POST /optimize (streaming)
 
-Select a conservative compatible profile, apply it, verify a completed answer and retain the working service. Default objective is decode, preset fastest, workload short. Optional sequential baseline benchmarking is explicit.
+Select a conservative compatible profile, apply it, verify a completed answer and retain the working service. Default objective is decode, preset fastest, workload short. Ollama is excluded from production optimization for all three models. Legacy sequential_compare requests are rejected before allocation or agent calls.
 
-Current ByteShape demo adapter: the throughput prompt is exactly `Write a short essay explaining the causes of the Industrial Revolution`, with a 256-token output cap. A separate arithmetic task checks basic correctness. `workload` selects short/long historical CANON evidence; it does not repeat or alter this demo prompt. For the live essay race, submit that exact prompt to `/race` with `max_tokens: 2048`; natural stopping is enabled, and completion status must remain visible if the cap is reached.
+All three demo adapters: the throughput prompt is exactly `Write a short essay explaining the causes of the Industrial Revolution`, with a 256-token output cap. A separate arithmetic task checks basic correctness. `workload` selects short/long historical CANON evidence; it does not repeat or alter this demo prompt. For live essay generation, submit that exact prompt to `/generate` with `max_tokens: 2048`; natural stopping is enabled, and completion status must remain visible if the cap is reached.
 
 Request example:
 ```json
@@ -210,7 +210,7 @@ Request example:
   "preset": "fastest",
   "objective": "decode",
   "workload": "short",
-  "mode": "sequential_compare",
+  "mode": "verify_only",
   "resources": {
     "target_id": "wright",
     "allocation_id": null,
@@ -240,15 +240,15 @@ Request example:
 }
 ```
 
-Required: model. Defaults: preset `fastest`, objective `decode`, workload `short`, mode `verify_only`, resources selected compatible backend target/profile, constraints preserve model/quant and required context, profile_id null, empty overrides, budget 180 seconds/two repairs, baseline_run_id null. `preset` supports fastest/balanced/quality as selection policies, not fixed engine parameters; caller constraints always win. `objective` currently supports decode; unsupported objectives return 422. `workload` supports short/long, corresponding to the CANON examples. `min_context_tokens` is per request slot, not process total.
+Required: model. Defaults: preset `fastest`, objective `decode`, workload `short`, mode `verify_only`, one GPU (Flash callers must specify three), constraints preserve model/quant and required context, profile_id null, empty overrides, budget 180 seconds/two repairs, baseline_run_id null. Only the `fastest` preset is implemented; caller constraints always win. `objective` currently supports decode; unsupported objectives return 422. `workload` supports short/long, corresponding to the CANON examples. `min_context_tokens` is per request slot, not process total.
 
 `allow_sampling_change` defaults true (project owner authorization, November 7); true permits a tested preset's declared temperature/top-k/top-p/min-p/reasoning changes, all shown in changed/effective config. `allow_quant_change` and `allow_experimental` default false. When no active profile exists, use the registered model's baseline sampler as the preserved reference. Constraints may include `fixed_settings` (partial settings that cannot change), `min_free_gpu_memory_mib` (per-device floor, cannot weaken backend guard), `max_gpu_count`, `runtime_requirements`, and `allow_cpu_offload` (default false). Preserve the current/profile context if no minimum is supplied. Overrides are fixed requested values, not suggestions; reject conflicts with fixed_settings instead of silently deciding precedence. Precedence: host/resource policy and user constraints > explicit profile/overrides > agent selection > defaults.
 
 `overrides` permits `artifact_id`, `quant`, `engine`, `runtime_id`, and a partial settings object. Artifact changes must match the selected model/quant and constraints. `profile_id` selects a base profile; null lets the agent choose. Explicit unsupported values produce field-level errors. A profile not registered on this host cannot be applied solely from an ID in CANON.
 
-`budget.deadline_seconds` must be positive and no greater than the deployment's advertised maximum; max_repair_attempts is an integer 0..2. `baseline_run_id` is valid only in sequential_compare. Constraints.quant is a string or null (null means preserve selected/current artifact quant, not authorize arbitrary quant changes). Specifying resources.gpu_ids requires allocation_id; omitting both allows the backend to resolve a compatible owned allocation or request one. With an existing allocation, resource requests must fit it; do not enlarge or replace it silently. Action requests may also include capabilities_revision at the top level.
+`budget.deadline_seconds` must be positive and no greater than the deployment's advertised maximum; max_repair_attempts is an integer 0..2. `baseline_run_id` is not supported; comparisons belong in standalone scripts. Constraints.quant is a string or null (null means preserve selected/current artifact quant, not authorize arbitrary quant changes). Specifying resources.gpu_ids requires allocation_id; omitting both allows the backend to resolve a compatible owned allocation or request one. With an existing allocation, resource requests must fit it; do not enlarge or replace it silently. Action requests may also include capabilities_revision at the top level.
 
-`verify_only`: no baseline required; after successful setup return before=null and speedup=null. `sequential_compare`: run untouched Ollama then the selected llama.cpp profile on the same owned allocation, or reuse a compatible baseline_run_id from this demo session with matching hardware/artifact/workload and documented measurement conditions. Never use historical CANON rates as a live baseline. Budget includes baseline, queueing, loading, verification and repairs; do not secretly restart the timer. An expensive queue/download is surfaced immediately. Failed comparison after a valid setup is still an error for this requested mode; preserve the last verified state and report it, never emit a misleading complete comparison.
+`verify_only` is the only enabled production mode. Apply and verify the selected llama.cpp profile, return before=null and speedup=null, and retain the service. `sequential_compare` returns 409 `unsupported_setting` for every model; it never starts Ollama. Queueing, model preparation, agent selection, loading and verification remain inside the advertised operation deadline unless preparation was explicitly performed beforehand. Do not restart the timer or hide preparation as successful optimization.
 
 Automatic repair is authorized inside this operation within constraints and budget. Try the smallest concrete correction or a compatible complete fallback; rerun verification. At most two repairs after the initial attempt. Stop when a working profile is verified. No unbounded optimization sweep, compile or large download by default.
 
@@ -269,7 +269,7 @@ All operation events include `type`, `run_id`, `sequence` (integer starting at 1
 | `done` | operation-specific final result; terminal success, emitted once |
 | `error` | standard error object plus cleanup and last_verified_profile_id; terminal failure/cancellation, emitted once |
 
-For optimize, order is start, progress/proposed config, optional baseline measurements, effective config, verification/measurements, and done; repairs may repeat appropriate steps. Never mark apply done until effective config is checked. No fabricated percentages; progress null is acceptable. Heartbeats are SSE comments and must not reset deadlines.
+For optimize, order is start, progress/proposed config, effective config, verification/measurements, and done; repairs may repeat appropriate steps. Never mark apply done until effective config is checked. No fabricated percentages; progress null is acceptable. Heartbeats are SSE comments and must not reset deadlines.
 
 Keep one mutating operation per overlapping owned resource set. Reject conflicting work with 409 and active_run_id. State changes are saved server-side. A dropped browser stream does not launch another run or reset its budget; the operation continues under backend supervision to its deadline. All long-running tools have deadlines and a cancellation check. Exceeding the deadline aborts this run's attempt and enters bounded cleanup; record cleanup time separately, and surface rollback failure. Never kill unrelated processes.
 
@@ -297,22 +297,9 @@ Fields: `status: "success"`, `mode`, `applied: true`, `config` (full effective),
 
 `comparison`: `{available,mode,baseline_run_id,reason,conditions_differ}`. Speedup = after.decode_tps / before.decode_tps only when both positive valid comparable phase rates exist. Round for display, preserve underlying rates. If unavailable, speedup=null and reason explains why. Operational success does not assert faster performance: a measured ratio below 1 is shown honestly. `service`: `{id,state,allocation_id,expires_at}`; success retains the service under backend supervision and the Slurm lifetime, not indefinitely. `rollback_id` resolves exact prior owned configuration/services, not a partial UI snapshot. `repairs` is an array of attempt summaries. `before` remains null in verify_only; after may have null phase rates if engine timing is unavailable, with a measurement warning.
 
-## 6. POST /race (streaming)
+## 6. POST /race (disabled)
 
-Required model and prompt. Optional `mode` simultaneous/sequential (default simultaneous), `max_tokens` positive integer (default 256), `tuned_profile_id` (default current verified profile), `resources` same schema, `budget` (default 180 seconds), and `seed` integer. No silent downgrade from simultaneous to sequential. Requesting sequential explicitly supports the staged presentation; show sequential in the UI.
-
-For race, resources.gpu_count is the total unique GPU request across lanes, while resources.same_node applies within each lane. CPU/RAM fields are per lane and the allocator reserves two sets in simultaneous mode. Returned lane_resources gives the exact mapping; omitting resources lets the backend derive the requirements from model and mode. Auto-repair of an already verified profile is not part of race; setup failures terminate visibly.
-
-The backend owns both lane configurations: untouched default Ollama and the verified optimized llama.cpp profile for the same model artifact. Keep input text/output cap comparable and disclose sampler/template/context/token-count differences. Simultaneous lanes require separate equivalent GPU and CPU resources. ByteShape/Glimmer need 2 L40s total; Flash needs 6 total, 3 on one node per lane. Return allocation_unavailable before launching when requirements cannot be met. Sequential mode reuses one model allocation (1/3/1 GPUs). Do not allow unverified profiles to bypass verification through this endpoint.
-
-Use shared start/step/error envelope, with these additional events:
-
-- `start` additionally supplies `lanes: ["default","tuned"]`, `mode`, and `lane_resources` map with allocated GPU IDs per lane.
-- `token`: lane, text, cumulative `tokens`, nullable running `tps`; `tokens` is also nullable while a runtime does not supply incremental counts. Final native counts arrive in lane_done; never substitute string lengths or chunk counts. Deliver parsed user-visible final text; do not forward hidden reasoning or native channel markers.
-- `lane_done`: lane, measurement and validation status (a race prompt is not automatically a correctness test).
-- `done`: status success, mode, measurements map, winner (`default`, `tuned`, `tie` or null), speedup (nullable), comparison, elapsed_seconds and cleanup. Compare measured decode rates; round only for display. A lane failure terminates with error and partial measurements, not a fabricated winner.
-
-After racing, stop only temporary lane services and restore/retain the pre-race verified tuned service where feasible. Report cleanup and service state. Baseline and race resources never overlap in simultaneous mode, even if a historical CANON row used shared replicas.
+Returns HTTP 409 `unsupported_setting`. The project owner moved default Ollama outside the tool for all three models. Do not render an in-tool race or baseline button; both race availability booleans in `/status` are false. Use the standalone comparison scripts in `scripts/` for demo baseline measurements. They record native timing conventions and actual model/GPU provenance and are never invoked by Optimize. Historical run records retain their original results.
 
 ## 7. Run recovery and cancellation
 
@@ -342,11 +329,17 @@ Before streaming: unknown model returns 404 `model_not_found`; no retained servi
 | --- | --- |
 | `waiting` | model, service_id; sent once on connect while no request is in flight |
 | `inference_started` | request_id, model, service_id, engine, tuned (boolean), prompt_tokens (nullable); a request reached the retained service |
-| `metrics` | request_id, decode_tps, prefill_tps (nullable numbers), output_tokens, timing_convention; running native-engine rates during generation, at most ~4 per second |
+| `metrics` | request_id, decode_tps, prefill_tps (nullable numbers), output_tokens, timing_convention; running native-engine rates during generation, targeting 5 updates per second (one native sample about every 200 ms; transport delays may reduce delivery frequency) |
 | `inference_done` | request_id, measurement (full measurement object above, origin `live`) |
 | `error` | standard error object; e.g. the service was stopped or reverted. The stream ends after it |
 
 Rates come only from the live engine timings of requests to the retained service; never emit historical CANON rates, estimates or the optimize benchmark here. Prefill may be null until the prompt phase finishes. Requests that bypass the retained service (for example a separate Ollama process) are not reported. The mock implements a non-contract `POST /mock/inference` to simulate a terminal request; the real backend does not expose it.
+
+### Terminal request adapter: POST /generate
+
+The ByteShape backend provides this additive helper to send terminal requests through its retained service. Requires pairing and Idempotency-Key. Body: `{model,prompt,max_tokens?:2048,budget?}`; max_tokens is 1–4096 and prompt is 1–12000 characters. Returns the ordinary operation SSE stream (`start`, visible-answer `token`, `benchmark`, `done`, or `error`). `done` includes `measurement` and `service`. Replays use the existing JSON idempotency response. No agent call, allocation, model load, or sampling change is performed. It uses the verified profile, natural stopping and the existing single-operation lock, deadline and cancellation handling. A capped answer retains `completed:false`.
+
+Use `uv run python scripts/generate.py` after Optimize. This is the supported monitored terminal route; direct calls to private llama.cpp ports are not instrumented. `/live` itself never initiates generation. Optimize and action benchmarks do not publish into `/live`; service-changing operations close observers with an error, and clients reconnect after verification. Idle service health is checked every five seconds while observed; shutdown, expiry, failure or revert ends the stream. A disconnected observer does not cancel inference. Reconnection during generation supplies the active request and latest native sample, never a finished request's rates. Slow observers receive an error and reconnect rather than silently losing request boundaries. Mock events are explicitly marked `simulation:true`.
 
 ## 10. POST /diagnose
 
@@ -398,7 +391,7 @@ Special conversions: `gpu_layers="53/53 (actual target)"` is observed placement,
 
 ## 14. Migration and implementation checklist
 
-1. Change `/status` and `/health` contract_version to 2.1 (2.0 plus `GET /live`). Clients must check it before mutations and show an incompatibility message for 0.1; there is no silent mixed-version contract.
+1. Change `/status` and `/health` contract_version to 2.1 (2.0 plus `GET /live` and `apply_default`). Clients must check it before mutations and show an incompatibility message for 0.1; there is no silent mixed-version contract.
 2. Replace flat v0.1 config objects with the full config envelope and settings. `threads` becomes settings.threads_decode; add threads_prefill. `kv_type` becomes distinct kv_type_k/kv_type_v. Boolean flash_attention becomes on/off/auto. Remaining old knobs move into settings; model/quant/engine stay identity fields. Do not accept both old and new spellings ambiguously.
 3. Replace gpu_index with resources allocation/GPU IDs and group requirements. Memory display now uses explicit MiB values. Add installed/loaded/ready distinctions and race availability.
 4. `changed` becomes `changes` with dotted paths and per-change reasons. Return evidence source IDs and independent validation. Measurements contain explicit timing/cache/token metadata; before/speedup can be null in verify_only.
@@ -415,3 +408,9 @@ Current upstream documentation is supplementary; it does not override our pinned
 - [llama.cpp server controls](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md)
 - [llama.cpp speculative decoding](https://github.com/ggml-org/llama.cpp/blob/master/docs/speculative.md)
 - [Ollama Modelfile controls](https://github.com/ollama/ollama/blob/main/docs/modelfile.mdx)
+
+## Enabled model adapters (November 7 update)
+
+ByteShape: one L40, 64K context, MTP3/MTP5; Glimmer: one L40, 256K context, patched runtime and DFlash11/DFlash15; Flash: three L40s on one node, 128K context, MTP2 on CUDA2, registered MMQ/lazy profile. The model-specific capabilities publish their actual bounds and fixed fields. Unknown/cross-model profiles are rejected. `/generate` and `/action` must match the retained model. Revert to unloaded before selecting a different model family. Installation/readiness information applies only to the worker's checked model; checking ByteShape does not mark Flash or Glimmer installed.
+
+Resource CPU count is per engine group and host memory is per GPU: the current Flash setup reserves 12 CPUs and 192 GiB RAM. Group masks come from Slurm. Memory/thermal guards and placement checks cover every assigned device. Glimmer's final user channel is parsed before visible text streaming. None of these adapters call Ollama from Optimize.

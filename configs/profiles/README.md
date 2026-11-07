@@ -1,5 +1,5 @@
-# Registered inference profiles
+# Registered model profiles
 
-`byteshape.json` contains the conservative MTP3, preferred MTP5 / temperature 0.75, and untouched Ollama baseline profiles. Profile IDs hash the complete configuration. The manifest pins the model hash and runtime/library hashes from the saved Wright receipts. The compute worker verifies these before loading.
+`byteshape.json`, `glimmer.json`, and `flash.json` pin the exact Wright artifacts, runtime/library hashes, launch arguments and complete settings. Configurations have content-derived profile IDs. Glimmer includes its patched libllama identity and the original DFlash head; Flash includes all four target shards, projector and MTP head plus its MMQ environment.
 
-Only ByteShape execution is enabled. Other model references remain in `docs/demo/DEMO_MODELS.md`. Do not turn descriptive source flags into writable settings without an explicit adapter mapping and validation.
+Production `/profiles` and Astra selection expose only the selected model's llama.cpp profiles. Ollama references are retained solely for standalone comparison scripts. They never run through Optimize. ByteShape/Glimmer each require one L40; Flash requires three on one node. The compute worker verifies assets and runtime before loading. Descriptive settings become writable only with an explicit validated adapter mapping.
