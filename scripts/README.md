@@ -9,4 +9,4 @@ GPU tests are opt-in. Ollama runs only in these separate developer/demo comparis
 
 ## Live menu-bar demo
 
-Use `./scripts/ollama-wright serve` and `./scripts/ollama-wright run qwen3.8-27b` for the standalone default baseline. Stop serve with Ctrl+C before optimizing in TuneIt. Then `./scripts/tuneit run qwen3.8-27b` selects the retained optimized model and asks for a prompt. See [WIDGET_DEMO.md](../docs/demo/WIDGET_DEMO.md).
+Use `./scripts/ollama-wright serve` and `./scripts/ollama-wright run qwen3.8-27b` for the standalone default baseline. Stop serve with Ctrl+C before optimizing in CMUTuneIt. Then `./scripts/cmutuneit run qwen3.8-27b` selects the retained optimized model and asks for a prompt. See [WIDGET_DEMO.md](../docs/demo/WIDGET_DEMO.md).

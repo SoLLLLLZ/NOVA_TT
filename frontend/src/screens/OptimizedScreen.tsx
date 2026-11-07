@@ -39,7 +39,7 @@ export function OptimizedScreen({ look, modelKey, confidence, rows, waitingText,
         </p>
       </div>
       <ChangedSettings rows={rows} title="Model settings" />
-      <p className="terminal-command">In Terminal: <code>./scripts/tuneit run {modelKey}</code></p>
+      <p className="terminal-command">In Terminal: <code>./scripts/cmutuneit run {modelKey}</code></p>
       {revertError && (
         <p className="inline-error" role="alert">
           {revertError}

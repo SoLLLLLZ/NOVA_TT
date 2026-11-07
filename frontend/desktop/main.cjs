@@ -22,7 +22,7 @@ const PROJECT_ROOT = process.env.NOVA_PROJECT_ROOT || (app.isPackaged
 const STATE = process.env.NOVA_STATE_DIR || path.join(PROJECT_ROOT, "var/backend");
 const API = "http://127.0.0.1:8000";
 fs.mkdirSync(path.join(PROJECT_ROOT, "var/desktop"), { recursive: true, mode: 0o700 });
-app.setName("TuneIt");
+app.setName("CMUTuneIt");
 app.setPath("userData", path.join(PROJECT_ROOT, "var/desktop"));
 let backend = null;
 let connection = null;

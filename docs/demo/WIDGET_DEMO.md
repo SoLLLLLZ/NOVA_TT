@@ -1,6 +1,6 @@
 # Menu-bar and terminal demo
 
-The TuneIt Electron widget connects to the real local Python backend, which calls OpenRouter Astra high and deploys a verified llama.cpp profile under Slurm on Wright. Default Ollama is **outside the tool** for all three models.
+The CMUTuneIt Electron widget connects to the real local Python backend, which calls OpenRouter Astra high and deploys a verified llama.cpp profile under Slurm on Wright. Default Ollama is **outside the tool** for all three models.
 
 For the complete copy-paste terminal sequence, including SSH recovery and verbose timing, see [Demo commands](DEMO_COMMANDS.md).
 
@@ -15,7 +15,7 @@ npm ci
 npm run desktop:bundle
 ```
 
-Open `frontend/release/TuneIt.app`. This local bundle points to this checkout; rebuild it after moving the checkout or changing frontend code. It starts the backend on loopback port 8000 when needed and reads the private local pairing token. The frontend never reads the OpenRouter key. Keep the existing authenticated Wright SSH connection open.
+Open `frontend/release/CMUTuneIt.app`. This local bundle points to this checkout; rebuild it after moving the checkout or changing frontend code. It starts the backend on loopback port 8000 when needed and reads the private local pairing token. The frontend never reads the OpenRouter key. Keep the existing authenticated Wright SSH connection open.
 
 The bolt in the macOS menu bar and **Option+Space** show/hide the floating widget. Hiding keeps the backend and retained model alive. **Revert setup** unloads this demo's model; quitting stops the backend child owned by the app. An existing external backend is reused and is not stopped by the widget.
 
@@ -45,7 +45,7 @@ The answer and native decode rate print in Terminal; a private receipt is saved 
 
 ## 2. Optimize in the widget
 
-1. Open TuneIt from the menu bar or Option+Space.
+1. Open CMUTuneIt from the menu bar or Option+Space.
 2. Select Wright, L40 and ByteShape Qwen3.8 27B.
 3. Click **PITSTOP · OPTIMIZE**.
 4. Wait for **SETUP OPTIMIZED** and the verified settings. The tested candidate changes draft maximum 3 → 5 and temperature 1 → 0.75. Astra chooses the compatible profile; no Ollama step runs.
@@ -55,7 +55,7 @@ The changed settings compare against the registered native reference, not an aut
 ## 3. Select the optimized model and type the prompt in Terminal
 
 ```sh
-./scripts/tuneit run qwen3.8-27b --verbose
+./scripts/cmutuneit run qwen3.8-27b --verbose
 ```
 
 This prints the actual model, engine, profile, draft/temperature and Wright job before the `>>>` prompt. Type the same Industrial Revolution prompt. It streams the final answer through the real `/generate` endpoint while the widget receives `/live` timing updates. The terminal and widget final decode rates must agree (the widget rounds to an integer). Receipts are saved under `var/terminal/`.

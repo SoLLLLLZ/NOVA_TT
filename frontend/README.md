@@ -2,7 +2,7 @@
 
 Owner: partner. One UI, two shells: a **floating desktop widget** (Electron) and a **Chrome Manifest V3 extension**. Built with Vite, React and TypeScript against [API contract v2.1](../docs/api/endpoint.md) and the [demo model catalog](../docs/demo/DEMO_MODELS.md).
 
-Flow: desktop auto-pairs with the private local backend → choose Wright, GPU and model → **PITSTOP · OPTIMIZE** → verified settings → run `./scripts/tuneit run <model>` in Terminal and type the prompt → **LIVE SPEED** from real Wright timings. **REVERT SETUP** returns to the prior configuration or unloads the service. Ollama defaults are a separate terminal demo; no widget action starts them.
+Flow: desktop auto-pairs with the private local backend → choose Wright, GPU and model → **PITSTOP · OPTIMIZE** → verified settings → run `./scripts/cmutuneit run <model>` in Terminal and type the prompt → **LIVE SPEED** from real Wright timings. **REVERT SETUP** returns to the prior configuration or unloads the service. Ollama defaults are a separate terminal demo; no widget action starts them.
 
 ## Run
 
@@ -20,7 +20,7 @@ npm run build        # typecheck + build the extension into frontend/dist
 ### Desktop widget (recommended for the demo)
 
 ```bash
-npm run desktop:bundle # builds release/TuneIt.app; open it for the menu-bar widget
+npm run desktop:bundle # builds release/CMUTuneIt.app; open it for the menu-bar widget
 npm run desktop       # development launcher
 npm run desktop:dev   # with `npm run dev` running: live-reloading UI
 ```

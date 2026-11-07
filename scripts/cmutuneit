@@ -2,7 +2,7 @@
 set -eu
 NOVA_ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 if [ "${1:-}" != run ]; then
-  echo "Usage: ./scripts/tuneit run [qwen3.8-27b|muse-glimmer|qwen3.8-flash-next]" >&2
+  echo "Usage: ./scripts/cmutuneit run [qwen3.8-27b|muse-glimmer|qwen3.8-flash-next]" >&2
   exit 2
 fi
 shift

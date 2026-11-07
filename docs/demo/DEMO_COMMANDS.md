@@ -1,10 +1,10 @@
-# TuneIt live demo commands
+# CMUTuneIt live demo commands
 
 Google Doc: https://docs.google.com/document/d/1xQQXhorkL4drHkqtOYHXWrzy1S2fI5zRfhqcTU6Lprw/edit?tab=t.0
 
 Repository: https://github.com/SoLLLLLZ/NOVA_TT
 
-Run these commands in macOS Terminal on Taeho's demo Mac. The launchers send inference to Wright L40 GPUs through Slurm. A bare `ollama serve` on the Mac would serve locally. Default Ollama remains separate from TuneIt; the same prompt is typed interactively in each run. Do not paste the `>>>` prompt marker itself.
+Run these commands in macOS Terminal on Taeho's demo Mac. The launchers send inference to Wright L40 GPUs through Slurm. A bare `ollama serve` on the Mac would serve locally. Default Ollama remains separate from CMUTuneIt; the same prompt is typed interactively in each run. Do not paste the `>>>` prompt marker itself.
 
 ## 0. Prepare the connection and widget
 
@@ -38,10 +38,10 @@ These paths match this Mac's configured backend and existing trusted host-key fi
 Open the prepared widget:
 
 ```sh
-open frontend/release/TuneIt.app
+open frontend/release/CMUTuneIt.app
 ```
 
-Option+Space shows or hides TuneIt. If a previous optimized model is still loaded, click REVERT SETUP before beginning the baseline.
+Option+Space shows or hides CMUTuneIt. If a previous optimized model is still loaded, click REVERT SETUP before beginning the baseline.
 
 ## 1. Terminal A: start default Ollama on Wright
 
@@ -75,12 +75,12 @@ In Terminal A, press Control+C once. Wait for:
 Ollama stopped. Owned Slurm allocation released.
 ```
 
-Open TuneIt with Option+Space. Select Wright / L40 / ByteShape Qwen3.8 27B, then click PITSTOP · OPTIMIZE. Wait for SETUP OPTIMIZED. Scroll the Model settings panel to show the 20 key applied settings. Arrows identify changed values; other rows show their current value. TuneIt calls Astra through OpenRouter and verifies the selected configuration. This does not launch Ollama.
+Open CMUTuneIt with Option+Space. Select Wright / L40 / ByteShape Qwen3.8 27B, then click PITSTOP · OPTIMIZE. Wait for SETUP OPTIMIZED. Scroll the Model settings panel to show the 20 key applied settings. Arrows identify changed values; other rows show their current value. CMUTuneIt calls Astra through OpenRouter and verifies the selected configuration. This does not launch Ollama.
 
 ## 4. Terminal B: select the optimized model and run the prompt
 
 ```sh
-./scripts/tuneit run qwen3.8-27b --verbose
+./scripts/cmutuneit run qwen3.8-27b --verbose
 ```
 
 The terminal prints the model, engine, profile, draft size, temperature and Wright job. At `>>>`, type the same prompt and press Return:
@@ -89,11 +89,11 @@ The terminal prints the model, engine, profile, draft size, temperature and Wrig
 Write a short essay explaining the causes of the Industrial Revolution
 ```
 
-The answer streams in Terminal while TuneIt's live speedometer updates. Show the final Decode line and compare it with the earlier Ollama number. The widget rounds the final rate to a whole number. Verbose output includes prefill speed and native timing details. Repeat the command for another prompt; it reuses the retained optimized model.
+The answer streams in Terminal while CMUTuneIt's live speedometer updates. Show the final Decode line and compare it with the earlier Ollama number. The widget rounds the final rate to a whole number. Verbose output includes prefill speed and native timing details. Repeat the command for another prompt; it reuses the retained optimized model.
 
 ## 5. Finish and release the GPU
 
-Click REVERT SETUP in TuneIt. It returns to model selection and releases its owned allocation. Leave TuneIt open if you want the menu-bar icon available for another demo.
+Click REVERT SETUP in CMUTuneIt. It returns to model selection and releases its owned allocation. Leave CMUTuneIt open if you want the menu-bar icon available for another demo.
 
 Optional read-only check from a Mac terminal:
 
@@ -108,7 +108,7 @@ This lists your jobs; unrelated jobs may remain. Do not cancel unrelated allocat
 
 ## Other model selections
 
-Use only one model at a time. Stop the baseline before optimizing, and revert the current TuneIt setup before switching models. Flash Next needs three L40 GPUs; Glimmer needs one.
+Use only one model at a time. Stop the baseline before optimizing, and revert the current CMUTuneIt setup before switching models. Flash Next needs three L40 GPUs; Glimmer needs one.
 
 Glimmer baseline (serve in Terminal A, run in Terminal B):
 
@@ -117,10 +117,10 @@ Glimmer baseline (serve in Terminal A, run in Terminal B):
 ./scripts/ollama-wright run muse-glimmer --verbose
 ```
 
-After selecting and optimizing Glimmer in TuneIt:
+After selecting and optimizing Glimmer in CMUTuneIt:
 
 ```sh
-./scripts/tuneit run muse-glimmer --verbose
+./scripts/cmutuneit run muse-glimmer --verbose
 ```
 
 Flash Next baseline (serve in Terminal A, run in Terminal B):
@@ -130,10 +130,10 @@ Flash Next baseline (serve in Terminal A, run in Terminal B):
 ./scripts/ollama-wright run qwen3.8-flash-next --verbose
 ```
 
-After selecting and optimizing Flash Next in TuneIt:
+After selecting and optimizing Flash Next in CMUTuneIt:
 
 ```sh
-./scripts/tuneit run qwen3.8-flash-next --verbose
+./scripts/cmutuneit run qwen3.8-flash-next --verbose
 ```
 
 ## Reading the numbers
