@@ -2497,6 +2497,42 @@
         "Different text does not establish a distributional error, prove worse quality, or isolate the numerical mechanism. One prompt is not broad quality validation."
       ],
       "parent_review": "Accepted after exact native-request equality, isolated settings comparison and complete final-text review."
+    },
+    {
+      "id": "lesson_019",
+      "title": "Prefer higher temperature when decode is not lower",
+      "takeaway": "Prefer a temperature closer to 1 when matched tests show decode is not lower than at lower temperatures. Account for measurement noise and respect the workload sampling and quality requirements.",
+      "config_ids": [
+        "cfg_11d1391160bbf856",
+        "cfg_ed65d80ba402ea74",
+        "cfg_a29eda3be71d4808"
+      ],
+      "source_path_base": "data/canon in the shared repository",
+      "observed_support": [
+        {
+          "path": "experiments/wright-flash-industrial-20261107.json",
+          "locator": "records A1/A3/A5: config.settings.temperature and measurement.decode_tps",
+          "values": {
+            "draft_tokens": 2,
+            "temperatures": [
+              1.0,
+              0.75,
+              0.5
+            ],
+            "decode_tps": [
+              72.60011578374021,
+              70.1943573424751,
+              73.84418051116708
+            ]
+          }
+        }
+      ],
+      "scope": "User-requested tie-breaking preference, conditional on matched decode evidence and workload requirements. Flash Track A is illustrative, not a universal threshold.",
+      "source_limitations": [
+        "One fixed-seed essay per setting; output lengths and text differ; no statistical equivalence or quality superiority established.",
+        "Temperature 1 beats 0.75 in these MTP 2 observations; 0.5 is slightly faster than 1. The rule does not imply that 1 always wins or that every small difference is noise."
+      ],
+      "parent_review": "Added at user request after matching MTP2 controls and checking native timings. No production preset changed."
     }
   ]
 }
