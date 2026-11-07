@@ -1,0 +1,560 @@
+{
+  "as_of": "2026-11-07",
+  "menu_count": 21,
+  "disabled_count": 20,
+  "planned_count": 2,
+  "scope": "Publicly documented CMU and CMU-affiliated PSC compute resources; broad research scope includes GPU pools, CPU HPC and specialized AI systems.",
+  "limits": [
+    "[Public sources cannot establish a complete inventory of private or intranet-only CMU lab clusters.]",
+    "Only Wright is supported by CMUTuneIt. Disabled entries are future integration candidates, not promises of access, compatibility or implementation dates.",
+    "No remote login, inference or capacity check was performed on these resources.",
+    "Planned systems are labeled explicitly; existing public pages do not establish current availability."
+  ],
+  "resources": [
+    {
+      "id": "wright",
+      "name": "Wright",
+      "note": "CMU · L40 · Slurm",
+      "targetId": "wright",
+      "source_id": "wright",
+      "organization": "Dietrich College: Statistics & Data Science, Philosophy, CMIST",
+      "kind": "gpu_hpc_cluster",
+      "documented_status": "current_public_documentation; live capacity and availability unverified",
+      "access_limits": [
+        "Department authorization required; accounts assigned to statds, phil, or cmist.",
+        "Non-affiliated node access uses lower-priority preemptible condo partitions in the PDF.",
+        "Slurm-managed computation; no large login-node jobs; explicitly request GPUs."
+      ],
+      "sources": [
+        "https://www.cmu.edu/dietrich/statistics-datascience/resources/docs/wright-gpu-cluster-policy.pdf",
+        "https://www.cmu.edu/dietrich/statistics-datascience/resources/index.html"
+      ],
+      "aliases": [
+        "Wright",
+        "Wright HPC GPU cluster",
+        "GPU Cluster (generic wiki redirect; not a separate system)"
+      ]
+    },
+    {
+      "id": "arjuna",
+      "name": "Arjuna",
+      "note": "Engineering · GPU/HPC · Future integration",
+      "targetId": null,
+      "source_id": "cmu-arjuna",
+      "organization": "Multi-departmental Engineering: Mechanical, Electrical and Computer, and Chemical Engineering; hosted at PSC",
+      "kind": "CPU/GPU HPC cluster",
+      "documented_status": "Current public operator documentation remains available, corroborated by a 2017 CMU launch article; [present operational status unverified].",
+      "access_limits": "Administrator-issued account requested through the operator GitHub issue process; Andrew ID required. Campus network, full VPN, or documented CMU timeshare route. Research use; compute through Slurm, never on the head node. No promise of approval.",
+      "sources": [
+        "https://meche.engineering.cmu.edu/news/2017/05/31-arjuna-gpu-cluster.html",
+        "https://arjunacluster.github.io/ArjunaUsers/",
+        "https://arjunacluster.github.io/ArjunaUsers/about/hardware.html",
+        "https://arjunacluster.github.io/ArjunaUsers/about/accounts.html",
+        "https://arjunacluster.github.io/ArjunaUsers/getting_started/connecting.html"
+      ],
+      "aliases": [
+        "Arjuna cluster",
+        "arjuna.psc.edu"
+      ]
+    },
+    {
+      "id": "atlas",
+      "name": "Atlas (LTI)",
+      "note": "LTI · HPC · Future integration",
+      "targetId": null,
+      "source_id": "lti-atlas",
+      "organization": "CMU Language Technologies Institute (SCS)",
+      "kind": "HPC; [GPU/CPU configuration unverified]",
+      "documented_status": "Named in currently public LTI access guide; [current operation and capabilities unverified].",
+      "access_limits": "Contributing faculty sponsorship and administrator provisioning required; Andrew authentication is not automatic authorization for every CMU student.",
+      "sources": [
+        "https://www.lti.cmu.edu/misc-pages/hpc1/hpc-guide.html"
+      ],
+      "aliases": [
+        "ATLAS"
+      ]
+    },
+    {
+      "id": "babel",
+      "name": "Babel",
+      "note": "LTI · GPU/HPC · Future integration",
+      "targetId": null,
+      "source_id": "lti-babel",
+      "organization": "CMU Language Technologies Institute (SCS)",
+      "kind": "GPU/HPC",
+      "documented_status": "Currently publicly documented; live service and hardware availability not checked.",
+      "access_limits": "Contributing faculty sponsorship and administrator provisioning required; Andrew authentication is not automatic authorization for every CMU student.",
+      "sources": [
+        "https://www.lti.cs.cmu.edu/misc-pages/hpc1/babel.html",
+        "https://www.lti.cmu.edu/misc-pages/hpc1/hpc-guide.html",
+        "https://www.wavlab.org/activities/2024/babel-usage/"
+      ],
+      "aliases": [
+        "BABEL",
+        "babel.lti.cs.cmu.edu"
+      ]
+    },
+    {
+      "id": "boston",
+      "name": "Boston (LTI)",
+      "note": "LTI · HPC · Future integration",
+      "targetId": null,
+      "source_id": "lti-boston",
+      "organization": "CMU Language Technologies Institute (SCS)",
+      "kind": "HPC; [GPU/CPU configuration unverified]",
+      "documented_status": "Named in currently public LTI access guide; [current operation and capabilities unverified].",
+      "access_limits": "Contributing faculty sponsorship and administrator provisioning required; Andrew authentication is not automatic authorization for every CMU student.",
+      "sources": [
+        "https://www.lti.cmu.edu/misc-pages/hpc1/hpc-guide.html"
+      ],
+      "aliases": [
+        "BOSTON"
+      ]
+    },
+    {
+      "id": "bridges2",
+      "name": "Bridges-2",
+      "note": "PSC · GPU/HPC · Future integration",
+      "targetId": null,
+      "source_id": "psc-bridges-2",
+      "organization": "Pittsburgh Supercomputing Center (joint CMU / University of Pittsburgh)",
+      "kind": "CPU + GPU HPC cluster",
+      "documented_status": "Current documented system; planned full outage Nov 9 2026 05:00 ET for approximately 4–6 weeks",
+      "access_limits": "PSC/ACCESS allocation required for relevant resource. CMU affiliation does not by itself grant GPU access.",
+      "sources": [
+        "https://www.psc.edu/resources/bridges-2/",
+        "https://www.psc.edu/resources/bridges-2/user-guide/",
+        "https://www.psc.edu/b2-migration-2026/",
+        "https://www.psc.edu/about/"
+      ],
+      "aliases": [
+        "Bridges 2",
+        "Bridges2",
+        "B2"
+      ]
+    },
+    {
+      "id": "caps",
+      "name": "CAPS",
+      "note": "Atmospheric modeling · CPU HPC · Future integration",
+      "targetId": null,
+      "source_id": "cmu-caps-hpc",
+      "organization": "Center for Atmospheric Particle Studies; Engineering interdisciplinary resource",
+      "kind": "Research-center HPC cluster; CPU documented, GPU unverified",
+      "documented_status": "Public research facilities description states CAPS operates it; [live status and hardware freshness unverified].",
+      "access_limits": "CAPS research infrastructure; [public general-user allocation/access route not found].",
+      "sources": [
+        "https://particulate-matter.cmu.edu/research/index.html"
+      ],
+      "aliases": [
+        "CAPS cluster"
+      ]
+    },
+    {
+      "id": "ece-dsc",
+      "name": "ECE Data Science Cloud",
+      "note": "ECE · GPU/CPU compute · Future integration",
+      "targetId": null,
+      "source_id": "cmu-ece-dsc",
+      "organization": "Electrical and Computer Engineering IT Services",
+      "kind": "Mixed high-memory CPU/GPU community compute systems",
+      "documented_status": "Public ECE specifications and account policy remain available; [live availability unverified].",
+      "access_limits": "Only ECE graduate students/faculty may use DSC, subject to application, resource/research approval and advisor consent for students. Large simulations go through a Condor head node.",
+      "sources": [
+        "https://cmu-enterprise.atlassian.net/wiki/spaces/ITS/pages/2332131370/ECE+Community+Compute+Clusters",
+        "https://cmu-enterprise.atlassian.net/wiki/spaces/ITS/pages/2331803689/Accessing+the+ECE+Data+Science+Cloud"
+      ],
+      "aliases": [
+        "DSC",
+        "ECE DSC",
+        "Data Science Cloud"
+      ]
+    },
+    {
+      "id": "ece-number",
+      "name": "ECE Number Cluster",
+      "note": "ECE · GPU host pool · Future integration",
+      "targetId": null,
+      "source_id": "cmu-ece-number",
+      "organization": "Electrical and Computer Engineering IT Services",
+      "kind": "GPU community compute-host pool; direct host login",
+      "documented_status": "Listed in official ECE community specifications and Linux guide; [live availability unverified].",
+      "access_limits": "The Linux guide describes access for ECE students; specifications describe ECE graduate students/research groups. Andrew authentication and CMU VPN required. [Individual eligibility and direct-host scheduling policy must be confirmed.]",
+      "sources": [
+        "https://cmu-enterprise.atlassian.net/wiki/spaces/ITS/pages/2332131370/ECE+Community+Compute+Clusters",
+        "https://cmu-enterprise.atlassian.net/wiki/spaces/ITS/pages/3549888534/ECE+Linux+Computing+Resources+Guide"
+      ],
+      "aliases": [
+        "ECE Numbers Cluster",
+        "ECE NUMBER Cluster",
+        "ECE Community Number Cluster"
+      ]
+    },
+    {
+      "id": "euler",
+      "name": "Euler",
+      "note": "Physics · GPU/HPC · Future integration",
+      "targetId": null,
+      "source_id": "cmu-euler",
+      "organization": "Widom research group, Department of Physics",
+      "kind": "Research-group CPU/GPU HPC cluster",
+      "documented_status": "Official group cluster documentation accessible; [operational state and document freshness unverified].",
+      "access_limits": "Research-group resource; internal and Andrew authentication documented, but [public eligibility/application policy not found]. Landing page describes Slurm.",
+      "sources": [
+        "https://euler.phys.cmu.edu/cluster/",
+        "https://euler.phys.cmu.edu/cluster/hardware.html"
+      ],
+      "aliases": [
+        "euler.phys.cmu.edu",
+        "Euler Linux cluster"
+      ]
+    },
+    {
+      "id": "ghc",
+      "name": "GHC GPU pool",
+      "note": "Gates · Course GPU workstations · Future integration",
+      "targetId": null,
+      "source_id": "ghc-workstations",
+      "organization": "CMU instructional computer labs / SCS courses",
+      "kind": "GPU workstation pool",
+      "documented_status": "Official 2023 assignment documents GPU hosts; 2026 course-project page also describes GHC GPUs. [Exact current machine inventory and access policy unverified].",
+      "access_limits": "Andrew credentials documented in older course material; [current course restrictions, GPU access and permission for long inference jobs unverified].",
+      "sources": [
+        "https://www.cs.cmu.edu/afs/cs/academic/class/15418-s23/www/labs/asst2.pdf",
+        "https://course.ece.cmu.edu/~ece845/sp19/",
+        "https://www.andrew.cmu.edu/user/athanf/SPH.html"
+      ],
+      "aliases": [
+        "GHC",
+        "Gates cluster",
+        "SCS Gates cluster",
+        "ghcX.ghc.andrew.cmu.edu"
+      ]
+    },
+    {
+      "id": "math-physics",
+      "name": "Math/Physics Parallel Cluster",
+      "note": "Math + Physics · GPU/CPU · Future integration",
+      "targetId": null,
+      "source_id": "cmu-math-physics-parallel",
+      "organization": "Mathematical Sciences and Physics; MCS Technology Services",
+      "kind": "Shared CPU/GPU departmental development cluster",
+      "documented_status": "Department cluster page publicly lists contemporary GPU additions; [live availability unverified].",
+      "access_limits": "Department math account via SSH. The page limits intended use to development and small tests; unsuitable for large or very long simulations. MCS page describes local clusters for Math/Physics personnel; this is not blanket CMU-student access.",
+      "sources": [
+        "https://support.math.cmu.edu/clusters.html",
+        "https://www.cmu.edu/mcs/technology-services/"
+      ],
+      "aliases": [
+        "Math parallel cluster",
+        "Physics and Math parallel cluster",
+        "fp/fpg cluster"
+      ]
+    },
+    {
+      "id": "mind",
+      "name": "MIND",
+      "note": "NI/CNBC · GPU/HPC · Future integration",
+      "targetId": null,
+      "source_id": "mind",
+      "organization": "Neuroscience Institute (NI) / Center for the Neural Basis of Cognition (CNBC); hosted/managed with SCS",
+      "kind": "mixed_cpu_gpu_hpc_cluster",
+      "documented_status": "current_public_documentation; live availability unverified",
+      "access_limits": [
+        "Account approval required; participating PI labs and collaborators.",
+        "Slurm allocations govern CPU/GPU jobs; no intensive login-node processing.",
+        "[Any fees, eligibility details, available GPUs and access for a specific student must be confirmed with NI support.]"
+      ],
+      "sources": [
+        "https://ni.cmu.edu/computing/knowledge-base/computing-facilities-description-overview/",
+        "https://ni.cmu.edu/computing/knowledge-base/mind-cluster-nodes/",
+        "https://ni.cmu.edu/computing/knowledge-base/cluster-policies-2/",
+        "https://ni.cmu.edu/computing/knowledge-base/getting-started/"
+      ],
+      "aliases": [
+        "Mind",
+        "NI Cluster",
+        "NI/CNBC Cluster",
+        "mind.cs.cmu.edu (head node)",
+        "mind-cluster.cs.cmu.edu (monitoring hostname)"
+      ]
+    },
+    {
+      "id": "mld-gpu",
+      "name": "MLD GPU resource",
+      "note": "MLD · Department GPU resource · Future integration",
+      "targetId": null,
+      "source_id": "mld-gpu",
+      "organization": "CMU Machine Learning Department (SCS)",
+      "kind": "GPU/HPC",
+      "documented_status": "Currently publicly described by SCS; [specific cluster name, current hardware and availability unverified].",
+      "access_limits": "Documented audience is MLD current PhD students; [wider eligibility and account process unverified].",
+      "sources": [
+        "https://www.cs.cmu.edu/giving/funds/",
+        "https://www.ml.cmu.edu/current-students/incoming-phd-student-information"
+      ],
+      "aliases": []
+    },
+    {
+      "id": "neocortex",
+      "name": "Neocortex",
+      "note": "PSC · Cerebras AI · Future integration",
+      "targetId": null,
+      "source_id": "psc-neocortex",
+      "organization": "PSC (joint CMU / University of Pittsburgh)",
+      "kind": "Specialized AI accelerator + extreme-memory HPC",
+      "documented_status": "Current publicly documented; funding extension to May 31 2027",
+      "access_limits": "Qualified PI and awarded ACCESS project; software/application fit and acceptable-use requirements.",
+      "sources": [
+        "https://www.psc.edu/resources/neocortex/",
+        "https://www.psc.edu/resources/neocortex/allocations/",
+        "https://www.psc.edu/nsf-grants-extend-bridges-2-and-neocortex-at-psc/"
+      ],
+      "aliases": [
+        "Neocortex CS",
+        "Neocortex CS-3 Cloud"
+      ]
+    },
+    {
+      "id": "orchard",
+      "name": "ORCHARD (FLAME / Community)",
+      "note": "CMU · Cloud GPUs · Future integration",
+      "targetId": null,
+      "source_id": "cmu-orchard",
+      "organization": "CMU Office of Research Computing and Data / Computing Services; Google Cloud hosted",
+      "kind": "GPU HPC cluster",
+      "documented_status": "Current publicly documented; live availability untested",
+      "access_limits": "PI-led project access; ACCESS ID onboarding; faculty-project governance. No automatic entitlement for every student.",
+      "sources": [
+        "https://www.cmu.edu/rcd/",
+        "https://www.cmu.edu/rcd/faq.html",
+        "https://cmu-enterprise.atlassian.net/wiki/spaces/ORCHARD"
+      ],
+      "aliases": [
+        "Orchard",
+        "Google Cloud Cluster",
+        "Google Cloud Orchard Cluster"
+      ]
+    },
+    {
+      "id": "qcd",
+      "name": "QCD",
+      "note": "Physics · CPU HPC · Future integration",
+      "targetId": null,
+      "source_id": "cmu-qcd",
+      "organization": "Physics; Colin Morningstar and Curtis Meyer",
+      "kind": "Departmental CPU HPC cluster; GPU not established",
+      "documented_status": "Official Physics research page and QCD documentation identify the cluster; [live availability unverified].",
+      "access_limits": "Local Physics research resource; SSH and Slurm documented. [Public account-eligibility and approval route not found.]",
+      "sources": [
+        "https://qcd.phys.cmu.edu/",
+        "https://qcd.phys.cmu.edu/QCDcluster/details.html",
+        "https://www.cmu.edu/physics/research/comp-phys.html"
+      ],
+      "aliases": [
+        "QCD cluster",
+        "ernest.phys.cmu.edu login endpoint"
+      ]
+    },
+    {
+      "id": "trace",
+      "name": "TRACE",
+      "note": "Engineering / PSC · GPU/HPC · Future integration",
+      "targetId": null,
+      "source_id": "cmu-trace",
+      "organization": "College of Engineering Shared Computing Facility; administered jointly by CMU Computing Services and PSC",
+      "kind": "CPU/GPU HPC cluster",
+      "documented_status": "Publicly documented as a maintained facility; [live availability and individual access unverified].",
+      "access_limits": "Research-group allocation/priority-access arrangement; CMU credentials and campus/VPN connectivity. Authentication alone does not establish an allocation.",
+      "sources": [
+        "https://www.cmu.edu/engineering/trace/",
+        "https://www.cmu.edu/engineering/trace/capabilities/index.html",
+        "https://cmu-enterprise.atlassian.net/wiki/spaces/TPR/pages/2338652206/Connecting+to+TRACE"
+      ],
+      "aliases": [
+        "Tartan Research Advanced Computing Environment",
+        "TRACE HPC",
+        "TRACE-HPC"
+      ]
+    },
+    {
+      "id": "vera",
+      "name": "Vera",
+      "note": "McWilliams / PSC · GPU/HPC · Future integration",
+      "targetId": null,
+      "source_id": "cmu-vera",
+      "organization": "McWilliams Center for Cosmology and Astrophysics, MCS Physics; operated by PSC",
+      "kind": "Dedicated CPU/GPU HPC cluster",
+      "documented_status": "CMU research pages and PSC operator user guide document Vera; [live availability unverified].",
+      "access_limits": "PSC identity plus Vera allocation required; faculty/staff request allocations and students need advisor addition to an allocation. Slurm production jobs on compute nodes; login nodes are not production compute.",
+      "sources": [
+        "https://vera-doc.psc.edu/",
+        "https://www.cmu.edu/astro-cosmology/research/collaborations.html",
+        "https://www.cmu.edu/mcs/news-events/2024/0322-mcwilliams-center-expands"
+      ],
+      "aliases": [
+        "Vera cluster",
+        "vera.psc.edu"
+      ]
+    },
+    {
+      "id": "bridges3",
+      "name": "Bridges-3 (planned)",
+      "note": "PSC · Planned 2027 · Future integration",
+      "targetId": null,
+      "source_id": "psc-bridges-3",
+      "organization": "PSC / NSF; planned HPE construction",
+      "kind": "Planned CPU + GPU HPC cluster",
+      "documented_status": "Announced future system; full operations expected summer 2027",
+      "access_limits": "Future ACCESS/NAIRR allocation planned; no current account route verified.",
+      "sources": [
+        "https://www.psc.edu/10-million-to-fund-new-supercomputer-at-psc/"
+      ],
+      "aliases": [
+        "Bridges 3",
+        "Bridges3"
+      ]
+    },
+    {
+      "id": "tanglelab",
+      "name": "TangleLab (planned)",
+      "note": "PSC · Planned QPU + GPU system · Future integration",
+      "targetId": null,
+      "source_id": "psc-tanglelab",
+      "organization": "PSC / HPE / Rigetti / University of Pittsburgh",
+      "kind": "Planned hybrid quantum-classical QPU + GPU testbed",
+      "documented_status": "Announced future system; full operations expected 2027",
+      "access_limits": "Competitive proposal process planned; training and teaching access described prospectively.",
+      "sources": [
+        "https://www.psc.edu/psc-will-build-new-hybrid-quantum-classical-supercomputer/"
+      ],
+      "aliases": [
+        "TangleLab supercomputing testbed"
+      ]
+    }
+  ],
+  "not_in_menu": [
+    {
+      "names": "FLAME / Community / Bootstrap / General / Advanced",
+      "reason": "ORCHARD governance partitions or access queues, not extra clusters.",
+      "sources": [
+        "https://www.cmu.edu/rcd/faq.html",
+        "https://www.cmu.edu/rcd/request.html"
+      ]
+    },
+    {
+      "names": "SWL; statds / phil / cmist; Vera and Arjuna partitions",
+      "reason": "Subdivisions or former nodes of Babel, Wright, Vera and Arjuna; not independent menu targets.",
+      "sources": [
+        "https://www.wavlab.org/activities/2024/babel-usage/",
+        "https://www.cmu.edu/dietrich/statistics-datascience/resources/docs/wright-gpu-cluster-policy.pdf",
+        "https://vera-doc.psc.edu/"
+      ]
+    },
+    {
+      "names": "SCS HPC; SCF; Hydra / Rocks; PDL ATLAS",
+      "reason": "Service umbrella, facility, deployment tools or trace-analysis project; not additional clusters. LTI Atlas remains a separate documented resource.",
+      "sources": [
+        "https://computing.cs.cmu.edu/research/hpc",
+        "https://www.cmu.edu/engineering/trace/",
+        "https://pdl.cmu.edu/ATLAS/index.shtml"
+      ]
+    },
+    {
+      "names": "Anton 3; Anton 1 / 2",
+      "reason": "Anton 3 is current specialized molecular-dynamics hardware, unsuitable as a promised general LLM target. Earlier generations are historical.",
+      "sources": [
+        "https://www.psc.edu/resources/anton/"
+      ]
+    },
+    {
+      "names": "Bridges (original); Blacklight; Greenfield",
+      "reason": "Retired or historical PSC systems; not current integration candidates.",
+      "sources": [
+        "https://www.psc.edu/bridges-to-bridges-2-transition/",
+        "https://www.psc.edu/blacklight-s-final-bow/",
+        "https://www.psc.edu/fall-2015-from-the-directors/"
+      ]
+    },
+    {
+      "names": "Keystone AI + Quantum Factory",
+      "reason": "Initiative/network, not a separate documented runnable cluster.",
+      "sources": [
+        "https://www.psc.edu/keystone-ai-quantum-factory-to-drive-innovation-jobs-and-statewide-growth/"
+      ]
+    },
+    {
+      "names": "Latedays",
+      "reason": "Historical course GPU cluster. [Present operation not established by the dated pages.]",
+      "sources": [
+        "https://www.cs.cmu.edu/afs/cs/academic/class/15740-s18/www/report/gpu_bfs",
+        "https://www.cs.cmu.edu/afs/cs/academic/class/15418-f24/www/resources.html"
+      ]
+    },
+    {
+      "names": "WARP / Moore; Coma; Ferrari; Gilgamesh; Hercules",
+      "reason": "Historical or ambiguous HPC references. [Present operation and successor relationships not verified.] WARP/Moore provisionally grouped from matching login examples.",
+      "sources": [
+        "https://www.cs.cmu.edu/~cga/warp/",
+        "https://www.cs.cmu.edu/~cga/warp/warp.pdf",
+        "https://www.cmu.edu/physics/research/astro-cosmo.html",
+        "https://www.cmu.edu/astro-cosmology/research/index.html",
+        "https://meche.engineering.cmu.edu/news/2017/05/31-arjuna-gpu-cluster.html"
+      ]
+    },
+    {
+      "names": "Auton; GROGU; OVEN; CCBI",
+      "reason": "Named in a January 2025 SCS service notice. [Current capabilities, operation and overlap with other resources remain unverified.]",
+      "sources": [
+        "https://mailman.srv.cs.cmu.edu/pipermail/autonlab-users/2025-January/002829.html"
+      ]
+    },
+    {
+      "names": "ORCA / SEI Big Learning / PDL Big Learning; OTTO",
+      "reason": "One historical 2017 CPU/GPU cluster with multiple descriptions; OTTO is storage. [Current cluster status unverified.]",
+      "sources": [
+        "https://www.sei.cmu.edu/documents/4137/2017_017_001_506514.pdf",
+        "https://www.sei.cmu.edu/documents/2347/2017_001_001_886821.pdf"
+      ]
+    },
+    {
+      "names": "MSE parallel cluster; MSE visualization/microscopy cluster",
+      "reason": "Older unnamed facility descriptions. [Current identity, capabilities and service status unverified.]",
+      "sources": [
+        "https://www.cmu.edu/engineering/materials/facilities/general/computer_equipment.html"
+      ]
+    },
+    {
+      "names": "ECE GUI; Math qwe; ECE teaching rooms; TechSpark classrooms; Chemistry teaching rooms",
+      "reason": "General GUI/classroom pools or historical instructional rooms, not documented shared GPU/HPC services for this menu. GHC and ECE Number are retained as explicitly documented remote CUDA pools.",
+      "sources": [
+        "https://cmu-enterprise.atlassian.net/wiki/spaces/ITS/pages/3549888534/ECE+Linux+Computing+Resources+Guide",
+        "https://support.math.cmu.edu/clusters.html",
+        "https://cmu-enterprise.atlassian.net/wiki/spaces/ITS/pages/2333704193/ECE+Community+Computer+Labs",
+        "https://engineering.cmu.edu/techspark/facilities/computers.html",
+        "https://www.chem.cmu.edu/courses/09-560/handouts/ctc.pdf"
+      ]
+    },
+    {
+      "names": "RAIL; unnamed AirLab, project and Physics/HEP systems",
+      "reason": "[No stable, separately documented current service identity established.] These are coverage gaps, not invented cluster entries.",
+      "sources": [
+        "https://www.psc.edu/cmu-robotics-institute-ais-learn-new-tasks-with-unprecedented-flexibility/",
+        "https://mscvprojects.ri.cmu.edu/2026teamf12/team/",
+        "https://www.cmu.edu/physics/research/cond-mat.html"
+      ]
+    }
+  ],
+  "important_notes": [
+    "ORCHARD includes FLAME and Community; the old standalone FLAME menu label is replaced by one ORCHARD entry.",
+    "Bridges-2 has a scheduled full outage from November 9, 2026 at 05:00 Eastern for about 4–6 weeks; check PSC before future use.",
+    "Neocortex is Cerebras, not a CUDA GPU cluster; a distinct integration would be needed. The public page gives inconsistent CS-3 counts, so no count is advertised.",
+    "Atlas/Boston hardware is not established here; their public LTI guide identifies HPC resources. MLD publishes a GPU resource without a stable public cluster name; do not infer physical independence from private named systems.",
+    "CPU-documented QCD/CAPS and workstation pools are labeled by kind rather than represented as uniform NVIDIA/Slurm clusters.",
+    "The search covered SCS/CSD/LTI/MLD/RI, Engineering/ECE/MCS/Math/Physics/Chemistry, central ORCD/Computing Services/PSC, Dietrich/NI/CNBC/SEI and targeted Heinz/Tepper/Qatar/Silicon Valley searches. No named system found in a unit is a coverage gap, not evidence of no hardware."
+  ],
+  "additional_sources": [
+    "https://www.psc.edu/b2-migration-2026/",
+    "https://www.psc.edu/about/"
+  ]
+}

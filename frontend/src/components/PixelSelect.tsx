@@ -10,11 +10,12 @@ type Props = {
   onChange: (value: string) => void;
   placeholder?: string;
   compact?: boolean;
+  wideMenu?: boolean;
   disabled?: boolean;
 };
 
 /** Accessible listbox dropdown (button + listbox, arrow/Home/End/Enter/Escape/Tab). */
-export function PixelSelect({ label, value, options, onChange, placeholder = "Select…", compact, disabled }: Props) {
+export function PixelSelect({ label, value, options, onChange, placeholder = "Select…", compact, wideMenu, disabled }: Props) {
   const id = useId();
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
@@ -103,7 +104,7 @@ export function PixelSelect({ label, value, options, onChange, placeholder = "Se
   };
 
   return (
-    <div className={`pselect${compact ? " pselect--compact" : ""}${open ? " is-open" : ""}`} ref={rootRef}>
+    <div className={`pselect${compact ? " pselect--compact" : ""}${wideMenu ? " pselect--wide-menu" : ""}${open ? " is-open" : ""}`} ref={rootRef}>
       <span className="pselect__label" id={`${id}-label`}>
         {label}
       </span>

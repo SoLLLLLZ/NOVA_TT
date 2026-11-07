@@ -57,7 +57,7 @@ The product name is a placeholder in `src/config.ts` (`APP_NAME`) and `public/ma
 - Optimize sends `mode: "verify_only"` with `allow_sampling_change: true`. Success requires `applied: true` and a passed validation. The changed-settings list comes from the backend's `changes` (falling back to a config diff), so values such as temperature 1 → 0.75 are shown explicitly.
 - No speed is shown until `/live` reports a real request. Historical CANON numbers are never displayed.
 - Idempotency keys are kept per click. A dropped stream or a replayed key switches to polling `GET /runs/{id}` instead of re-posting. Reopening the widget resumes an active run or a tuned result.
-- Cluster list: Wright is supported. Babel, Bridges-2 and FLAME are listed but disabled until the backend advertises them.
+- Cluster list: Wright is supported; 20 source-backed future options are gray and disabled in a scrollable menu. FLAME/Community appear under ORCHARD; planned systems are labeled. See the [CMU resource inventory](../docs/research/CMU_CLUSTERS.md) for sources, access limits and exclusions.
 - `prefers-reduced-motion` replaces the pitstop sequence with the service scene and disables the tweens.
 
 See [the exact terminal/demo sequence](../docs/demo/WIDGET_DEMO.md).

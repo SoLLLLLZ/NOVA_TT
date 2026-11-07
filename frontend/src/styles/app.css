@@ -296,6 +296,17 @@ input {
   outline: none;
 }
 
+/* The cluster menu spans both columns and scrolls inside the small widget. */
+.select-row .pselect--wide-menu .pselect__list {
+  right: auto;
+  width: calc(200% + 10px);
+  max-height: min(360px, 50vh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--muted-2) #0a1626;
+}
+
 .pselect__option {
   display: flex;
   align-items: center;
@@ -340,8 +351,12 @@ input {
 }
 
 .pselect__option.is-disabled {
-  color: var(--muted-2);
+  color: #818894;
   cursor: not-allowed;
+}
+
+.pselect__option.is-disabled .pselect__hint {
+  color: #818894;
 }
 
 /* ----------------------------------------------------------------- stage */

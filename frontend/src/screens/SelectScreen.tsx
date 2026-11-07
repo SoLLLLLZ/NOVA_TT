@@ -45,6 +45,7 @@ export function SelectScreen({ status, offline, clusterId, gpuType, model, onClu
       <div className="select-row">
         <PixelSelect
           compact
+          wideMenu
           label="Cluster"
           value={clusterId}
           onChange={onCluster}

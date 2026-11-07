@@ -1,0 +1,32 @@
+{
+  "date": "2026-11-07",
+  "menu_resources": 21,
+  "disabled_future_options": 20,
+  "planned_options": 2,
+  "enabled_backend_targets": [
+    "wright"
+  ],
+  "review": {
+    "builders": 4,
+    "checkers": 4,
+    "model": "GPT-6.1 Sol",
+    "reasoning": "high",
+    "mode": "quiet",
+    "confirmed_checks": 8,
+    "unresolved_checks": 0
+  },
+  "validation": {
+    "frontend_tests_passed": 30,
+    "typescript": "passed",
+    "desktop_bundle": "passed after npm ci --ignore-scripts restored locked dependencies",
+    "codesign": "passed",
+    "native_ui": [
+      "Old TuneIt widget quit; rebuilt CMUTuneIt launched",
+      "Wright remains selected after clicking disabled Arjuna",
+      "End and Return cannot select a disabled cluster",
+      "Menu scrolls to Bridges-3 and TangleLab; long labels fit"
+    ],
+    "new_remote_compute_started": false
+  },
+  "coverage_limit": "Publicly documented resources; private or intranet-only clusters may be missing."
+}
