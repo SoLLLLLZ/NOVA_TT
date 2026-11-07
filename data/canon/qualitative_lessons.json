@@ -2460,6 +2460,43 @@
         "Admission evidence, not a throughput improvement; no inference was run on the rejected device."
       ],
       "parent_review": "Accepted after checking live Slurm GRES mapping, physical device metadata and successful allocated-device runs."
+    },
+    {
+      "id": "lesson_018",
+      "title": "Check output reproducibility after runtime changes",
+      "takeaway": "Treat a fixed seed as a reproducibility control, not a guarantee of identical output across runtime configurations. Compare final text and completed-task behavior when tuning speculation or execution settings.",
+      "config_ids": [
+        "cfg_8c190a298808f87f",
+        "cfg_cab84848d1124600",
+        "cfg_645c00bd7793bea7"
+      ],
+      "source_path_base": "data/canon in the shared repository",
+      "observed_support": [
+        {
+          "path": "experiments/wright-glimmer-industrial-20261107.json",
+          "locator": "records A1/A4/A5: native.request, config.settings.draft_tokens, measurement.final_text",
+          "values": {
+            "same_native_request": true,
+            "seed": 71430,
+            "temperature": 0.75,
+            "draft_depths": [
+              15,
+              5,
+              3
+            ],
+            "final_text_sha256": [
+              "1f1a207008f195309ad5f3ef642d2ed98f98ac4bf43c3efb8cbdb38d4b7c70f3",
+              "f09fa842da58c12a0af182d82be4c964cfbebad82841e10c810b86fbc85c64e0",
+              "33c80b34a8cca30758839626cb1b481155d7d25a877530bf2996c0bb7a9da0ca"
+            ]
+          }
+        }
+      ],
+      "scope": "One fixed-seed Glimmer essay per configuration on the same allocated L40; only requested draft depth changed.",
+      "source_limitations": [
+        "Different text does not establish a distributional error, prove worse quality, or isolate the numerical mechanism. One prompt is not broad quality validation."
+      ],
+      "parent_review": "Accepted after exact native-request equality, isolated settings comparison and complete final-text review."
     }
   ]
 }
