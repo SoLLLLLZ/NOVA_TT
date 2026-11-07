@@ -1,0 +1,2437 @@
+{
+  "schema_version": 1,
+  "updated": "2026-11-07",
+  "record_type": "qualitative_takeaway",
+  "source_path_base": "P100 Project workspace / research archive; raw files are not all included in NOVA_TT.",
+  "interpretation": "Engineering guidance, not new measured configurations. General recommendations do not guarantee gains on untested systems.",
+  "lessons": [
+    {
+      "id": "lesson_001",
+      "title": "Tune draft depth; do not maximize it",
+      "takeaway": "Increasing speculative draft depth can improve or reduce decode speed. Test a bounded range and retain the fastest setting that meets memory and quality constraints; larger drafts are not automatically better.",
+      "config_ids": [
+        "cfg_73cac72da6c83a3e",
+        "cfg_72c207f34465c54e",
+        "cfg_fbbaa080394e4c85",
+        "cfg_9ba075d5fbe82aaa",
+        "cfg_97806061105a7b52",
+        "cfg_e70e968b1e33d39d",
+        "cfg_68fb5be3728630b3",
+        "cfg_58f71b5a6591206e",
+        "cfg_5c77aeb9e5b9a4fc",
+        "cfg_4214ed11d14a93ec",
+        "cfg_7b41fe07bb291d95"
+      ],
+      "observed_support": [
+        {
+          "path": "reports/byteshape-three-knobs-20261104/config3",
+          "locator": "baseline + baseline-repeat versus variant; short/long-speed-r1/r2.response.json:timings",
+          "values": {
+            "fixed_temperature": 1.0,
+            "context_tokens": 65536,
+            "draft_depth_change": [
+              3,
+              5
+            ],
+            "short_decode_tps": [
+              59.33368503926677,
+              68.46117106115484
+            ],
+            "long_decode_tps": [
+              52.41564043732287,
+              57.84778176963949
+            ],
+            "decode_change_pct": [
+              15.383312221122857,
+              10.363588591104245
+            ]
+          }
+        },
+        {
+          "path": "reports/byteshape-temperature-draft-20261104/config2/variant/telemetry.jsonl",
+          "locator": "line6 gpu.free_MiB and line7 error",
+          "values": {
+            "context_tokens": 65536,
+            "draft_tokens": 9,
+            "temperature": 0.5,
+            "min_free_mib": 635,
+            "guard_mib": 768,
+            "valid_speed_observations": 0
+          }
+        },
+        {
+          "path": "reports/byteshape-temperature-draft-20261104/config3/variant/telemetry.jsonl",
+          "locator": "line5 gpu.free_MiB and line6 error",
+          "values": {
+            "context_tokens": 65536,
+            "draft_tokens": 9,
+            "temperature": 0.0,
+            "min_free_mib": 521,
+            "guard_mib": 768,
+            "valid_speed_observations": 0
+          }
+        },
+        {
+          "path": "reports/byteshape-temperature-draft-20261104",
+          "locator": "config2-32k and config3-32k: matched-context raw timing pools and variant/telemetry.jsonl",
+          "values": {
+            "fallback_context_tokens": 32768,
+            "temperature05_draft9_decode_gain_pct": [
+              5.516932649179829,
+              4.283860083802327
+            ],
+            "temperature0_draft9_decode_gain_pct": [
+              5.376088820501801,
+              0.41290899834933725
+            ],
+            "both_min_free_mib": 1689
+          }
+        },
+        {
+          "path": "reports/glimmer-dflash-cycle2-20260915/protocol.json",
+          "locator": "$.primary_selection, $.throughput, $.correctness and $.invariants",
+          "values": {
+            "primary_objective": "lowest successful eight-task native completed-work wall time",
+            "fixed_probes_ignore_eos": true,
+            "fixed_probe_output_counts": [
+              512,
+              256,
+              3072
+            ],
+            "completed_answers_checked_separately": true
+          }
+        },
+        {
+          "path": "reports/glimmer-dflash-cycle2-20260915/01-dflash7-frozen/native/results.json",
+          "locator": "$.wall_s and $.waves[*].tasks; compare03-dflash11-safe-batch/native/results.json",
+          "values": {
+            "dflash7_native_wall_s": 742.8720996379852,
+            "dflash11_native_wall_s": 674.7493393421173,
+            "native_change_percent": -9.170186944571668,
+            "passed_tasks_each": 8,
+            "native_suite_repetitions_each": 1,
+            "comparison_raw_path": "reports/glimmer-dflash-cycle2-20260915/03-dflash11-safe-batch/native/results.json",
+            "different_completed_tool_counts": [
+              76,
+              72
+            ]
+          }
+        },
+        {
+          "path": "reports/glimmer-dflash-cycle2-20260915/01-dflash7-frozen/fixed/cold-0/results.json",
+          "locator": "sum $.wall_s across fixed/{cold,warm,decode-heavy}-{0,1}/results.json for each candidate",
+          "values": {
+            "probe_wall_s": {
+              "01-dflash7-frozen": {
+                "cold": 269.1986701488495,
+                "warm": 26.218886613845825,
+                "decode-heavy": 198.27773451805115
+              },
+              "03-dflash11-safe-batch": {
+                "cold": 272.21324586868286,
+                "warm": 28.85194730758667,
+                "decode-heavy": 202.06392741203308
+              }
+            },
+            "raw_paths": [
+              "reports/glimmer-dflash-cycle2-20260915/01-dflash7-frozen/fixed/cold-0/results.json",
+              "reports/glimmer-dflash-cycle2-20260915/01-dflash7-frozen/fixed/cold-1/results.json",
+              "reports/glimmer-dflash-cycle2-20260915/01-dflash7-frozen/fixed/warm-0/results.json",
+              "reports/glimmer-dflash-cycle2-20260915/01-dflash7-frozen/fixed/warm-1/results.json",
+              "reports/glimmer-dflash-cycle2-20260915/01-dflash7-frozen/fixed/decode-heavy-0/results.json",
+              "reports/glimmer-dflash-cycle2-20260915/01-dflash7-frozen/fixed/decode-heavy-1/results.json",
+              "reports/glimmer-dflash-cycle2-20260915/03-dflash11-safe-batch/fixed/cold-0/results.json",
+              "reports/glimmer-dflash-cycle2-20260915/03-dflash11-safe-batch/fixed/cold-1/results.json",
+              "reports/glimmer-dflash-cycle2-20260915/03-dflash11-safe-batch/fixed/warm-0/results.json",
+              "reports/glimmer-dflash-cycle2-20260915/03-dflash11-safe-batch/fixed/warm-1/results.json",
+              "reports/glimmer-dflash-cycle2-20260915/03-dflash11-safe-batch/fixed/decode-heavy-0/results.json",
+              "reports/glimmer-dflash-cycle2-20260915/03-dflash11-safe-batch/fixed/decode-heavy-1/results.json"
+            ]
+          }
+        },
+        {
+          "path": "reports/flash-next-cycle2-20260907/03-mtp4/results.json",
+          "locator": "$[*].timings; compare01-existing-200w/results.json, only maximum draft depth2→4in inference settings",
+          "values": {
+            "mtp2": {
+              "requests": 4,
+              "new_prompt_tokens": 5212,
+              "prompt_ms": 54818.368,
+              "decode_tokens_minus_one_per_request": 1020,
+              "decode_ms": 39949.28,
+              "prefill_tps": 95.07762069823019,
+              "decode_tps": 25.532375051565385,
+              "sum_wall_s": 95.7019510269165,
+              "cache_n": [
+                0
+              ]
+            },
+            "mtp4": {
+              "requests": 4,
+              "new_prompt_tokens": 5212,
+              "prompt_ms": 55066.299,
+              "decode_tokens_minus_one_per_request": 1020,
+              "decode_ms": 42448.042,
+              "prefill_tps": 94.6495423634699,
+              "decode_tps": 24.029376902708492,
+              "sum_wall_s": 98.62377715110779,
+              "cache_n": [
+                0
+              ]
+            },
+            "prefill_change_percent": -0.450240899610832,
+            "decode_change_percent": -5.886636655702516,
+            "elapsed_change_percent": 3.0530476054448474,
+            "draft_acceptance_scope": "Raw draft_n/draft_n_accepted are available per request; do not equate acceptance alone with total speed."
+          }
+        }
+      ],
+      "scope": "General engineering guidance grounded in the following bounded observations; no universal numeric preset is implied.",
+      "observed_scopes": [
+        "ByteShape Qwen3.8 27B IQ3_S hybrid, production b10820 runtime, one 16GiB V100 per lane, Q8 target/draft KV, 150W, fixed ledger probes at4031/24109 input tokens.",
+        "Historical GlimmerDFlash7/11 at the same successful four-slot layout and FlashMTP2/4at the same saved three-V100 profile. Glimmer selection was among DFlash candidates because that was the requested feature, not a claim that DFlash beat no speculation."
+      ],
+      "source_limitations": [
+        "No same-context, same-temperature draft5 versus draft9 pair exists. Draft9 fallback also changes context and temperature relative to the64K draft5 test. The failures are reserve-guard stops, not demonstrated CUDA OOMs. Successful draft5 minimum free VRAM was825-827MiB, only57-59MiB above the guard.",
+        [
+          "The native suite uses synthetic tasks and one observation per configuration; generated tool sequences and recovery differ. Uniform DONE-validator amendment is preserved in validation-amendment.json, and stricter original results remain available. No ACU production replay or general full-context quality claim.",
+          "DFlash11 was slower than the historical four-agent no-DFlash suite629.218669s; that is a separate ordered system comparison with different tool sequences, not an isolated speculation estimate.",
+          "FlashMTP2→4uses four short uncached capped requests, temperature0/seed1234. Its pooled result is different from the single prose representative pair in CANON; do not substitute one for the other or claim general quality equivalence."
+        ]
+      ],
+      "limitations": "ByteShape draft3-to5 improved decode; Flash MTP2-to4 regressed. ByteShape draft9 failed the64K reserve. Its32K fallback is not a controlled draft5-to9 comparison or a universal diminishing-returns curve.",
+      "review": {
+        "reviewed_by": "parent",
+        "proposal_ids": [
+          "v100-spec-01",
+          "v100-runtime-06-completed-work-selection"
+        ],
+        "decision": "Retained after review; rewritten as a general rule with empirical scope and limits separated.",
+        "rejected_overclaims": [
+          "Increasing MTP/DFLASH draft size always improves decode, with a universally diminishing but positive return; draft9 is a valid64K candidate.",
+          "Higher draft depth or a winning capped decode rate guarantees lower completed-task time, and a capped timing probe counts as a quality pass."
+        ]
+      }
+    },
+    {
+      "id": "lesson_002",
+      "title": "Check memory on every device under load",
+      "takeaway": "Model weights fitting is only the first memory check. Verify each GPU under the intended context, batch, draft depth and concurrency, retaining working headroom. Record failed fits and context reductions as separate configurations.",
+      "config_ids": [
+        "cfg_73cac72da6c83a3e",
+        "cfg_72c207f34465c54e",
+        "cfg_fbbaa080394e4c85",
+        "cfg_9ba075d5fbe82aaa",
+        "cfg_97806061105a7b52",
+        "cfg_e70e968b1e33d39d",
+        "cfg_68fb5be3728630b3",
+        "cfg_1295342535cebf04",
+        "cfg_58f71b5a6591206e",
+        "cfg_5c77aeb9e5b9a4fc"
+      ],
+      "observed_support": [
+        {
+          "path": "reports/byteshape-three-knobs-20261104/config3",
+          "locator": "baseline + baseline-repeat versus variant; short/long-speed-r1/r2.response.json:timings",
+          "values": {
+            "fixed_temperature": 1.0,
+            "context_tokens": 65536,
+            "draft_depth_change": [
+              3,
+              5
+            ],
+            "short_decode_tps": [
+              59.33368503926677,
+              68.46117106115484
+            ],
+            "long_decode_tps": [
+              52.41564043732287,
+              57.84778176963949
+            ],
+            "decode_change_pct": [
+              15.383312221122857,
+              10.363588591104245
+            ]
+          }
+        },
+        {
+          "path": "reports/byteshape-temperature-draft-20261104/config2/variant/telemetry.jsonl",
+          "locator": "line6 gpu.free_MiB and line7 error",
+          "values": {
+            "context_tokens": 65536,
+            "draft_tokens": 9,
+            "temperature": 0.5,
+            "min_free_mib": 635,
+            "guard_mib": 768,
+            "valid_speed_observations": 0
+          }
+        },
+        {
+          "path": "reports/byteshape-temperature-draft-20261104/config3/variant/telemetry.jsonl",
+          "locator": "line5 gpu.free_MiB and line6 error",
+          "values": {
+            "context_tokens": 65536,
+            "draft_tokens": 9,
+            "temperature": 0.0,
+            "min_free_mib": 521,
+            "guard_mib": 768,
+            "valid_speed_observations": 0
+          }
+        },
+        {
+          "path": "reports/byteshape-temperature-draft-20261104",
+          "locator": "config2-32k and config3-32k: matched-context raw timing pools and variant/telemetry.jsonl",
+          "values": {
+            "fallback_context_tokens": 32768,
+            "temperature05_draft9_decode_gain_pct": [
+              5.516932649179829,
+              4.283860083802327
+            ],
+            "temperature0_draft9_decode_gain_pct": [
+              5.376088820501801,
+              0.41290899834933725
+            ],
+            "both_min_free_mib": 1689
+          }
+        },
+        {
+          "path": "reports/glimmer-four-agent-20260915/05-four-agent-dflash/startup-fit.json",
+          "locator": "$.slots[*].n_ctx and $.gpu",
+          "values": {
+            "slots": 4,
+            "context_per_slot": 262144,
+            "startup_free_mib": [
+              2769,
+              2269,
+              1789
+            ],
+            "draft_tokens": 15
+          }
+        },
+        {
+          "path": "reports/glimmer-four-agent-20260915/05-four-agent-dflash/runtime-failure.log",
+          "locator": "line673 and adjacent CUDA error block; failure.json diagnosis records four concurrent requests",
+          "values": {
+            "raw_error": "CUDA error: out of memory",
+            "device_from_diagnosis": 2,
+            "diagnosis_path": "reports/glimmer-four-agent-20260915/05-four-agent-dflash/failure.json",
+            "startup_and_sequential_warmup_passed": true,
+            "native_test_excluded": true
+          }
+        },
+        {
+          "path": "reports/glimmer-four-agent-20260915/06-four-agent-dflash7-fit/changes.json",
+          "locator": "--spec-draft-n-max, --ubatch-size and --tensor-split; startup-fit.json $.gpu",
+          "values": {
+            "successful_revised_package": {
+              "draft_tokens": 7,
+              "microbatch": 512,
+              "tensor_split": "1.1,1.1,0.8"
+            },
+            "startup_free_mib": [
+              2283,
+              4509,
+              5109
+            ],
+            "note": "Several settings changed together; this supports a jointly validated fit, not a placement-only causal estimate."
+          }
+        },
+        {
+          "path": "reports/glimmer-dflash-cycle2-20260915/02-dflash7-b8192-ub1024/fit-rejection.json",
+          "locator": "$.reason, $.free_MiB and $.counts_toward_three_configuration_cap",
+          "values": {
+            "loaded_free_mib": [
+              477,
+              2607,
+              2165
+            ],
+            "frozen_guard_mib": 768,
+            "concurrent_long_input": true,
+            "observed_oom": false,
+            "cpu_active_weights_or_kv_offload": false,
+            "configuration_counted_despite_rejection": true
+          }
+        },
+        {
+          "path": "reports/glimmer-dflash-cycle2-20260915/03-dflash11-safe-batch/startup-fit.json",
+          "locator": "$.gpu and $.slots; summary.json records minimum loaded reserve",
+          "values": {
+            "startup_free_mib": [
+              2283,
+              4509,
+              5109
+            ],
+            "minimum_sampled_loaded_free_mib": 1931,
+            "loaded_summary_path": "reports/glimmer-dflash-cycle2-20260915/summary.json"
+          }
+        }
+      ],
+      "scope": "General engineering guidance grounded in the following bounded observations; no universal numeric preset is implied.",
+      "observed_scopes": [
+        "ByteShape Qwen3.8 27B IQ3_S hybrid, production b10820 runtime, one 16GiB V100 per lane, Q8 target/draft KV, 150W, fixed ledger probes at4031/24109 input tokens.",
+        "Historical Glimmer UD-Q4_K_XL with F16 target/draft KV, four262144-token slots on three independent16GiB V100s. The OOM and guard-rejected attempts are raw failure evidence and have no invented timing row in CANON."
+      ],
+      "source_limitations": [
+        "No same-context, same-temperature draft5 versus draft9 pair exists. Draft9 fallback also changes context and temperature relative to the64K draft5 test. The failures are reserve-guard stops, not demonstrated CUDA OOMs. Successful draft5 minimum free VRAM was825-827MiB, only57-59MiB above the guard.",
+        [
+          "The exact failed tensor and the isolated contribution of draft depth, split, batching or temporary work buffers were not established. Startup free memory is not peak workload memory.",
+          "768MiB was this campaign’s frozen admission floor, not a universal safe reserve. Passing the measured workload does not prove arbitrary full-context quality, memory fit or long-term reliability."
+        ]
+      ],
+      "limitations": "Observed reserve failures are not necessarily CUDA OOMs. The recorded768MiB guard is a campaign rule, not a universal reserve; short-probe fit does not certify full-context quality or sustained concurrent operation.",
+      "review": {
+        "reviewed_by": "parent",
+        "proposal_ids": [
+          "v100-spec-01",
+          "v100-runtime-03-loaded-memory"
+        ],
+        "decision": "Retained after review; rewritten as a general rule with empirical scope and limits separated.",
+        "rejected_overclaims": [
+          "Increasing MTP/DFLASH draft size always improves decode, with a universally diminishing but positive return; draft9 is a valid64K candidate.",
+          "A model that loads with four slots supports four simultaneous requests safely, or combined48GiB VRAM can be treated as one memory pool."
+        ]
+      }
+    },
+    {
+      "id": "lesson_003",
+      "title": "Tune threads to the actual CPU allocation",
+      "takeaway": "Inspect the CPUs allocated to the process and the threads the runtime actually uses. More threads can be neutral or harmful even for GPU inference; test an allocation-aware setting rather than maximizing thread count.",
+      "config_ids": [
+        "cfg_b4e8b9b5c2d0a26e",
+        "cfg_ef0255924ec70762",
+        "cfg_73cac72da6c83a3e",
+        "cfg_7f4035b0adcb8078"
+      ],
+      "observed_support": [
+        {
+          "path": "reports/wright-byteshape-20261103/evidence/results/diagnostic-ollama-default-control-264447-restart-0/allocation.json",
+          "locator": "#/environment/SLURM_CPUS_PER_TASK; #/gpu",
+          "values": {
+            "allocated_logical_cpus": 12,
+            "gpu": "NVIDIA L40",
+            "power_limit_w": 300
+          }
+        },
+        {
+          "path": "reports/wright-byteshape-20261103/evidence/results/diagnostic-ollama-default-control-264447-restart-0/server.log",
+          "locator": "line 38 system_info; line 248 threadpool init",
+          "values": {
+            "threads_decode": 128,
+            "threads_prefill": 128,
+            "visible_machine_logical_cpus": 256
+          }
+        },
+        {
+          "path": "reports/wright-byteshape-20261103/evidence/results/diagnostic-ollama-threads12-264447-restart-0/server.log",
+          "locator": "line 38 system_info; line 248 threadpool init",
+          "values": {
+            "threads_decode": 12,
+            "threads_prefill": 12
+          }
+        },
+        {
+          "path": "reports/wright-byteshape-20261103/evidence/results/diagnostic-ollama-threads12-264447-restart-0/speed-2-request.json",
+          "locator": "#/options",
+          "values": {
+            "num_predict": 512,
+            "num_thread": 12,
+            "only_additional_request_setting_vs_default": "num_thread"
+          }
+        },
+        {
+          "path": "reports/wright-byteshape-20261103/evidence/results",
+          "locator": "diagnostic-ollama-{default-control,threads12}-264447-restart-0/speed-{2,3}-response.json: prompt_eval_count/prompt_eval_duration and eval_count/eval_duration; arithmetic mean of the two per-request rates",
+          "values": {
+            "default": {
+              "prefill_tps": 1135.9126657805164,
+              "decode_tps": 22.215455513835742
+            },
+            "threads12": {
+              "prefill_tps": 2205.1396021666988,
+              "decode_tps": 54.25136486893726
+            },
+            "decode_ratio": 2.4420550294433356,
+            "prefill_ratio": 1.941293260121796
+          }
+        },
+        {
+          "path": "reports/byteshape-three-knobs-20261104/config1",
+          "locator": "baseline,baseline-repeat,variant/configuration.json:argv plus short/long-speed-r1/r2.response.json:timings",
+          "values": {
+            "threads_decode_change": [
+              2,
+              4
+            ],
+            "threads_prefill_unchanged": 6,
+            "short_decode_tps": [
+              60.75883143288587,
+              61.02617240562484
+            ],
+            "long_decode_tps": [
+              53.726677095705114,
+              53.806159257386554
+            ],
+            "decode_change_pct": [
+              0.44000348004433754,
+              0.14793798160988025
+            ]
+          }
+        },
+        {
+          "path": "reports/byteshape-three-knobs-20261104/config1",
+          "locator": "baseline versus baseline-repeat/short-speed-r1/r2.response.json:timings",
+          "values": {
+            "before_baseline_short_decode_tps": 61.00176720090169,
+            "after_baseline_short_decode_tps": 60.517822942969886,
+            "before_after_change_pct": -0.7933282593895918
+          }
+        }
+      ],
+      "scope": "General engineering guidance grounded in the following bounded observations; no universal numeric preset is implied.",
+      "observed_scopes": [
+        "Same physical L40, same model bytes, sequential diagnostic job 264447, 12 allocated CPUs, short 1359-token inputs and 512 output tokens; samples 2 and 3 were predeclared for comparison.",
+        "ByteShape27B on GPU0 in the three-lane V100 campaign; fully GPU-resident model, existing2/6 thread baseline, three lanes share host CPU."
+      ],
+      "source_limitations": [
+        "Only 128 versus 12 was tested in this Ollama diagnostic. [Oversubscription and synchronization are plausible mechanisms; CPU scheduler counters were not collected to isolate the mechanism.] Twelve threads is an observed useful correction here, not a universal optimum.",
+        "This does not show that2 threads is optimal across engines, CPU allocations, models or concurrency. Small observed gains have no statistical significance claim; baseline drift itself was about0.79% on short decode. [Shared CPU contention may affect the result; the experiment did not isolate its mechanism.]"
+      ],
+      "limitations": "Ollama128-to12 threads helped in one12-CPU L40 allocation; V100 decode2-to4 changed less than0.5%. Neither establishes a universal thread count. [Scheduler-level causes were not isolated.]",
+      "review": {
+        "reviewed_by": "parent",
+        "proposal_ids": [
+          "l40_cpu_allocation",
+          "v100-spec-04"
+        ],
+        "decision": "Retained after review; rewritten as a general rule with empirical scope and limits separated.",
+        "rejected_overclaims": [
+          "More CPU threads always improve GPU inference, or every Ollama/L40 installation needs exactly 12 threads.",
+          "Doubling decode threads doubles inference speed, or two decode threads are a universal optimum."
+        ]
+      }
+    },
+    {
+      "id": "lesson_004",
+      "title": "Tune batches against speed and memory together",
+      "takeaway": "Larger prefill batches or microbatches can trade better prompt processing for slower decode and less free GPU memory. Measure both phases and peak memory at the intended workload before retaining a larger batch.",
+      "config_ids": [
+        "cfg_4214ed11d14a93ec",
+        "cfg_dbc448fd90c0b29b"
+      ],
+      "observed_support": [
+        {
+          "path": "reports/flash-next-cycle2-20260907/01-existing-200w/results.json",
+          "locator": "$[*].timings and $[*].wall_s; pooled tokens divided by summed phase milliseconds",
+          "values": {
+            "baseline_batch_microbatch": [
+              2048,
+              1024
+            ],
+            "requests": 4,
+            "new_prompt_tokens": 5212,
+            "prompt_ms": 54818.368,
+            "decode_tokens_minus_one_per_request": 1020,
+            "decode_ms": 39949.28,
+            "prefill_tps": 95.07762069823019,
+            "decode_tps": 25.532375051565385,
+            "sum_wall_s": 95.7019510269165,
+            "cache_n": [
+              0
+            ]
+          }
+        },
+        {
+          "path": "reports/flash-next-cycle2-20260907/04-ubatch2048/results.json",
+          "locator": "$[*].timings and $[*].wall_s; same two payloads, two repeats, 256 output tokens each",
+          "values": {
+            "candidate_batch_microbatch": [
+              2048,
+              2048
+            ],
+            "requests": 4,
+            "new_prompt_tokens": 5212,
+            "prompt_ms": 44459.229,
+            "decode_tokens_minus_one_per_request": 1020,
+            "decode_ms": 54410.106,
+            "prefill_tps": 117.23100281383647,
+            "decode_tps": 18.746517420862954,
+            "sum_wall_s": 99.90702605247498,
+            "cache_n": [
+              0
+            ],
+            "prefill_change_percent": 23.300311843014644,
+            "decode_change_percent": -26.577463385202748,
+            "elapsed_change_percent": 4.393928211950215
+          }
+        },
+        {
+          "path": "reports/flash-next-cycle2-20260907/04-ubatch2048/telemetry.jsonl",
+          "locator": "each record.gpu CSV field 5 is memory.used MiB; maximum sampled use per device",
+          "values": {
+            "candidate": {
+              "peak_used_mib": {
+                "0": 14884.0,
+                "1": 14394.0,
+                "2": 16034.0
+              },
+              "minimum_free_mib_using_recorded_16384_mib_total": {
+                "0": 1500.0,
+                "1": 1990.0,
+                "2": 350.0
+              }
+            },
+            "baseline_raw_path": "reports/flash-next-cycle2-20260907/01-existing-200w/telemetry.jsonl",
+            "baseline": {
+              "peak_used_mib": {
+                "0": 14830.0,
+                "1": 14646.0,
+                "2": 15208.0
+              },
+              "minimum_free_mib_using_recorded_16384_mib_total": {
+                "0": 1554.0,
+                "1": 1738.0,
+                "2": 1176.0
+              }
+            }
+          }
+        }
+      ],
+      "scope": "General engineering guidance grounded in the following bounded observations; no universal numeric preset is implied.",
+      "observed_scopes": [
+        "Historical three-V100 Flash Next UD-Q4_K_XL, 131072 context, F16 target/draft KV, MTP2, 200 W, four short uncached fixed-output requests. Rates recomputed from raw timings; they are pooled rates, not CANON representative pairs."
+      ],
+      "source_limitations": [
+        [
+          "Only two short payloads and two repeats; OS page cache was not flushed. Automatic fit can change placement when buffers change, so this does not isolate a single kernel or explain the slowdown.",
+          "350 MiB is the sampled candidate GPU2 reserve, not proof of OOM or a universal reserve policy. Long-context and other output mixes were not tested in this cycle."
+        ]
+      ],
+      "limitations": "Flash V100 microbatch evidence supports this tradeoff, not a universally optimal batch size. Automatic fit could also change placement, so the measured configuration tradeoff does not isolate a single kernel mechanism.",
+      "review": {
+        "reviewed_by": "parent",
+        "proposal_ids": [
+          "v100-runtime-01-batching-balance"
+        ],
+        "decision": "Retained after review; rewritten as a general rule with empirical scope and limits separated.",
+        "rejected_overclaims": [
+          "Larger microbatches always improve inference, or microbatch1024 is a portable optimum."
+        ]
+      }
+    },
+    {
+      "id": "lesson_005",
+      "title": "Keep sampling changes explicit",
+      "takeaway": "Temperature changes model sampling as well as the experiment. Do not silently lower it to gain speed; measure its effect separately from draft depth and validate completed answers. Lower temperature is not a reliable universal speed setting.",
+      "config_ids": [
+        "cfg_73cac72da6c83a3e",
+        "cfg_eb411c2a23a579db",
+        "cfg_f23ceaec843ca6af",
+        "cfg_0a382b0afd885e1d",
+        "cfg_548689484dc51d0c"
+      ],
+      "observed_support": [
+        {
+          "path": "reports/byteshape-three-knobs-20261104/config2",
+          "locator": "baseline,baseline-repeat,variant/{short,long}-speed-r1/r2.response.json:timings and generation_settings.temperature",
+          "values": {
+            "draft_tokens": 3,
+            "context_tokens": 65536,
+            "effective_temperature_change": [
+              1.0,
+              0.5
+            ],
+            "short_decode_tps": [
+              60.70708427913427,
+              62.232687164806656
+            ],
+            "long_decode_tps": [
+              53.77939995345082,
+              53.58208001335462
+            ],
+            "decode_change_pct": [
+              2.513055772300943,
+              -0.3669061764671855
+            ]
+          }
+        },
+        {
+          "path": "reports/byteshape-temp075-draft5-20261104/config1",
+          "locator": "variant/configuration.json:argv and matched raw response timing pools",
+          "values": {
+            "joint_changes": {
+              "temperature": [
+                1.0,
+                0.75
+              ],
+              "draft_tokens": [
+                3,
+                5
+              ]
+            },
+            "decode_change_pct": [
+              14.45291430824971,
+              11.019822958830883
+            ]
+          }
+        },
+        {
+          "path": "reports/byteshape-temperature-draft-20261104/config1/variant",
+          "locator": "short-speed-r1.response.json and short-speed-r2.response.json:timings and content",
+          "values": {
+            "temperature": 0.0,
+            "seeds": [
+              71430,
+              71431
+            ],
+            "draft_n_each": 475,
+            "draft_n_accepted_each": 415,
+            "short_decode_ms": [
+              7679.854,
+              7722.465
+            ]
+          }
+        }
+      ],
+      "scope": "General engineering guidance grounded in the following bounded observations; no universal numeric preset is implied.",
+      "observed_scopes": [
+        "The pure-temperature result is the same GPU1, same context/runtime/model, one changed inference setting, two cold repeats per length plus bracketing controls."
+      ],
+      "source_limitations": [
+        "Only two ledger lengths and two seeds were tested. Temperature0 repeats measure timing variation, not independent stochastic samples. Different-GPU or separate-campaign temperature/draft combinations do not form a temperature-only ranking."
+      ],
+      "limitations": "At fixed MTP3, temperature1-to0.5 improved short decode2.51% and changed long decode-0.37%. Combined temperature/draft changes do not isolate temperature. Temperature0 seeds are timing repeats, not independent stochastic samples.",
+      "review": {
+        "reviewed_by": "parent",
+        "proposal_ids": [
+          "v100-spec-03"
+        ],
+        "decision": "Retained after review; rewritten as a general rule with empirical scope and limits separated.",
+        "rejected_overclaims": [
+          "Lower temperature reliably increases MTP acceptance and decode speed, or temperature0.75 is universally optimal."
+        ]
+      }
+    },
+    {
+      "id": "lesson_006",
+      "title": "Measure speculation throughput, not acceptance alone",
+      "takeaway": "Use draft-acceptance counters to diagnose speculation, but rank candidates by measured decode time and memory fit. Acceptance fraction alone can rank candidates incorrectly because it does not measure the cost or benefit of the whole speculative step.",
+      "config_ids": [
+        "cfg_73cac72da6c83a3e",
+        "cfg_72c207f34465c54e",
+        "cfg_91cf36411e6d4895",
+        "cfg_0956f7625217646c"
+      ],
+      "observed_support": [
+        {
+          "path": "reports/byteshape-three-knobs-20261104/config3",
+          "locator": "short-speed-r1/r2.response.json:timings, pooling baseline + baseline-repeat versus variant",
+          "values": {
+            "baseline_drafted": 1606,
+            "baseline_accepted": 1506,
+            "baseline_acceptance_fraction": 0.937733499377335,
+            "variant_drafted": 912,
+            "variant_accepted": 839,
+            "variant_acceptance_fraction": 0.9199561403508771,
+            "baseline_decode_tps": 59.33368503926677,
+            "variant_decode_tps": 68.46117106115484
+          }
+        },
+        {
+          "path": "reports/byteshape-three-knobs-20261104/config3",
+          "locator": "long-speed-r1/r2.response.json:timings, pooling baseline + baseline-repeat versus variant",
+          "values": {
+            "baseline_drafted": 1570,
+            "baseline_accepted": 1518,
+            "baseline_acceptance_fraction": 0.9668789808917198,
+            "variant_drafted": 909,
+            "variant_accepted": 839,
+            "variant_acceptance_fraction": 0.922992299229923,
+            "baseline_decode_tps": 52.41564043732287,
+            "variant_decode_tps": 57.84778176963949
+          }
+        },
+        {
+          "path": "reports/wright-glimmer-1l40-20261105/evidence/results/266776/production/short-1-response.json",
+          "locator": "timings.prompt_n, prompt_ms, predicted_n, predicted_ms, cache_n, draft_n, draft_n_accepted; content; stop_type",
+          "values": {
+            "prompt_tokens": 3940,
+            "prompt_seconds": 2.268725,
+            "output_tokens": 512,
+            "decode_timed_tokens": 511,
+            "decode_seconds": 3.0049870000000003,
+            "prefill_tps": 1736.658255187385,
+            "decode_tps": 170.050652465385,
+            "cached_tokens": 0,
+            "drafted_tokens": 742,
+            "accepted_draft_tokens": 443,
+            "stop_type": "limit"
+          }
+        },
+        {
+          "path": "reports/wright-glimmer-1l40-20261105/evidence/results/266776/production/short-2-response.json",
+          "locator": "timings.prompt_n, prompt_ms, predicted_n, predicted_ms, cache_n, draft_n, draft_n_accepted; content; stop_type",
+          "values": {
+            "prompt_tokens": 3940,
+            "prompt_seconds": 2.24532,
+            "output_tokens": 512,
+            "decode_timed_tokens": 511,
+            "decode_seconds": 3.622629,
+            "prefill_tps": 1754.7610140202733,
+            "decode_tps": 141.05777875680894,
+            "cached_tokens": 0,
+            "drafted_tokens": 895,
+            "accepted_draft_tokens": 428,
+            "stop_type": "limit"
+          }
+        },
+        {
+          "path": "reports/wright-glimmer-1l40-20261105/evidence/results/266776/draft15-temp075/short-1-response.json",
+          "locator": "timings.prompt_n, prompt_ms, predicted_n, predicted_ms, cache_n, draft_n, draft_n_accepted; content; stop_type",
+          "values": {
+            "prompt_tokens": 3940,
+            "prompt_seconds": 2.2534409999999996,
+            "output_tokens": 512,
+            "decode_timed_tokens": 511,
+            "decode_seconds": 2.844372,
+            "prefill_tps": 1748.4371678690504,
+            "decode_tps": 179.6530130376758,
+            "cached_tokens": 0,
+            "drafted_tokens": 907,
+            "accepted_draft_tokens": 449,
+            "stop_type": "limit"
+          }
+        },
+        {
+          "path": "reports/wright-glimmer-1l40-20261105/evidence/results/266776/draft15-temp075/short-2-response.json",
+          "locator": "timings.prompt_n, prompt_ms, predicted_n, predicted_ms, cache_n, draft_n, draft_n_accepted; content; stop_type",
+          "values": {
+            "prompt_tokens": 3940,
+            "prompt_seconds": 2.2717669999999996,
+            "output_tokens": 512,
+            "decode_timed_tokens": 511,
+            "decode_seconds": 2.793934,
+            "prefill_tps": 1734.332790290554,
+            "decode_tps": 182.89623162179205,
+            "cached_tokens": 0,
+            "drafted_tokens": 918,
+            "accepted_draft_tokens": 449,
+            "stop_type": "limit"
+          }
+        },
+        {
+          "path": "reports/wright-glimmer-1l40-20261105/evidence/results/266776/production/short-1-response.json",
+          "locator": "timings aggregated with production/short-2-response.json; compared with draft15-temp075 short-1 and short-2 raw timings",
+          "values": {
+            "production_short_accepted": 871,
+            "production_short_drafted": 1637,
+            "production_short_fraction": 0.5320708613317043,
+            "production_short_pooled_decode_tps": 154.20326102176108,
+            "candidate_short_accepted": 898,
+            "candidate_short_drafted": 1825,
+            "candidate_short_fraction": 0.49205479452054796,
+            "candidate_short_pooled_decode_tps": 181.26011607032325
+          }
+        }
+      ],
+      "scope": "General engineering guidance grounded in the following bounded observations; no universal numeric preset is implied.",
+      "observed_scopes": [
+        "Same-V100, temperature1, context65536, identical runtime/model and short/long fixed512 probes. Acceptance fraction is sum(draft_n_accepted)/sum(draft_n).",
+        "Counterexample within the saved Glimmer DFlash11/temp1 versus DFlash15/temp0.75 single-L40 comparison. The fraction is sum(draft_n_accepted)/sum(draft_n), not tokens emitted per verification step."
+      ],
+      "source_limitations": [
+        "Acceptance fraction is not accepted tokens per verification step or an estimate of drafter cost. These aggregate counters do not isolate which runtime operation caused the gain.",
+        "Changing draft width changes the fraction’s denominator, and temperature also changed. The counters do not independently measure draft latency or verification overhead. [Their causal contribution to the measured throughput difference is not isolated.]"
+      ],
+      "limitations": "Both the controlled V100 MTP3-to5 pair and L40 Glimmer combination ran faster with lower accepted/proposed fractions. Glimmer also changed temperature. [Draft and verification costs were not separately timed.]",
+      "review": {
+        "reviewed_by": "parent",
+        "proposal_ids": [
+          "v100-spec-02",
+          "lesson_l40_acceptance_fraction"
+        ],
+        "decision": "Retained after review; rewritten as a general rule with empirical scope and limits separated.",
+        "rejected_overclaims": [
+          "The configuration with the highest draft acceptance percentage must be fastest.",
+          "A higher fraction of accepted draft tokens necessarily means higher decode throughput, or a lower fraction means speculation is ineffective."
+        ]
+      }
+    },
+    {
+      "id": "lesson_007",
+      "title": "Keep decode speed and request latency distinct",
+      "takeaway": "Choose the optimization objective explicitly and measure both inference phases. Higher decode throughput can coexist with slower prefill and longer total requests; report that tradeoff even when decode is the primary objective.",
+      "config_ids": [
+        "cfg_91cf36411e6d4895",
+        "cfg_0956f7625217646c",
+        "cfg_d93b6fcfd7905833",
+        "cfg_22bd103c1aadb59c",
+        "cfg_ef0255924ec70762",
+        "cfg_acd42e38ebc7b799",
+        "cfg_e7be25853fc486d2",
+        "cfg_66cefe35fcd0a30a",
+        "cfg_aee1c8396d18230b",
+        "cfg_549fe546f2fd44a6"
+      ],
+      "observed_support": [
+        {
+          "path": "reports/wright-glimmer-1l40-20261105/evidence/results/266776/production/long-1-response.json",
+          "locator": "timings.prompt_n, prompt_ms, predicted_n, predicted_ms, cache_n, draft_n, draft_n_accepted; content; stop_type",
+          "values": {
+            "prompt_tokens": 23290,
+            "prompt_seconds": 12.795699,
+            "output_tokens": 512,
+            "decode_timed_tokens": 511,
+            "decode_seconds": 4.435113,
+            "prefill_tps": 1820.1428464361345,
+            "decode_tps": 115.21690653654146,
+            "cached_tokens": 0,
+            "drafted_tokens": 1098,
+            "accepted_draft_tokens": 410,
+            "stop_type": "limit"
+          }
+        },
+        {
+          "path": "reports/wright-glimmer-1l40-20261105/evidence/results/266776/production/long-2-response.json",
+          "locator": "timings.prompt_n, prompt_ms, predicted_n, predicted_ms, cache_n, draft_n, draft_n_accepted; content; stop_type",
+          "values": {
+            "prompt_tokens": 23290,
+            "prompt_seconds": 12.877241,
+            "output_tokens": 512,
+            "decode_timed_tokens": 511,
+            "decode_seconds": 4.0102269999999995,
+            "prefill_tps": 1808.6172340798778,
+            "decode_tps": 127.42420815579767,
+            "cached_tokens": 0,
+            "drafted_tokens": 999,
+            "accepted_draft_tokens": 420,
+            "stop_type": "limit"
+          }
+        },
+        {
+          "path": "reports/wright-glimmer-1l40-20261105/evidence/results/266776/draft15-temp075/long-1-response.json",
+          "locator": "timings.prompt_n, prompt_ms, predicted_n, predicted_ms, cache_n, draft_n, draft_n_accepted; content; stop_type",
+          "values": {
+            "prompt_tokens": 23290,
+            "prompt_seconds": 13.517161,
+            "output_tokens": 512,
+            "decode_timed_tokens": 511,
+            "decode_seconds": 3.437906,
+            "prefill_tps": 1722.994939543888,
+            "decode_tps": 148.63699007477226,
+            "cached_tokens": 0,
+            "drafted_tokens": 1125,
+            "accepted_draft_tokens": 435,
+            "stop_type": "limit"
+          }
+        },
+        {
+          "path": "reports/wright-glimmer-1l40-20261105/evidence/results/266776/draft15-temp075/long-2-response.json",
+          "locator": "timings.prompt_n, prompt_ms, predicted_n, predicted_ms, cache_n, draft_n, draft_n_accepted; content; stop_type",
+          "values": {
+            "prompt_tokens": 23290,
+            "prompt_seconds": 13.756591,
+            "output_tokens": 512,
+            "decode_timed_tokens": 511,
+            "decode_seconds": 4.619414,
+            "prefill_tps": 1693.0066467775337,
+            "decode_tps": 110.62009163932915,
+            "cached_tokens": 0,
+            "drafted_tokens": 1342,
+            "accepted_draft_tokens": 421,
+            "stop_type": "limit"
+          }
+        },
+        {
+          "path": "reports/wright-glimmer-1l40-20261105/evidence/results/266776/production/summary.json",
+          "locator": "label in [long-1,long-2]; wall_seconds and engine phase fields; pool tokens / summed seconds, excluding warmup and quality",
+          "values": {
+            "pooled": {
+              "n": 2,
+              "prefill_tps": 1814.3617365210216,
+              "decode_tps": 121.01348199125198,
+              "summed_phase_seconds": 34.11828,
+              "drafted_tokens": 2097,
+              "accepted_draft_tokens": 830
+            },
+            "wall_seconds_by_trial": [
+              17.601271184161305,
+              17.264182632789016
+            ],
+            "summed_wall_seconds": 34.86545381695032
+          }
+        },
+        {
+          "path": "reports/wright-glimmer-1l40-20261105/evidence/results/266776/draft15-temp075/summary.json",
+          "locator": "label in [long-1,long-2]; wall_seconds and engine phase fields; pool tokens / summed seconds, excluding warmup and quality",
+          "values": {
+            "pooled": {
+              "n": 2,
+              "prefill_tps": 1707.8691629959822,
+              "decode_tps": 126.84118292434704,
+              "summed_phase_seconds": 35.331072,
+              "drafted_tokens": 2467,
+              "accepted_draft_tokens": 856
+            },
+            "wall_seconds_by_trial": [
+              17.39877512305975,
+              18.78379144333303
+            ],
+            "summed_wall_seconds": 36.18256656639278
+          }
+        },
+        {
+          "path": "reports/wright-flash-next-3l40-20261104/evidence/results/265953/ollama/summary.json",
+          "locator": "short-1,short-2,long-1,long-2; pooled prompt tokens/prompt_seconds and decode_timed_tokens/decode_seconds",
+          "values": {
+            "short_prefill_tps": 1656.9574028269449,
+            "short_decode_tps": 20.966604273956285,
+            "long_prefill_tps": 2042.6892110011445,
+            "long_decode_tps": 19.019126090100993
+          }
+        },
+        {
+          "path": "reports/wright-flash-next-3l40-20261104/evidence/results/266141/production/summary.json",
+          "locator": "short-1,short-2,long-1,long-2; pooled prompt tokens/prompt_seconds and decode_timed_tokens/decode_seconds",
+          "values": {
+            "short_prefill_tps": 1031.9772310434912,
+            "short_decode_tps": 93.95553347529014,
+            "long_prefill_tps": 1525.3957614126427,
+            "long_decode_tps": 86.96765075697597
+          }
+        },
+        {
+          "path": "reports/wright-byteshape-20261103/evidence/results",
+          "locator": "diagnostic-llamacpp-mtp-{off,control}-264447-restart-0/speed-{2,3}-response.json: native phase rates, mean of rates",
+          "values": {
+            "mtp_off": {
+              "prefill_tps": 1728.8137353341908,
+              "decode_tps": 54.077062303141446
+            },
+            "mtp3": {
+              "prefill_tps": 1421.255553682048,
+              "decode_tps": 121.78398658768435
+            },
+            "mtp_prefill_change_pct": -17.790128303943042,
+            "mtp_decode_change_pct": 125.20451629749437
+          }
+        },
+        {
+          "path": "reports/wright-three-configs-20261104/evidence/results/265070",
+          "locator": "{ollama-default,production,temp075-draft5}/{short,long}-{1,2}-response.json; sum native timed tokens / sum phase seconds per length, excluding warmup and quality",
+          "values": {
+            "ollama-default": {
+              "short": {
+                "prefill_tps": 1432.118362229722,
+                "decode_tps": 21.96363568351242
+              },
+              "long": {
+                "prefill_tps": 2127.493172575313,
+                "decode_tps": 21.965209253582294
+              }
+            },
+            "production": {
+              "short": {
+                "prefill_tps": 1826.4116960943254,
+                "decode_tps": 126.84044303802965
+              },
+              "long": {
+                "prefill_tps": 1854.2971090105466,
+                "decode_tps": 112.02745132944358
+              }
+            },
+            "temp075-draft5": {
+              "short": {
+                "prefill_tps": 1812.5843473730774,
+                "decode_tps": 145.86078629810604
+              },
+              "long": {
+                "prefill_tps": 1841.974984613925,
+                "decode_tps": 135.39574706325698
+              }
+            }
+          }
+        },
+        {
+          "path": "reports/wright-three-configs-20261104/evidence/results/265070",
+          "locator": "production/short-{1,2}-response.json and long-{1,2}-response.json, compared with temp075-draft5 equivalents",
+          "values": {
+            "candidate_decode_change_pct": {
+              "short": 14.995487877926795,
+              "long": 20.859437090194376
+            },
+            "candidate_prefill_change_pct": {
+              "short": -0.7570773200159087,
+              "long": -0.6645172629965779
+            }
+          }
+        }
+      ],
+      "scope": "General engineering guidance grounded in the following bounded observations; no universal numeric preset is implied.",
+      "observed_scopes": [
+        "Observed on uncached synthetic ledger probes: Glimmer 23,290 input / 512 output tokens, one L40, one slot. Summed Glimmer long phase time increased 34.118280→35.331072 seconds (+3.5547%); summed request wall increased 34.865454→36.182567 seconds (+3.7777%). Flash corroborates a prefill/decode tradeoff across full systems.",
+        "Cold short/long ledger probes on the recorded single-L40 allocation; November 4 input lengths were 4036/24114 for llama.cpp and 4078/24156 for Ollama. The November 3 diagnostic used shorter inputs."
+      ],
+      "source_limitations": [
+        "Two repeats per length. All speed probes reached their length limit; these are timing observations, not completed user tasks. Loading/warmup are excluded. Glimmer temperature and draft depth changed together; Flash engines/configurations and physical GPU trios differ. [The best preset for other input/output mixes requires measurement.]",
+        "[Input_tokens/prefill_rate plus native_timed_output_tokens/decode_rate is a useful first phase-time estimate, not verified wall-time prediction.] These measurements exclude loading, queueing and tool work. The default Ollama long-prefill advantage is a system comparison, not a controlled MTP-only result."
+      ],
+      "limitations": "Glimmer long probes gained4.82% decode but took3.78% more request time. These are two capped repeats, not completed tasks. Flash and cross-engine comparisons change multiple settings; loading and queue time are excluded.",
+      "review": {
+        "reviewed_by": "parent",
+        "proposal_ids": [
+          "lesson_l40_phase_objective",
+          "l40_phase_objective"
+        ],
+        "decision": "Retained after review; rewritten as a general rule with empirical scope and limits separated.",
+        "rejected_overclaims": [
+          "Higher decode tokens/second establishes faster overall work or one universally fastest preset.",
+          "The fastest decoder is always the fastest system for long documents, or one tested preset maximizes both phases."
+        ]
+      }
+    },
+    {
+      "id": "lesson_008",
+      "title": "Retain repeats and test representative lengths",
+      "takeaway": "Keep repeat-level timings and evaluate short and long inputs separately. Small pooled gains amid large run-to-run variation are provisional; do not select a preset from its fastest sample or assume one prompt length predicts another.",
+      "config_ids": [
+        "cfg_91cf36411e6d4895",
+        "cfg_0956f7625217646c",
+        "cfg_ef0255924ec70762",
+        "cfg_acd42e38ebc7b799",
+        "cfg_e7be25853fc486d2",
+        "cfg_66cefe35fcd0a30a",
+        "cfg_aee1c8396d18230b",
+        "cfg_549fe546f2fd44a6"
+      ],
+      "observed_support": [
+        {
+          "path": "reports/wright-glimmer-1l40-20261105/evidence/results/266776/production/long-1-response.json",
+          "locator": "timings.prompt_n, prompt_ms, predicted_n, predicted_ms, cache_n, draft_n, draft_n_accepted; content; stop_type",
+          "values": {
+            "prompt_tokens": 23290,
+            "prompt_seconds": 12.795699,
+            "output_tokens": 512,
+            "decode_timed_tokens": 511,
+            "decode_seconds": 4.435113,
+            "prefill_tps": 1820.1428464361345,
+            "decode_tps": 115.21690653654146,
+            "cached_tokens": 0,
+            "drafted_tokens": 1098,
+            "accepted_draft_tokens": 410,
+            "stop_type": "limit"
+          }
+        },
+        {
+          "path": "reports/wright-glimmer-1l40-20261105/evidence/results/266776/production/long-2-response.json",
+          "locator": "timings.prompt_n, prompt_ms, predicted_n, predicted_ms, cache_n, draft_n, draft_n_accepted; content; stop_type",
+          "values": {
+            "prompt_tokens": 23290,
+            "prompt_seconds": 12.877241,
+            "output_tokens": 512,
+            "decode_timed_tokens": 511,
+            "decode_seconds": 4.0102269999999995,
+            "prefill_tps": 1808.6172340798778,
+            "decode_tps": 127.42420815579767,
+            "cached_tokens": 0,
+            "drafted_tokens": 999,
+            "accepted_draft_tokens": 420,
+            "stop_type": "limit"
+          }
+        },
+        {
+          "path": "reports/wright-glimmer-1l40-20261105/evidence/results/266776/draft15-temp075/long-1-response.json",
+          "locator": "timings.prompt_n, prompt_ms, predicted_n, predicted_ms, cache_n, draft_n, draft_n_accepted; content; stop_type",
+          "values": {
+            "prompt_tokens": 23290,
+            "prompt_seconds": 13.517161,
+            "output_tokens": 512,
+            "decode_timed_tokens": 511,
+            "decode_seconds": 3.437906,
+            "prefill_tps": 1722.994939543888,
+            "decode_tps": 148.63699007477226,
+            "cached_tokens": 0,
+            "drafted_tokens": 1125,
+            "accepted_draft_tokens": 435,
+            "stop_type": "limit"
+          }
+        },
+        {
+          "path": "reports/wright-glimmer-1l40-20261105/evidence/results/266776/draft15-temp075/long-2-response.json",
+          "locator": "timings.prompt_n, prompt_ms, predicted_n, predicted_ms, cache_n, draft_n, draft_n_accepted; content; stop_type",
+          "values": {
+            "prompt_tokens": 23290,
+            "prompt_seconds": 13.756591,
+            "output_tokens": 512,
+            "decode_timed_tokens": 511,
+            "decode_seconds": 4.619414,
+            "prefill_tps": 1693.0066467775337,
+            "decode_tps": 110.62009163932915,
+            "cached_tokens": 0,
+            "drafted_tokens": 1342,
+            "accepted_draft_tokens": 421,
+            "stop_type": "limit"
+          }
+        },
+        {
+          "path": "reports/wright-byteshape-20261103/evidence/results",
+          "locator": "diagnostic-llamacpp-mtp-{off,control}-264447-restart-0/speed-{2,3}-response.json: native phase rates, mean of rates",
+          "values": {
+            "mtp_off": {
+              "prefill_tps": 1728.8137353341908,
+              "decode_tps": 54.077062303141446
+            },
+            "mtp3": {
+              "prefill_tps": 1421.255553682048,
+              "decode_tps": 121.78398658768435
+            },
+            "mtp_prefill_change_pct": -17.790128303943042,
+            "mtp_decode_change_pct": 125.20451629749437
+          }
+        },
+        {
+          "path": "reports/wright-three-configs-20261104/evidence/results/265070",
+          "locator": "{ollama-default,production,temp075-draft5}/{short,long}-{1,2}-response.json; sum native timed tokens / sum phase seconds per length, excluding warmup and quality",
+          "values": {
+            "ollama-default": {
+              "short": {
+                "prefill_tps": 1432.118362229722,
+                "decode_tps": 21.96363568351242
+              },
+              "long": {
+                "prefill_tps": 2127.493172575313,
+                "decode_tps": 21.965209253582294
+              }
+            },
+            "production": {
+              "short": {
+                "prefill_tps": 1826.4116960943254,
+                "decode_tps": 126.84044303802965
+              },
+              "long": {
+                "prefill_tps": 1854.2971090105466,
+                "decode_tps": 112.02745132944358
+              }
+            },
+            "temp075-draft5": {
+              "short": {
+                "prefill_tps": 1812.5843473730774,
+                "decode_tps": 145.86078629810604
+              },
+              "long": {
+                "prefill_tps": 1841.974984613925,
+                "decode_tps": 135.39574706325698
+              }
+            }
+          }
+        },
+        {
+          "path": "reports/wright-three-configs-20261104/evidence/results/265070",
+          "locator": "production/short-{1,2}-response.json and long-{1,2}-response.json, compared with temp075-draft5 equivalents",
+          "values": {
+            "candidate_decode_change_pct": {
+              "short": 14.995487877926795,
+              "long": 20.859437090194376
+            },
+            "candidate_prefill_change_pct": {
+              "short": -0.7570773200159087,
+              "long": -0.6645172629965779
+            }
+          }
+        }
+      ],
+      "scope": "General engineering guidance grounded in the following bounded observations; no universal numeric preset is implied.",
+      "observed_scopes": [
+        "Two Glimmer long trials per configuration in the same sequential one-GPU Slurm allocation; seeds 71430/71431 and distinct trial labels. CANON retains a lower-middle individual observation, while the report pools repeats.",
+        "Cold short/long ledger probes on the recorded single-L40 allocation; November 4 input lengths were 4036/24114 for llama.cpp and 4078/24156 for Ollama. The November 3 diagnostic used shorter inputs."
+      ],
+      "source_limitations": [
+        "With only two timing repeats, the descriptive spread is not a confidence interval or a significance test. Distinct trial labels and stochastic outputs can differ. [The cause of the variation and whether the long candidate is better on average remain unresolved.]",
+        "[Input_tokens/prefill_rate plus native_timed_output_tokens/decode_rate is a useful first phase-time estimate, not verified wall-time prediction.] These measurements exclude loading, queueing and tool work. The default Ollama long-prefill advantage is a system comparison, not a controlled MTP-only result."
+      ],
+      "limitations": "Glimmer long candidate repeats ranged110.62-148.64t/s around a pooled126.84t/s. Only two repeats per length were available. [Repeatability and the cause of variation remain unresolved.]",
+      "review": {
+        "reviewed_by": "parent",
+        "proposal_ids": [
+          "lesson_l40_repeat_variation",
+          "l40_phase_objective"
+        ],
+        "decision": "Retained after review; rewritten as a general rule with empirical scope and limits separated.",
+        "rejected_overclaims": [
+          "The fastest single run, the CANON representative row, or a +4.82% pooled mean proves a stable long-prompt speedup.",
+          "The fastest decoder is always the fastest system for long documents, or one tested preset maximizes both phases."
+        ]
+      }
+    },
+    {
+      "id": "lesson_009",
+      "title": "Separate prefix reuse from raw prefill",
+      "takeaway": "Prefix caching can avoid most repeated prompt work without improving uncached prefill throughput. Record reused and newly processed tokens separately, and benchmark cold and reused-prefix requests as distinct workloads.",
+      "config_ids": [
+        "cfg_4214ed11d14a93ec",
+        "cfg_b4e8b9b5c2d0a26e",
+        "cfg_ef0255924ec70762",
+        "cfg_e7be25853fc486d2",
+        "cfg_66cefe35fcd0a30a",
+        "cfg_aee1c8396d18230b",
+        "cfg_549fe546f2fd44a6"
+      ],
+      "observed_support": [
+        {
+          "path": "reports/flash-next-cycle2-20260907/cache-baseline/uncached.json",
+          "locator": "$.timings, $.stop_type and $.content",
+          "values": {
+            "cache_n": 0,
+            "new_prompt_n": 1489,
+            "prompt_ms": 14113.91,
+            "raw_prefill_tps": 105.49875973419131,
+            "decode_tps": 25.312837774407605,
+            "output_tokens": 128,
+            "stop_type": "limit"
+          }
+        },
+        {
+          "path": "reports/flash-next-cycle2-20260907/cache-baseline/reused.json",
+          "locator": "$.timings; exact compared response path is cache-baseline/uncached.json",
+          "values": {
+            "cache_n": 1485,
+            "new_prompt_n": 4,
+            "prompt_ms": 580.093,
+            "reported_new_token_prefill_tps": 6.895446075025902,
+            "decode_tps": 24.8743064083656,
+            "output_tokens": 128,
+            "prompt_phase_time_reduction_percent": 95.88991994422523,
+            "identical_returned_content": true,
+            "stop_type": "limit"
+          }
+        },
+        {
+          "path": "reports/wright-three-configs-20261104/evidence/results/265070/ollama-default/short-1-response.json",
+          "locator": "#/prompt_eval_count; #/prompt_eval_cached_count; #/eval_count; #/eval_duration",
+          "values": {
+            "prompt_tokens": 4078,
+            "reused_prompt_tokens": 0,
+            "output_tokens": 512,
+            "timed_decode_tokens": 512,
+            "decode_seconds": 23.920559,
+            "decode_tps_recomputed": 21.40418206781873
+          }
+        },
+        {
+          "path": "reports/wright-three-configs-20261104/evidence/results/265070/production/short-1-response.json",
+          "locator": "#/timings; compare long-1-response.json and corresponding Ollama long-1-response.json",
+          "values": {
+            "prompt_tokens": 4036,
+            "long_prompt_tokens": 24114,
+            "ollama_long_prompt_tokens": 24156,
+            "cache_n": 0,
+            "predicted_n": 512,
+            "timed_decode_tokens": 511,
+            "decode_seconds": 3.974759,
+            "decode_tps_recomputed": 128.56125365085026,
+            "512_vs_511_numerator_difference_pct": 0.1956947162426559
+          }
+        },
+        {
+          "path": "reports/wright-byteshape-20261103/evidence/results/diagnostic-llamacpp-mtp-control-264447-restart-0/speed-2-response.json",
+          "locator": "#/tokens_cached versus #/timings/cache_n; request #/cache_prompt",
+          "values": {
+            "tokens_cached": 1828,
+            "actual_prompt_reuse_cache_n": 0,
+            "cache_prompt_request": false,
+            "prompt_n": 1317
+          }
+        }
+      ],
+      "scope": "General engineering guidance grounded in the following bounded observations; no universal numeric preset is implied.",
+      "observed_scopes": [
+        "Exact historical Flash cycle2 baseline same-slot prefix-cache pair,128capped output tokens. The selected-profile validation has a different raw14.514066s→0.566816s pair and is intentionally not mixed with this baseline pair.",
+        "These recorded Ollama and llama.cpp APIs and CANON selection conventions. November 4 probes have explicit zero reuse in the native response fields; the earlier Ollama compact rows preserve unknown despite more specific raw evidence."
+      ],
+      "source_limitations": [
+        [
+          "The cache reuse result is one same-slot experiment with the saved4096MiB host prompt cache; it is not a cold varied-input throughput measurement or a cache-hit-rate estimate.",
+          "Both responses stop at the output limit; byte-identical content verifies this pair’s output consistency, not completed-answer quality. The response field tokens_cached is not used to infer input reuse; timings.cache_n is explicit."
+        ],
+        "The 0.196% decode-numerator difference is small at 512 output tokens but should be disclosed. tokens_cached describes cached state here and must not be substituted for timings.cache_n. Do not silently rewrite preserved CANON rows or replace an individual representative pair with pooled report averages."
+      ],
+      "limitations": "Cache benefits require a reusable prefix and depend on runtime state. A stored-token counter is not automatically a reused-token counter; verify each API field. Do not divide the full prompt length by the time spent processing only its new suffix.",
+      "review": {
+        "reviewed_by": "parent",
+        "proposal_ids": [
+          "v100-runtime-05-cache-accounting",
+          "l40_metric_contract"
+        ],
+        "decision": "Retained after review; rewritten as a general rule with empirical scope and limits separated.",
+        "rejected_overclaims": [
+          "Prefix caching made the model process1489new tokens in0.58seconds, or cache reuse demonstrates a comparable increase in raw prefill capacity.",
+          "Different prompt-token counts prove different user tasks; a nonzero tokens_cached proves warm-prefix timing; or the one-token rate convention explains a multiple-fold gain."
+        ]
+      }
+    },
+    {
+      "id": "lesson_010",
+      "title": "Separate concurrency, throughput and user latency",
+      "takeaway": "More concurrent requests or replicas do not guarantee faster individual requests. Measure completed workload wall time and each request latency under the actual GPU topology; overlapping per-request token rates must not be summed into server throughput.",
+      "config_ids": [
+        "cfg_b375644fc18a7e1f",
+        "cfg_b0cba4cf88252232",
+        "cfg_8f7db95fe7aa36df"
+      ],
+      "observed_support": [
+        {
+          "path": "reports/glimmer-four-agent-20260915/01-two-agent-reference/native/results.json",
+          "locator": "$.wall_s, $.waves[*].tasks, $.max_overlapping_inference",
+          "values": {
+            "agents": 2,
+            "eight_task_wall_s": 713.6996140480042,
+            "passed_tasks": 8,
+            "max_simultaneous_inference": 2,
+            "waves": 4
+          }
+        },
+        {
+          "path": "reports/glimmer-four-agent-20260915/02-four-agent-frozen/native/results.json",
+          "locator": "$.wall_s, $.waves[*].tasks, $.max_overlapping_inference",
+          "values": {
+            "agents": 4,
+            "eight_task_wall_s": 637.515406370163,
+            "passed_tasks": 8,
+            "max_simultaneous_inference": 4,
+            "waves": 2,
+            "native_wall_change_percent": -10.674547972043168
+          }
+        },
+        {
+          "path": "reports/glimmer-four-agent-20260915/02-four-agent-frozen/fixed/cold-0/results.json",
+          "locator": "$.requests[0]; compare01-two-agent-reference/fixed/cold-0/results.json $.requests[0], same3820-token prompt and512-token output",
+          "values": {
+            "two_slot_wall_s": 25.641912937164307,
+            "four_slot_wall_s": 44.049545764923096,
+            "two_slot_decode_tps": 29.694608673580188,
+            "four_slot_decode_tps": 15.283601888550718,
+            "cache_n_both": 0
+          }
+        },
+        {
+          "path": "reports/glimmer-separate-20260914/run-1/long/results.json",
+          "locator": "$.pair_wall_s; recompute mean over run1/run2 short+long; compare glimmer-vs-qwen2 production1/2/3 short+long",
+          "values": {
+            "separate_short_observations_s": [
+              23.1207537651062,
+              23.25659990310669
+            ],
+            "separate_long_observations_s": [
+              148.0519199371338,
+              149.0804464817047
+            ],
+            "shared_short_observations_s": [
+              24.15598964691162,
+              24.11496663093567,
+              24.05590033531189
+            ],
+            "shared_long_observations_s": [
+              116.24910831451416,
+              117.05578279495239,
+              117.63833546638489
+            ],
+            "separate_sum_of_short_long_mean_s": 171.7548600435257,
+            "shared_sum_of_short_long_mean_s": 141.0900277296702,
+            "separate_more_elapsed_percent": 21.7342308363633,
+            "raw_paths": [
+              "reports/glimmer-separate-20260914/run-1/short/results.json",
+              "reports/glimmer-separate-20260914/run-1/long/results.json",
+              "reports/glimmer-separate-20260914/run-2/short/results.json",
+              "reports/glimmer-separate-20260914/run-2/long/results.json",
+              "reports/glimmer-vs-qwen2-20260914/glimmer/production-1/short/results.json",
+              "reports/glimmer-vs-qwen2-20260914/glimmer/production-1/long/results.json",
+              "reports/glimmer-vs-qwen2-20260914/glimmer/production-2/short/results.json",
+              "reports/glimmer-vs-qwen2-20260914/glimmer/production-2/long/results.json",
+              "reports/glimmer-vs-qwen2-20260914/glimmer/production-3/short/results.json",
+              "reports/glimmer-vs-qwen2-20260914/glimmer/production-3/long/results.json"
+            ]
+          }
+        }
+      ],
+      "scope": "General engineering guidance grounded in the following bounded observations; no universal numeric preset is implied.",
+      "observed_scopes": [
+        "Historical shared2/4-slot and separate2-replica Glimmer systems; all retain262144 context per agent. Native comparison uses the same eight synthetic tasks, four two-agent waves versus two four-agent waves."
+      ],
+      "source_limitations": [
+        [
+          "Only one native suite per configuration, with generated tool sequences that differ. The result is an observed elapsed-time comparison, not a universal concurrency speedup.",
+          "The separate system uses overlapping GPU0+1/GPU1+2 replicas,4/6threads per replica and a different runtime package from the shared pipeline system. This is not a pure replication-versus-sharing experiment or a claim about fully independent GPUs.",
+          "The matched fixed request is one of several unequal-length concurrent inputs. Phase timers include contention and cannot be added as if work ran serially."
+        ]
+      ],
+      "limitations": "Glimmer shared/separate comparisons changed topology and runtime, and historical task times were single observations. [The optimal concurrency or replica layout for another workload is unestablished.]",
+      "review": {
+        "reviewed_by": "parent",
+        "proposal_ids": [
+          "v100-runtime-04-concurrency-objective"
+        ],
+        "decision": "Retained after review; rewritten as a general rule with empirical scope and limits separated.",
+        "rejected_overclaims": [
+          "Twice as many slots makes each request twice as fast, or replication is inherently slower than a shared server."
+        ]
+      }
+    },
+    {
+      "id": "lesson_011",
+      "title": "Check completed work after a token-rate win",
+      "takeaway": "Fixed-output probes measure token generation, while naturally completed tasks measure useful work. Check correctness, generated length and completion time separately: faster decode may produce a longer answer or rank configurations differently from a real workflow.",
+      "config_ids": [
+        "cfg_73cac72da6c83a3e",
+        "cfg_72c207f34465c54e",
+        "cfg_f23ceaec843ca6af",
+        "cfg_0a382b0afd885e1d",
+        "cfg_66cefe35fcd0a30a",
+        "cfg_aee1c8396d18230b",
+        "cfg_549fe546f2fd44a6",
+        "cfg_58f71b5a6591206e",
+        "cfg_5c77aeb9e5b9a4fc",
+        "cfg_4214ed11d14a93ec",
+        "cfg_7b41fe07bb291d95"
+      ],
+      "observed_support": [
+        {
+          "path": "reports/byteshape-three-knobs-20261104/config3/baseline/short-quality-r1.response.json",
+          "locator": "timings and choices[0].message; wall time in sibling short-quality-r1.result.json",
+          "values": {
+            "output_tokens": 816,
+            "reasoning_chars": 995,
+            "wall_s": 21.9717195169942,
+            "decode_tps": 60.49779216462288,
+            "finish_reason": "stop",
+            "final_json_matches_frozen_expected": true
+          }
+        },
+        {
+          "path": "reports/byteshape-three-knobs-20261104/config3/variant/short-quality-r1.response.json",
+          "locator": "timings and choices[0].message; wall time in sibling short-quality-r1.result.json",
+          "values": {
+            "output_tokens": 963,
+            "reasoning_chars": 1352,
+            "wall_s": 22.63930881100532,
+            "decode_tps": 68.17342213075109,
+            "finish_reason": "stop",
+            "final_json_matches_frozen_expected": true,
+            "wall_change_pct": 3.0384025860823893,
+            "output_tokens_change_pct": 18.014705882352942,
+            "fixed512_short_decode_gain_pct": 15.383312221122857
+          }
+        },
+        {
+          "path": "reports/byteshape-temp075-draft5-20261104/config1",
+          "locator": "baseline and variant/short-quality-r1.response.json with sibling result.json wall times",
+          "values": {
+            "baseline_wall_s": 21.47391099500237,
+            "variant_wall_s": 20.692914289989858,
+            "baseline_output_tokens": 816,
+            "variant_output_tokens": 871,
+            "both_final_answers_match": true,
+            "wall_change_pct": -3.636956049572315
+          }
+        },
+        {
+          "path": "reports/wright-three-configs-20261104/evidence/results/265070",
+          "locator": "{ollama-default,production,temp075-draft5}/quality-response.json; summaries label=quality for measured request wall; final JSON independently parsed after reasoning separator",
+          "values": {
+            "ollama-default": {
+              "output_tokens": 893,
+              "wall_seconds": 43.47775392793119,
+              "normal_stop": true,
+              "final_json_matches": true
+            },
+            "production": {
+              "output_tokens": 953,
+              "wall_seconds": 9.639609050005674,
+              "normal_stop": true,
+              "final_json_matches": true
+            },
+            "temp075-draft5": {
+              "output_tokens": 1024,
+              "wall_seconds": 9.112878421321511,
+              "normal_stop": true,
+              "final_json_matches": true
+            }
+          }
+        },
+        {
+          "path": "reports/wright-three-configs-20261104/evidence/results/265070/production/short-1-response.json",
+          "locator": "#/generation_settings/ignore_eos; #/stop_type; compare quality-response.json",
+          "values": {
+            "speed_probe_ignore_eos": true,
+            "speed_probe_stop": "limit",
+            "quality_ignore_eos": false,
+            "quality_stop": "eos"
+          }
+        },
+        {
+          "path": "reports/wright-three-configs-20261104/evidence/results/265070",
+          "locator": "production and temp075-draft5: short-{1,2}-response.json plus quality-response.json",
+          "values": {
+            "fixed_512_short_decode_gain_pct": 14.995487877926795,
+            "natural_answer_wall_reduction_pct": 5.464232272820779,
+            "natural_output_length_increase_pct": 7.450157397691504,
+            "configuration_changes": [
+              "temperature 1 -> 0.75",
+              "maximum MTP draft tokens 3 -> 5"
+            ]
+          }
+        },
+        {
+          "path": "reports/glimmer-dflash-cycle2-20260915/protocol.json",
+          "locator": "$.primary_selection, $.throughput, $.correctness and $.invariants",
+          "values": {
+            "primary_objective": "lowest successful eight-task native completed-work wall time",
+            "fixed_probes_ignore_eos": true,
+            "fixed_probe_output_counts": [
+              512,
+              256,
+              3072
+            ],
+            "completed_answers_checked_separately": true
+          }
+        },
+        {
+          "path": "reports/glimmer-dflash-cycle2-20260915/01-dflash7-frozen/native/results.json",
+          "locator": "$.wall_s and $.waves[*].tasks; compare03-dflash11-safe-batch/native/results.json",
+          "values": {
+            "dflash7_native_wall_s": 742.8720996379852,
+            "dflash11_native_wall_s": 674.7493393421173,
+            "native_change_percent": -9.170186944571668,
+            "passed_tasks_each": 8,
+            "native_suite_repetitions_each": 1,
+            "comparison_raw_path": "reports/glimmer-dflash-cycle2-20260915/03-dflash11-safe-batch/native/results.json",
+            "different_completed_tool_counts": [
+              76,
+              72
+            ]
+          }
+        },
+        {
+          "path": "reports/glimmer-dflash-cycle2-20260915/01-dflash7-frozen/fixed/cold-0/results.json",
+          "locator": "sum $.wall_s across fixed/{cold,warm,decode-heavy}-{0,1}/results.json for each candidate",
+          "values": {
+            "probe_wall_s": {
+              "01-dflash7-frozen": {
+                "cold": 269.1986701488495,
+                "warm": 26.218886613845825,
+                "decode-heavy": 198.27773451805115
+              },
+              "03-dflash11-safe-batch": {
+                "cold": 272.21324586868286,
+                "warm": 28.85194730758667,
+                "decode-heavy": 202.06392741203308
+              }
+            },
+            "raw_paths": [
+              "reports/glimmer-dflash-cycle2-20260915/01-dflash7-frozen/fixed/cold-0/results.json",
+              "reports/glimmer-dflash-cycle2-20260915/01-dflash7-frozen/fixed/cold-1/results.json",
+              "reports/glimmer-dflash-cycle2-20260915/01-dflash7-frozen/fixed/warm-0/results.json",
+              "reports/glimmer-dflash-cycle2-20260915/01-dflash7-frozen/fixed/warm-1/results.json",
+              "reports/glimmer-dflash-cycle2-20260915/01-dflash7-frozen/fixed/decode-heavy-0/results.json",
+              "reports/glimmer-dflash-cycle2-20260915/01-dflash7-frozen/fixed/decode-heavy-1/results.json",
+              "reports/glimmer-dflash-cycle2-20260915/03-dflash11-safe-batch/fixed/cold-0/results.json",
+              "reports/glimmer-dflash-cycle2-20260915/03-dflash11-safe-batch/fixed/cold-1/results.json",
+              "reports/glimmer-dflash-cycle2-20260915/03-dflash11-safe-batch/fixed/warm-0/results.json",
+              "reports/glimmer-dflash-cycle2-20260915/03-dflash11-safe-batch/fixed/warm-1/results.json",
+              "reports/glimmer-dflash-cycle2-20260915/03-dflash11-safe-batch/fixed/decode-heavy-0/results.json",
+              "reports/glimmer-dflash-cycle2-20260915/03-dflash11-safe-batch/fixed/decode-heavy-1/results.json"
+            ]
+          }
+        },
+        {
+          "path": "reports/flash-next-cycle2-20260907/03-mtp4/results.json",
+          "locator": "$[*].timings; compare01-existing-200w/results.json, only maximum draft depth2→4in inference settings",
+          "values": {
+            "mtp2": {
+              "requests": 4,
+              "new_prompt_tokens": 5212,
+              "prompt_ms": 54818.368,
+              "decode_tokens_minus_one_per_request": 1020,
+              "decode_ms": 39949.28,
+              "prefill_tps": 95.07762069823019,
+              "decode_tps": 25.532375051565385,
+              "sum_wall_s": 95.7019510269165,
+              "cache_n": [
+                0
+              ]
+            },
+            "mtp4": {
+              "requests": 4,
+              "new_prompt_tokens": 5212,
+              "prompt_ms": 55066.299,
+              "decode_tokens_minus_one_per_request": 1020,
+              "decode_ms": 42448.042,
+              "prefill_tps": 94.6495423634699,
+              "decode_tps": 24.029376902708492,
+              "sum_wall_s": 98.62377715110779,
+              "cache_n": [
+                0
+              ]
+            },
+            "prefill_change_percent": -0.450240899610832,
+            "decode_change_percent": -5.886636655702516,
+            "elapsed_change_percent": 3.0530476054448474,
+            "draft_acceptance_scope": "Raw draft_n/draft_n_accepted are available per request; do not equate acceptance alone with total speed."
+          }
+        }
+      ],
+      "scope": "General engineering guidance grounded in the following bounded observations; no universal numeric preset is implied.",
+      "observed_scopes": [
+        "Separate naturally stopped short ledger checks; all final fields independently rechecked against frozen expected JSON. Fixed probes intentionally used ignore_eos and512 outputs.",
+        "One completed short ledger answer per configuration in job 265070. All three final JSON answers matched the same expected 16 records and totals after reasoning extraction; capped probes were not scored as quality passes.",
+        "Historical GlimmerDFlash7/11 at the same successful four-slot layout and FlashMTP2/4at the same saved three-V100 profile. Glimmer selection was among DFlash candidates because that was the requested feature, not a claim that DFlash beat no speculation."
+      ],
+      "source_limitations": [
+        "One completed short check per configuration. No broad quality equivalence, long-answer quality or production workflow speedup is established. Reasoning/output lengths can change even when final JSON matches.",
+        "One short check per configuration does not establish broad or long-context quality. Temperature changes the sampling distribution. The entire raw response includes reasoning and is not itself strict JSON; completion wall times are observed outcomes with different output lengths, not equal-output causal comparisons.",
+        [
+          "The native suite uses synthetic tasks and one observation per configuration; generated tool sequences and recovery differ. Uniform DONE-validator amendment is preserved in validation-amendment.json, and stricter original results remain available. No ACU production replay or general full-context quality claim.",
+          "DFlash11 was slower than the historical four-agent no-DFlash suite629.218669s; that is a separate ordered system comparison with different tool sequences, not an isolated speculation estimate.",
+          "FlashMTP2→4uses four short uncached capped requests, temperature0/seed1234. Its pooled result is different from the single prose representative pair in CANON; do not substitute one for the other or claim general quality equivalence."
+        ]
+      ],
+      "limitations": "ByteShape MTP5 generated more tokens and finished one short check later despite faster decode. Glimmer native and fixed-probe rankings differed. These bounded checks do not establish broad model quality or production-workflow speedups.",
+      "review": {
+        "reviewed_by": "parent",
+        "proposal_ids": [
+          "v100-spec-05",
+          "l40_completed_work",
+          "v100-runtime-06-completed-work-selection"
+        ],
+        "decision": "Retained after review; rewritten as a general rule with empirical scope and limits separated.",
+        "rejected_overclaims": [
+          "A15% decode improvement means tasks finish15% sooner, or fixed512 capped reasoning output proves answer quality.",
+          "A 15% short decode improvement guarantees 15% faster useful answers, or a fixed-512 output and HTTP success certify answer quality.",
+          "Higher draft depth or a winning capped decode rate guarantees lower completed-task time, and a capped timing probe counts as a quality pass."
+        ]
+      }
+    },
+    {
+      "id": "lesson_012",
+      "title": "Separate default repair from feature gains",
+      "takeaway": "Keep untouched defaults, resource-aware corrections and within-runtime feature controls distinct. A full optimized preset can be much faster, but only matched comparisons support attributing the gain to a particular change.",
+      "config_ids": [
+        "cfg_b4e8b9b5c2d0a26e",
+        "cfg_ef0255924ec70762",
+        "cfg_acd42e38ebc7b799",
+        "cfg_e7be25853fc486d2",
+        "cfg_66cefe35fcd0a30a",
+        "cfg_aee1c8396d18230b"
+      ],
+      "observed_support": [
+        {
+          "path": "reports/wright-byteshape-20261103/evidence/results",
+          "locator": "diagnostic-*/speed-{2,3}-response.json; native phase-time arithmetic recomputed, then mean of rates",
+          "values": {
+            "default_decode_tps": 22.215455513835742,
+            "corrected_ollama_decode_tps": 54.25136486893726,
+            "llamacpp_no_mtp_decode_tps": 54.077062303141446,
+            "llamacpp_mtp3_decode_tps": 121.78398658768435,
+            "thread_correction_ratio": 2.4420550294433356,
+            "mtp_on_off_ratio": 2.2520451629749436,
+            "full_default_to_mtp3_ratio": 5.481948660104562,
+            "mtp3_vs_corrected_ollama_ratio": 2.2448096353316687,
+            "no_mtp_vs_corrected_ollama_pct": -0.32128696893967135
+          }
+        },
+        {
+          "path": "reports/wright-byteshape-20261103/evidence/results/diagnostic-llamacpp-mtp-control-264447-restart-0/effective-launch-settings.json",
+          "locator": "#/adapted_argv and #/runtime_sha256, compared with ../diagnostic-llamacpp-mtp-off-264447-restart-0/effective-launch-settings.json",
+          "values": {
+            "inference_argument_difference": "--spec-type draft-mtp versus none",
+            "other_argument_difference": "private port",
+            "runtime_binary_and_library_hash_sets_identical": true
+          }
+        },
+        {
+          "path": "reports/wright-three-configs-20261104/evidence/results/265070/ollama-default/server.log",
+          "locator": "lines 38, 208-223, 233 and 239; compare production/launch.json #/adapted_argv",
+          "values": {
+            "ollama": {
+              "context": 32768,
+              "threads": "128/128",
+              "batch_microbatch": "1024/1024",
+              "kv": "f16",
+              "speculation": "none",
+              "CPU_Mapped_model_MiB": 644.14
+            },
+            "llamacpp_production": {
+              "context": 65536,
+              "threads": "2/6",
+              "batch_microbatch": "2048/512",
+              "kv": "q8_0",
+              "speculation": "draft-mtp3",
+              "tensor_override": "token_embd.weight=CUDA0"
+            },
+            "both_reported_gpu_layers": "66/66"
+          }
+        }
+      ],
+      "scope": "General engineering guidance grounded in the following bounded observations; no universal numeric preset is implied.",
+      "observed_scopes": [
+        "The causal MTP toggle is confined to the matched llama.cpp diagnostic. Ollama versus llama.cpp remains a full-configuration comparison with different context, KV, batching, template, sampling path and tensor placement."
+      ],
+      "source_limitations": [
+        "Two warmed speed samples per diagnostic variant, unfixed sampling seed and one short structured workload. Similar non-MTP decode here does not establish equal engines in general. CPU_Mapped model storage and 66/66 layer offload do not by themselves isolate an active CPU bottleneck or prove every tensor is GPU resident."
+      ],
+      "limitations": "L40 thread correction and matched llama.cpp MTP toggle each contributed substantially. The full Ollama-to-llama.cpp comparison also changes context, KV, batching, templates and placement; it does not isolate an agent or speculation effect.",
+      "review": {
+        "reviewed_by": "parent",
+        "proposal_ids": [
+          "l40_baseline_ladder"
+        ],
+        "decision": "Retained after review; rewritten as a general rule with empirical scope and limits separated.",
+        "rejected_overclaims": [
+          "The full 5.48x default-to-production multiplier is caused entirely by speculative decoding, an AI selector, or the GPU architecture."
+        ]
+      }
+    },
+    {
+      "id": "lesson_013",
+      "title": "Revalidate settings on the destination runtime and hardware",
+      "takeaway": "Transfer candidate settings as hypotheses, then verify the destination GPU, CPU allocation, runtime build and libraries, model placement and workload. Effective defaults and kernel behavior can change across systems; identical model bytes do not make speedups portable.",
+      "config_ids": [
+        "cfg_bed1cbe9b7725af3",
+        "cfg_b4e8b9b5c2d0a26e",
+        "cfg_ef0255924ec70762",
+        "cfg_aee1c8396d18230b",
+        "cfg_967d0b0483016e09",
+        "cfg_4214ed11d14a93ec",
+        "cfg_d9a8e115f75aff06",
+        "cfg_ed3054abb07264d4",
+        "cfg_c30b21ad4981dd80",
+        "cfg_aed0ae24ccd21a04",
+        "cfg_b3ca36f23d1d9bd0",
+        "cfg_d93b6fcfd7905833",
+        "cfg_22bd103c1aadb59c",
+        "cfg_7bc565a253127cc7",
+        "cfg_91cf36411e6d4895",
+        "cfg_0956f7625217646c"
+      ],
+      "observed_support": [
+        {
+          "path": "reports/ollama-byteshape-default-20261102/evidence/attempt2-single-gpu/ollama-server.log",
+          "locator": "lines 10-11 and 30 backend selection; line 36 threads; lines 218-221 context/batching",
+          "values": {
+            "gpu": "V100",
+            "selected_backend": "cuda_v12",
+            "cuda_v13_backend_skipped": "compute capability 700 absent from compiled architecture list",
+            "threads": "12/12",
+            "context": 4096,
+            "batch_microbatch": "512/512"
+          }
+        },
+        {
+          "path": "reports/ollama-byteshape-default-20261102/evidence/attempt2-single-gpu",
+          "locator": "speed-{1,2,3}-response.json; counts and nanosecond phase durations, arithmetic mean of per-request rates",
+          "values": {
+            "prompt_tokens": 1359,
+            "output_tokens": 512,
+            "zero_reuse_all_three": true,
+            "mean_rates": {
+              "prefill_tps": 535.1105646036124,
+              "decode_tps": 30.269449763085973
+            },
+            "gpu_limit_w": 150.0
+          }
+        },
+        {
+          "path": "reports/wright-byteshape-20261103/evidence/results/diagnostic-ollama-default-control-264447-restart-0/server.log",
+          "locator": "line 38; lines 218-221; allocation.json #/environment/SLURM_CPUS_PER_TASK",
+          "values": {
+            "gpu": "L40",
+            "threads": "128/128",
+            "allocated_cpus": 12,
+            "context": 32768,
+            "batch_microbatch": "1024/1024",
+            "power_limit_w": 300
+          }
+        },
+        {
+          "path": "reports/wright-three-configs-20261104/evidence/results/265070/production/launch.json",
+          "locator": "#/adapted_argv and #/runtime_sha256; production/server.log line 7 and lines 154-169",
+          "values": {
+            "rebuild_architecture": "SM89",
+            "threads": "2/6",
+            "context": 65536,
+            "gpu_layers": "66/66",
+            "embedding_override": "token_embd.weight=CUDA0",
+            "llama_server_sha256": "97e81fb144ffd1ca974de7e2c6bec6afd55220b86749a2171dcead64111c71f7"
+          }
+        },
+        {
+          "path": "reports/flash-next-cycle2-20260907/06-threads6/results.json",
+          "locator": "$[*].timings; compare 01-existing-200w with decode threads8, keeping prefill threads12",
+          "values": {
+            "threads8_baseline": {
+              "requests": 4,
+              "new_prompt_tokens": 5212,
+              "prompt_ms": 54818.368,
+              "decode_tokens_minus_one_per_request": 1020,
+              "decode_ms": 39949.28,
+              "prefill_tps": 95.07762069823019,
+              "decode_tps": 25.532375051565385,
+              "sum_wall_s": 95.7019510269165,
+              "cache_n": [
+                0
+              ]
+            },
+            "threads6_candidate": {
+              "requests": 4,
+              "new_prompt_tokens": 5212,
+              "prompt_ms": 55133.799,
+              "decode_tokens_minus_one_per_request": 1020,
+              "decode_ms": 41775.436,
+              "prefill_tps": 94.53366346113752,
+              "decode_tps": 24.41626222644331,
+              "sum_wall_s": 97.8627598285675,
+              "cache_n": [
+                0
+              ]
+            },
+            "decode_change_percent": -4.371363113960081
+          }
+        },
+        {
+          "path": "reports/qwen27b-tuning-20260907/evidence/06-mtp2-mmq/results.json",
+          "locator": "$[*].timings; compare 05-mtp2-balanced/results.json, same model/flags except runtime package plus forced-MMQ environment",
+          "values": {
+            "automatic_package": {
+              "requests": 6,
+              "new_prompt_tokens": 22290,
+              "prompt_ms": 36266.615,
+              "decode_tokens_minus_one_per_request": 1530,
+              "decode_ms": 30654.568,
+              "prefill_tps": 614.6148461884299,
+              "decode_tps": 49.91099532050166,
+              "sum_wall_s": 69.37734174728394,
+              "cache_n": [
+                0
+              ]
+            },
+            "forced_mmq_package": {
+              "requests": 6,
+              "new_prompt_tokens": 22290,
+              "prompt_ms": 44746.068,
+              "decode_tokens_minus_one_per_request": 1530,
+              "decode_ms": 29679.786,
+              "prefill_tps": 498.144328569831,
+              "decode_tps": 51.55023691882415,
+              "sum_wall_s": 76.90507578849792,
+              "cache_n": [
+                0
+              ]
+            },
+            "prefill_change_percent": -18.95016339759732,
+            "decode_change_percent": 3.2843296107323727,
+            "elapsed_change_percent": 10.850421552089372,
+            "control_paths": [
+              "reports/qwen27b-tuning-20260907/evidence/05-mtp2-balanced/argv.json",
+              "reports/qwen27b-tuning-20260907/evidence/06-mtp2-mmq/argv.json",
+              "reports/qwen27b-tuning-20260907/evidence/06-mtp2-mmq/environment.json"
+            ]
+          }
+        },
+        {
+          "path": "reports/flash-next-tuning-20260906/04-mmq/results.json",
+          "locator": "$[*].timings; compare 03-threads8-fit1024/results.json",
+          "values": {
+            "earlier_package": {
+              "requests": 4,
+              "new_prompt_tokens": 5212,
+              "prompt_ms": 74381.19,
+              "decode_tokens_minus_one_per_request": 1020,
+              "decode_ms": 56112.835,
+              "prefill_tps": 70.07147909303414,
+              "decode_tps": 18.177659353693322,
+              "sum_wall_s": 131.48142170906067,
+              "cache_n": [
+                0
+              ]
+            },
+            "forced_mmq_package": {
+              "requests": 4,
+              "new_prompt_tokens": 5212,
+              "prompt_ms": 66946.294,
+              "decode_tokens_minus_one_per_request": 1020,
+              "decode_ms": 59859.113,
+              "prefill_tps": 77.85345070781663,
+              "decode_tps": 17.040011936027184,
+              "sum_wall_s": 127.80069994926453,
+              "cache_n": [
+                0
+              ]
+            },
+            "prefill_change_percent": 11.10576188130743,
+            "decode_change_percent": -6.25849233683099
+          }
+        },
+        {
+          "path": "reports/wright-flash-next-3l40-20261104/evidence/results/265953/allocation.json",
+          "locator": "job,node,devices[].uuid,cpus",
+          "values": {
+            "job": "265953",
+            "node": "n03",
+            "gpu_uuids": [
+              "GPU-b88255ea-7355-ce97-d8c1-82a5beadfabe",
+              "GPU-a02edcc1-86e5-c351-cdf7-e89c8a1d1e83",
+              "GPU-e7716227-6a9f-318d-c437-0b162a6704dd"
+            ],
+            "cpu_count": 12
+          }
+        },
+        {
+          "path": "reports/wright-flash-next-3l40-20261104/evidence/results/266141/allocation.json",
+          "locator": "job,node,devices[].uuid,cpus",
+          "values": {
+            "job": "266141",
+            "node": "n03",
+            "gpu_uuids": [
+              "GPU-a02edcc1-86e5-c351-cdf7-e89c8a1d1e83",
+              "GPU-7144eac3-d656-4f7a-e05e-17a1ffdf8116",
+              "GPU-92ab188f-6562-580e-cc3b-bcd05d197e46"
+            ],
+            "cpu_count": 12,
+            "shared_physical_gpus_with_ollama": 1
+          }
+        },
+        {
+          "path": "reports/wright-glimmer-1l40-20261105/evidence/results/266776/allocation.json",
+          "locator": "job,devices[].uuid,cpus",
+          "values": {
+            "job": "266776",
+            "gpu_uuids": [
+              "GPU-b88255ea-7355-ce97-d8c1-82a5beadfabe"
+            ],
+            "cpu_count": 12,
+            "all_three_glimmer_variants": "same sequential physical allocation"
+          }
+        },
+        {
+          "path": "reports/wright-flash-next-3l40-20261104/evidence/results/266141/production/placement.json",
+          "locator": "three_target_buffers,model_buffers_mib",
+          "values": {
+            "three_target_buffers": true,
+            "target_buffers_mib": [
+              27624.06,
+              25557.39,
+              24875.01
+            ]
+          }
+        },
+        {
+          "path": "reports/wright-glimmer-1l40-20261105/evidence/results/266776/draft15-temp075/server.log",
+          "locator": "lines135,140–156,294,330: target/draft GPU offload; n_seq_max,n_ctx,n_ctx_slot",
+          "values": {
+            "target_gpu_layers": "53/53",
+            "draft_gpu_layers": "6/6",
+            "slots": 1,
+            "context_per_slot": 262144,
+            "largest_tested_speed_prompt": 23290
+          }
+        },
+        {
+          "path": "reports/wright-glimmer-1l40-20261105/evidence/results/266776/draft15-temp075/telemetry.jsonl",
+          "locator": "all gpu samples; CSV positions used_MiB,free_MiB,temp_C,power_W,limit_W,utilization",
+          "values": {
+            "minimum_free_mib": 23466,
+            "peak_temperature_c": 50,
+            "gpu_limit_w": 300
+          }
+        },
+        {
+          "path": "reports/wright-glimmer-1l40-20261105/evidence/results/266776/draft15-temp075/launch.json",
+          "locator": "argv LD_LIBRARY_PATH; production_argv; binary_sha256; libraries",
+          "values": {
+            "binary_sha256": "97e81fb144ffd1ca974de7e2c6bec6afd55220b86749a2171dcead64111c71f7",
+            "libllama_sha256": "c08e722d134fe69113c43cdae327e7f1e195f7006aac50d237fe579d3f81cb72",
+            "draft15_temp075_differs_from_glimmer_production_in": [
+              "temperature",
+              "max_draft_tokens",
+              "operational_port"
+            ]
+          }
+        },
+        {
+          "path": "reports/wright-glimmer-1l40-20261105/evidence/runtime-build.json",
+          "locator": "base_sources_match_v100,patched_sources_match_v100,library_sha256",
+          "values": {
+            "base_sources_match_v100": true,
+            "patched_sources_match_v100": true,
+            "library_sha256": "c08e722d134fe69113c43cdae327e7f1e195f7006aac50d237fe579d3f81cb72"
+          }
+        }
+      ],
+      "scope": "General engineering guidance grounded in the following bounded observations; no universal numeric preset is implied.",
+      "observed_scopes": [
+        "Historical V100 November 2 and L40 November 3-4 records for the identical ByteShape target artifact. This is an audit of differing effective systems, not a new matched hardware experiment.",
+        "Historical V100 Flash cycle2 threads8-to6 and Flash/Q8_0 runtime-package comparisons; prior excluded Flash failure example omitted.",
+        "Local saved L40 campaign evidence only: Flash jobs265953/266141; Glimmer job266776. Returned manifests rechecked:35+24+69 files, zero hash mismatches. All results describe single-request serving, with Flash distributed across three GPUs."
+      ],
+      "source_limitations": [
+        "Dates, CPU platforms and allocations, GPU power limits, context, batching, CUDA backend and sometimes prompt lengths differ. [Their separate contributions to a V100/L40 multiplier cannot be recovered from this evidence.] No SSH or new inference was performed for these lessons.",
+        [
+          "The MMQ comparisons also change the runtime executable/package; they are not isolated MMQ causal estimates. Flash and27B differ in architecture, artifacts, batching, context and KV. No claim that MMQ itself universally helps one model or hurts another.",
+          "Current upstream terminology was checked with the official llama.cpp server documentation; measured claims here use only local historical records: https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md"
+        ],
+        "Physical GPU/CPU assignments, runtime libraries, templates/token counts, context and sampler defaults matter. The one-L40 Glimmer result adapts a historical V100 four-slot profile; it does not validate four slots on L40, general256K fidelity, sustained reliability, or a V100→L40 hardware-only speedup. [The contribution of each changed control is unisolated in these campaigns.]"
+      ],
+      "limitations": "V100/L40 differ in CPU platforms, power, defaults and sometimes workloads. Kernel comparisons also changed runtime packages, so MMQ effects are not isolated. Exploratory records are not deployable profiles. [A portable optimum is unestablished.]",
+      "review": {
+        "reviewed_by": "parent",
+        "proposal_ids": [
+          "l40_hardware_transfer",
+          "v100-runtime-02-local-runtime-controls",
+          "lesson_l40_comparison_identity"
+        ],
+        "decision": "Retained after review; rewritten as a general rule with empirical scope and limits separated.",
+        "rejected_overclaims": [
+          "A historical V100 speedup predicts the same L40 speedup, or Ada architecture alone explains why the default-system multiplier changed.",
+          "Use all CPU threads, force MMQ on all Volta models, or attribute the observed regression to CPU oversubscription without profiling.",
+          "The measured multiplier is caused entirely by MTP/DFlash or the GPU generation, a binary hash uniquely identifies the loaded runtime, or free VRAM alone certifies arbitrary full-context/concurrent deployment."
+        ]
+      }
+    },
+    {
+      "id": "lesson_014",
+      "title": "Verify effective settings before counting experiments",
+      "takeaway": "Read the runtime-resolved settings and supported model limits. A requested flag can be clamped or rejected; record the value actually executed and never count an unexecuted or duplicate effective setting as a distinct benchmark.",
+      "config_ids": [
+        "cfg_0956f7625217646c"
+      ],
+      "observed_support": [
+        {
+          "path": "reports/wright-glimmer-1l40-20261105/evidence/draft-cap-source.txt",
+          "locator": "n_draft_max = is_dspark && sample_from_anchor ? block_size : block_size - 1; clamp of params.n_max/n_min",
+          "values": {
+            "trained_block_size": 16,
+            "effective_dflash_max_draft_tokens": 15,
+            "runtime_behavior": "requests above the cap are clamped"
+          }
+        },
+        {
+          "path": "reports/wright-glimmer-1l40-20261105/evidence/results/266776/draft15-temp075/server.log",
+          "locator": "lines332–333: common_speculative_impl_draft_dflash initialization",
+          "values": {
+            "n_max": 15,
+            "block_size": 16,
+            "sample_from_anchor": true
+          }
+        },
+        {
+          "path": "reports/wright-glimmer-1l40-20261105/evidence/results/266776/draft15-temp075/launch.json",
+          "locator": "production_argv: --spec-type,--spec-draft-n-max,--temp,--spec-draft-model",
+          "values": {
+            "spec_type": "draft-dflash",
+            "spec_draft_n_max": 15,
+            "temperature": 0.75,
+            "draft_model": "dflash-kquant.gguf"
+          }
+        },
+        {
+          "path": "reports/wright-glimmer-1l40-20261105/protocol.json",
+          "locator": "draft_cap_note",
+          "values": {
+            "draft17_timed_run": false,
+            "user_approved_explicit15_before_gpu_job": true
+          }
+        },
+        {
+          "path": "reports/wright-glimmer-1l40-20261105/benchmark-requested17-not-executed.py",
+          "locator": "preserved unexecuted requested17 benchmark script",
+          "values": {
+            "status": "prepared, not executed as a draft17 timing"
+          }
+        }
+      ],
+      "scope": "General engineering guidance grounded in the following bounded observations; no universal numeric preset is implied.",
+      "observed_scopes": [
+        "The pinned original kquant DFlash model and saved runtime implementation. CANON’s measured draft_tokens=15 is correct."
+      ],
+      "source_limitations": [
+        "The cap is specific to this implementation/model; the source explicitly treats DSpark separately. It does not establish a universal cap or a performance optimum. This L40 comparison changes temperature and draft depth together; it cannot prove a draft-only or monotonic depth effect."
+      ],
+      "limitations": "This pinned Glimmer DFlash path caps drafts at15 for its16-position block. Requested17 was replaced before timing. The cap is implementation-specific and does not establish a universal speculative limit or performance optimum.",
+      "review": {
+        "reviewed_by": "parent",
+        "proposal_ids": [
+          "lesson_l40_effective_cap"
+        ],
+        "decision": "Retained after review; rewritten as a general rule with empirical scope and limits separated.",
+        "rejected_overclaims": [
+          "Draft17 was benchmarked and outperformed draft11, or every increase in requested draft depth creates a distinct valid performance experiment."
+        ]
+      }
+    },
+    {
+      "id": "lesson_015",
+      "title": "Validate model output channels and answer correctness separately",
+      "takeaway": "Parse the model-specific final-answer channel before checking task correctness, while retaining raw responses and endpoint-format checks. Reasoning text, an HTTP success or a capped output does not establish a valid completed answer.",
+      "config_ids": [
+        "cfg_7bc565a253127cc7",
+        "cfg_91cf36411e6d4895",
+        "cfg_0956f7625217646c"
+      ],
+      "observed_support": [
+        {
+          "path": "reports/wright-glimmer-1l40-20261105/evidence/results/266776/ollama/quality-response.json",
+          "locator": "response after <|start|>assistant to=user<|message|>",
+          "values": {
+            "final_channel_marker_count": 1,
+            "final_json_rows": 16,
+            "total_net": 260,
+            "included_count": 6,
+            "exact_expected_match": true,
+            "raw_body_is_clean_json": false
+          }
+        },
+        {
+          "path": "reports/wright-glimmer-1l40-20261105/evidence/results/266776/production/quality-response.json",
+          "locator": "content after <|start|>assistant to=user<|message|>",
+          "values": {
+            "final_channel_marker_count": 1,
+            "final_json_rows": 16,
+            "total_net": 260,
+            "included_count": 6,
+            "exact_expected_match": true,
+            "raw_body_is_clean_json": false
+          }
+        },
+        {
+          "path": "reports/wright-glimmer-1l40-20261105/evidence/results/266776/draft15-temp075/quality-response.json",
+          "locator": "content after <|start|>assistant to=user<|message|>",
+          "values": {
+            "final_channel_marker_count": 1,
+            "final_json_rows": 16,
+            "total_net": 260,
+            "included_count": 6,
+            "exact_expected_match": true,
+            "raw_body_is_clean_json": false
+          }
+        },
+        {
+          "path": "reports/wright-glimmer-1l40-20261105/evidence/results/266776/ollama/summary.json",
+          "locator": "label=quality; original quality_pass,normal_stop,output_tokens,wall_seconds",
+          "values": {
+            "quality_pass": false,
+            "normal_stop": true,
+            "output_tokens": 1264,
+            "wall_seconds": 69.12834920547903
+          }
+        },
+        {
+          "path": "reports/wright-glimmer-1l40-20261105/evidence/results/266776/production/summary.json",
+          "locator": "label=quality; original quality_pass,normal_stop,output_tokens,wall_seconds",
+          "values": {
+            "quality_pass": false,
+            "normal_stop": true,
+            "output_tokens": 1603,
+            "wall_seconds": 12.309197647497058
+          }
+        },
+        {
+          "path": "reports/wright-glimmer-1l40-20261105/evidence/results/266776/draft15-temp075/summary.json",
+          "locator": "label=quality; original quality_pass,normal_stop,output_tokens,wall_seconds",
+          "values": {
+            "quality_pass": false,
+            "normal_stop": true,
+            "output_tokens": 1383,
+            "wall_seconds": 11.269961399957538
+          }
+        },
+        {
+          "path": "reports/wright-glimmer-1l40-20261105/payloads.json",
+          "locator": "short[0].expected",
+          "values": {
+            "row_count": 16,
+            "included_nets": [
+              10,
+              52,
+              15,
+              68,
+              31,
+              84
+            ],
+            "sum_net": 260,
+            "included_count": 6
+          }
+        },
+        {
+          "path": "reports/wright-glimmer-1l40-20261105/evidence/results/266776/draft15-temp075/short-1-response.json",
+          "locator": "content,stop_type,timings.predicted_n; same limit outcome on all four candidate speed probes",
+          "values": {
+            "output_tokens": 512,
+            "stop_type": "limit",
+            "final_user_channel_present": false,
+            "quality_status": "capped reasoning is not a completed-answer quality check"
+          }
+        }
+      ],
+      "scope": "General engineering guidance grounded in the following bounded observations; no universal numeric preset is implied.",
+      "observed_scopes": [
+        "All three naturally completed Glimmer short checks in job266776. Verified every final JSON field and arithmetic; original false verdicts preserved."
+      ],
+      "source_limitations": [
+        "One short synthetic ledger check per configuration establishes neither broad quality nor long/full-context accuracy. Native-channel extraction must honor the actual model format; it is not permission to accept arbitrary malformed text or change the expected answer."
+      ],
+      "limitations": "All three Glimmer short final answers matched after correct channel extraction; raw bodies remained non-JSON and original parser failures were retained. One short check per configuration is not broad or full-context quality evidence.",
+      "review": {
+        "reviewed_by": "parent",
+        "proposal_ids": [
+          "lesson_l40_final_channel_quality"
+        ],
+        "decision": "Retained after review; rewritten as a general rule with empirical scope and limits separated.",
+        "rejected_overclaims": [
+          "All three Glimmer configurations failed semantic quality, or the entire raw response is clean JSON, or 512-token speed probes certify answer quality."
+        ]
+      }
+    },
+    {
+      "id": "lesson_016",
+      "title": "Preserve the meaning of every throughput number",
+      "takeaway": "Record formatted input/output token counts, phase durations, cache state and the engine timing convention. Pool compatible runs using summed timed tokens divided by summed phase time, and keep individual observations distinct from pooled results.",
+      "config_ids": [
+        "cfg_b4e8b9b5c2d0a26e",
+        "cfg_ef0255924ec70762",
+        "cfg_e7be25853fc486d2",
+        "cfg_66cefe35fcd0a30a",
+        "cfg_aee1c8396d18230b",
+        "cfg_549fe546f2fd44a6",
+        "cfg_91cf36411e6d4895",
+        "cfg_0956f7625217646c"
+      ],
+      "observed_support": [
+        {
+          "path": "reports/wright-three-configs-20261104/evidence/results/265070/ollama-default/short-1-response.json",
+          "locator": "#/prompt_eval_count; #/prompt_eval_cached_count; #/eval_count; #/eval_duration",
+          "values": {
+            "prompt_tokens": 4078,
+            "reused_prompt_tokens": 0,
+            "output_tokens": 512,
+            "timed_decode_tokens": 512,
+            "decode_seconds": 23.920559,
+            "decode_tps_recomputed": 21.40418206781873
+          }
+        },
+        {
+          "path": "reports/wright-three-configs-20261104/evidence/results/265070/production/short-1-response.json",
+          "locator": "#/timings; compare long-1-response.json and corresponding Ollama long-1-response.json",
+          "values": {
+            "prompt_tokens": 4036,
+            "long_prompt_tokens": 24114,
+            "ollama_long_prompt_tokens": 24156,
+            "cache_n": 0,
+            "predicted_n": 512,
+            "timed_decode_tokens": 511,
+            "decode_seconds": 3.974759,
+            "decode_tps_recomputed": 128.56125365085026,
+            "512_vs_511_numerator_difference_pct": 0.1956947162426559
+          }
+        },
+        {
+          "path": "reports/wright-byteshape-20261103/evidence/results/diagnostic-llamacpp-mtp-control-264447-restart-0/speed-2-response.json",
+          "locator": "#/tokens_cached versus #/timings/cache_n; request #/cache_prompt",
+          "values": {
+            "tokens_cached": 1828,
+            "actual_prompt_reuse_cache_n": 0,
+            "cache_prompt_request": false,
+            "prompt_n": 1317
+          }
+        },
+        {
+          "path": "reports/wright-glimmer-1l40-20261105/evidence/results/266776/production/long-1-response.json",
+          "locator": "timings.prompt_n, prompt_ms, predicted_n, predicted_ms, cache_n, draft_n, draft_n_accepted; content; stop_type",
+          "values": {
+            "prompt_tokens": 23290,
+            "prompt_seconds": 12.795699,
+            "output_tokens": 512,
+            "decode_timed_tokens": 511,
+            "decode_seconds": 4.435113,
+            "prefill_tps": 1820.1428464361345,
+            "decode_tps": 115.21690653654146,
+            "cached_tokens": 0,
+            "drafted_tokens": 1098,
+            "accepted_draft_tokens": 410,
+            "stop_type": "limit"
+          }
+        },
+        {
+          "path": "reports/wright-glimmer-1l40-20261105/evidence/results/266776/production/long-2-response.json",
+          "locator": "timings.prompt_n, prompt_ms, predicted_n, predicted_ms, cache_n, draft_n, draft_n_accepted; content; stop_type",
+          "values": {
+            "prompt_tokens": 23290,
+            "prompt_seconds": 12.877241,
+            "output_tokens": 512,
+            "decode_timed_tokens": 511,
+            "decode_seconds": 4.0102269999999995,
+            "prefill_tps": 1808.6172340798778,
+            "decode_tps": 127.42420815579767,
+            "cached_tokens": 0,
+            "drafted_tokens": 999,
+            "accepted_draft_tokens": 420,
+            "stop_type": "limit"
+          }
+        },
+        {
+          "path": "reports/wright-glimmer-1l40-20261105/evidence/results/266776/draft15-temp075/long-1-response.json",
+          "locator": "timings.prompt_n, prompt_ms, predicted_n, predicted_ms, cache_n, draft_n, draft_n_accepted; content; stop_type",
+          "values": {
+            "prompt_tokens": 23290,
+            "prompt_seconds": 13.517161,
+            "output_tokens": 512,
+            "decode_timed_tokens": 511,
+            "decode_seconds": 3.437906,
+            "prefill_tps": 1722.994939543888,
+            "decode_tps": 148.63699007477226,
+            "cached_tokens": 0,
+            "drafted_tokens": 1125,
+            "accepted_draft_tokens": 435,
+            "stop_type": "limit"
+          }
+        },
+        {
+          "path": "reports/wright-glimmer-1l40-20261105/evidence/results/266776/draft15-temp075/long-2-response.json",
+          "locator": "timings.prompt_n, prompt_ms, predicted_n, predicted_ms, cache_n, draft_n, draft_n_accepted; content; stop_type",
+          "values": {
+            "prompt_tokens": 23290,
+            "prompt_seconds": 13.756591,
+            "output_tokens": 512,
+            "decode_timed_tokens": 511,
+            "decode_seconds": 4.619414,
+            "prefill_tps": 1693.0066467775337,
+            "decode_tps": 110.62009163932915,
+            "cached_tokens": 0,
+            "drafted_tokens": 1342,
+            "accepted_draft_tokens": 421,
+            "stop_type": "limit"
+          }
+        }
+      ],
+      "scope": "General engineering guidance grounded in the following bounded observations; no universal numeric preset is implied.",
+      "observed_scopes": [
+        "These recorded Ollama and llama.cpp APIs and CANON selection conventions. November 4 probes have explicit zero reuse in the native response fields; the earlier Ollama compact rows preserve unknown despite more specific raw evidence.",
+        "Two Glimmer long trials per configuration in the same sequential one-GPU Slurm allocation; seeds 71430/71431 and distinct trial labels. CANON retains a lower-middle individual observation, while the report pools repeats."
+      ],
+      "source_limitations": [
+        "The 0.196% decode-numerator difference is small at 512 output tokens but should be disclosed. tokens_cached describes cached state here and must not be substituted for timings.cache_n. Do not silently rewrite preserved CANON rows or replace an individual representative pair with pooled report averages.",
+        "With only two timing repeats, the descriptive spread is not a confidence interval or a significance test. Distinct trial labels and stochastic outputs can differ. [The cause of the variation and whether the long candidate is better on average remain unresolved.]"
+      ],
+      "limitations": "Recorded Ollama decode uses n/time; llama.cpp uses(n-1)/time. Templates also change token counts. CANON representative pairs remain individual observations. Unknown cache state cannot be promoted to confirmed cold-prefill evidence.",
+      "review": {
+        "reviewed_by": "parent",
+        "proposal_ids": [
+          "l40_metric_contract",
+          "lesson_l40_repeat_variation"
+        ],
+        "decision": "Retained after review; rewritten as a general rule with empirical scope and limits separated.",
+        "rejected_overclaims": [
+          "Different prompt-token counts prove different user tasks; a nonzero tokens_cached proves warm-prefix timing; or the one-token rate convention explains a multiple-fold gain.",
+          "The fastest single run, the CANON representative row, or a +4.82% pooled mean proves a stable long-prompt speedup."
+        ]
+      }
+    }
+  ]
+}
