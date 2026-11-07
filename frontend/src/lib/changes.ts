@@ -1,7 +1,8 @@
 import type { Change, Config } from "../api/types";
 import { formatTokens } from "./format";
 
-export type ChangeRow = { key: string; label: string; from: string; to: string; reason: string };
+/** `advanced` rows are backend internals (templates, tensor placement…) shown only on request. */
+export type ChangeRow = { key: string; label: string; from: string; to: string; reason: string; advanced: boolean };
 
 type Field = { label: string; format?: (value: unknown) => string };
 
@@ -67,6 +68,7 @@ function row(change: Change): ChangeRow {
     from: format(change.from),
     to: format(change.to),
     reason: change.reason ?? "",
+    advanced: !field,
   };
 }
 
@@ -85,6 +87,7 @@ function mergePair(byPath: Map<string, Change>, a: string, b: string, merged: st
     from: join(ra.from, rb.from),
     to: join(ra.to, rb.to),
     reason: [...new Set([ra.reason, rb.reason].filter(Boolean))].join(" · "),
+    advanced: false,
   };
 }
 

@@ -29,10 +29,11 @@ export function SelectScreen({ status, offline, clusterId, gpuType, model, onClu
   const types = status ? gpuTypes(status.all_gpus, catalog.map((m) => m.requirements.gpu_type)) : [];
   const cluster = CLUSTERS.find((c) => c.id === clusterId);
   const clusterSupported = !!cluster?.targetId && cluster.targetId === status?.target_id;
-  const canOptimize = !detecting && !offline && !!selected?.installed && !!gpuType && clusterSupported;
+  // installed may be null (not checked yet); only an explicit false blocks Optimize.
+  const canOptimize = !detecting && !offline && !!selected && selected.installed !== false && !!gpuType && clusterSupported;
 
   let note: string | null = null;
-  if (selected && !selected.installed) note = "This model isn't installed on the backend.";
+  if (selected && selected.installed === false) note = "This model isn't installed on the backend.";
   else if (selected && !selected.ready && selected.readiness_reasons.length) note = selected.readiness_reasons[0];
   else if (selected && gpuType && selected.requirements.gpu_type !== gpuType)
     note = `Tested on ${selected.requirements.gpu_type}; ${gpuType} has no verified profile.`;

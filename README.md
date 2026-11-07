@@ -4,14 +4,14 @@ A simple model/GPU setup tool that uses CANON evidence and an OpenRouter agent t
 
 Shared repository: https://github.com/SoLLLLLZ/NOVA_TT
 
-**Current status:** API v2.1 contract, agent instructions and inference evidence are available. The widget frontend ([frontend/](frontend/README.md)) and a contract mock server ([tests/mocks/](tests/mocks/README.md)) run locally. Backend and deployment code are not implemented yet; their folders are placeholders.
+**Current status:** The Python FastAPI backend, explicit frontend mock mode, registered ByteShape profiles and Wright Slurm worker are implemented. Start with [backend setup and usage](backend/README.md). ByteShape is the first enabled model; Glimmer and Flash execution remain deferred. The widget frontend is in [frontend/](frontend/README.md); a standalone stdlib mock for frontend work is in [tests/mocks/](tests/mocks/README.md). Contract v2.1 adds `GET /live`, which the backend does not implement yet.
 
 ## Start here
 
 1. Read the [API v2 contract](docs/api/endpoint.md) before connecting frontend and backend.
 2. Use the [three demo models](docs/demo/DEMO_MODELS.md) for names, IDs, resource requirements and config examples.
 3. Read the [optimizer instructions](backend/prompts/OPTIMIZER_AGENT.md) and [CANON guide](data/canon/CANON_GUIDE.md) before implementing selection.
-4. Put implementation code in the folders below and add actual install/run commands when choosing the stack. No language or framework is imposed by these placeholders.
+4. Run `uv sync --locked`, then follow the backend README to launch real or explicitly simulated mode.
 
 ## Repository layout
 
@@ -21,7 +21,7 @@ NOVA_TT/
 ├── .gitignore
 ├── backend/
 │   ├── README.md
-│   ├── src/                     # Future API, agent tools, runtime adapters and run control
+│   ├── src/                     # API, OpenRouter selection, runtime adapter and run control
 │   └── prompts/
 │       └── OPTIMIZER_AGENT.md
 ├── frontend/
@@ -34,18 +34,18 @@ NOVA_TT/
 ├── data/
 │   └── canon/                  # CSV, interpretation guide, validation and lessons
 ├── configs/
-│   └── profiles/               # Future registered model/runtime configurations
-├── scripts/                    # Future developer and preparation commands
+│   └── profiles/               # Pinned ByteShape model/runtime configurations
+├── scripts/                    # Opt-in live ByteShape rehearsal
 ├── deploy/
-│   └── wright/                 # Future Slurm jobs and private service launchers
+│   └── wright/                 # Private Slurm worker
 ├── tests/
 │   ├── README.md
 │   ├── fixtures/               # Future small, sanitized test cases
-│   └── mocks/                  # Future frontend mock server
+│   └── mocks/                  # Same-API simulated frontend mode
 └── var/                        # Local run state/cache/logs; ignored except its README
 ```
 
-Folders with no implementation contain a README or `.gitkeep` so Git tracks them. These files do not select a package layout; adapt `src/` to the chosen framework when implementation starts.
+Frontend placeholders remain for the partner's implementation. Backend package and locked dependencies are defined by `pyproject.toml` and `uv.lock`.
 
 ## Ownership and shared boundaries
 
@@ -62,7 +62,7 @@ Keep the normal UI simple. The backend applies the complete supported configurat
 
 - [CANON.csv](data/canon/CANON.csv) is the curated evidence table. Keep its [guide](data/canon/CANON_GUIDE.md), [validation receipt](data/canon/CANON_VALIDATION.json) and [lessons](data/canon/qualitative_lessons.json) alongside it.
 - Historical raw-record paths inside the evidence refer to the original P100 Project research workspace. This repository is not a copy of the complete experiment archive.
-- Future deployable profiles belong in `configs/profiles/`; CANON rows and documentation examples are not complete executable profiles.
+- Deployable profiles belong in `configs/profiles/`; CANON rows and documentation examples are not complete executable profiles.
 - Put local run manifests, benchmark output, caches and logs under `var/`. Put small sanitized test fixtures under `tests/fixtures/`.
 - Keep model weights on Wright or outside Git. The repo's `.gitignore` excludes common weight formats, credentials, environment secrets and generated files. It is a convenience, not a guarantee that a file contains no secrets.
 - Store the OpenRouter key in macOS Keychain or backend secret storage. Never put it in a committed file, prompt, fixture or frontend bundle. Never store SSH passwords/private keys here.

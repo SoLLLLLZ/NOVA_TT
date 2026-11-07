@@ -30,6 +30,14 @@ describe("changeRows", () => {
     expect(rows.find((r) => r.label === "Engine")).toMatchObject({ from: "Ollama", to: "llama.cpp" });
   });
 
+  it("marks backend internals as advanced", () => {
+    const rows = changeRows([
+      { path: "settings.chat_template_id", from: null, to: "byteshape-embedded" },
+      { path: "settings.draft_tokens", from: null, to: 5 },
+    ]);
+    expect(rows.map((r) => [r.label, r.advanced])).toEqual([["Draft tokens", false], ["Chat template id", true]]);
+  });
+
   it("keeps unmerged K/V when they differ in presence", () => {
     const rows = changeRows([{ path: "settings.kv_type_k", from: "f16", to: "q8_0" }]);
     expect(rows[0].label).toBe("KV cache (K)");

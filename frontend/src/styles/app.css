@@ -1228,6 +1228,31 @@ input {
   color: var(--cyan);
 }
 
+.changes__scroll {
+  max-height: 340px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--cyan-dim) transparent;
+}
+
+.changes__more {
+  display: block;
+  margin: 2px 0 4px;
+  padding: 4px 0;
+  border: none;
+  background: none;
+  color: var(--cyan-dim);
+  font-family: var(--font-micro);
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.changes__more:hover {
+  color: var(--cyan);
+}
+
 .changes__empty {
   margin: 8px 0;
   color: var(--muted);

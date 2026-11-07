@@ -1,4 +1,18 @@
-# Frontend API mock
+# Frontend mock mode
+
+There are two ways to run the API without GPUs. Both label every rate as simulated; never display mock rates as real hardware measurements.
+
+## Backend mock mode (real schemas and runner)
+
+Use the real API schemas and runner with the simulated driver:
+
+```sh
+NOVA_MODE=mock NOVA_STATE_DIR=var/mock uv run uvicorn nova_backend.app:app --host 127.0.0.1 --port 8000 --workers 1
+```
+
+Read `var/mock/pairing-token` locally. All results are explicitly marked simulated. Mock rates are fixtures and must never be displayed as real hardware measurements.
+
+## Standalone stdlib mock (frontend development)
 
 `mock_server.py` implements [API contract v2.1](../../docs/api/endpoint.md) for the three [demo models](../../docs/demo/DEMO_MODELS.md). It uses only the Python standard library. Profiles and changes mirror DEMO_MODELS. Every rate it emits is simulated, and its measurements carry the warning `mock fixture: not a real measurement`. It runs no inference and touches no GPU, Slurm or OpenRouter.
 

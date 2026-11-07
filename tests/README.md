@@ -1,8 +1,7 @@
-# Tests and integration fixtures
+# Backend validation
 
-Backend behavior, API-contract and frontend integration tests. Implemented so far: the mock contract suite (`python3 -m unittest tests/mocks/test_mock_server.py`); frontend unit tests run with `npm test` in `frontend/`.
+Run `uv run pytest -q`. Tests cover authentication, strict settings, idempotency, profile selection, context and sampling constraints, quality failure, resource locking, cancellation, rollback, race and actions using an explicitly simulated driver. They do not claim GPU performance.
 
-- `fixtures/`: small sanitized inputs, expected answers and API response fixtures; label synthetic measurements as mock.
-- [mocks/](mocks/): stdlib mock server implementing [API v2.1](../docs/api/endpoint.md), with its unittest suite.
+`scripts/live_byteshape.py` is the opt-in real Wright rehearsal. It runs ByteShape only; Glimmer and Flash are deferred. Test output goes to ignored `var/`.
 
-Keep large benchmark outputs in `var/`. Use real inference only in explicit integration checks with an owned allocation; ordinary tests should not consume GPUs or OpenRouter credit implicitly.
+The standalone frontend mock has its own suite: `python3 -m unittest tests/mocks/test_mock_server.py`. Frontend unit tests run with `npm test` in `frontend/`.

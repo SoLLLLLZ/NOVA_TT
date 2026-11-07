@@ -36,8 +36,9 @@ export type CatalogModel = {
   id: string;
   display_name: string;
   quant: string;
-  installed: boolean;
-  loaded: boolean;
+  /** null while the backend has not checked assets yet. */
+  installed: boolean | null;
+  loaded: boolean | null;
   database_coverage: "verified" | "inferred" | "experimental" | "none";
   requirements: { gpu_type: string; gpu_count: number; same_node: boolean; context_per_slot: number };
   ready: boolean;
