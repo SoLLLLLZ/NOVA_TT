@@ -1,0 +1,31 @@
+:root {
+  --bg: #07111f;
+  --bg-deep: #050c17;
+  --panel: #0b1626;
+  --panel-2: #0e1c30;
+  --line: rgba(92, 225, 255, 0.28);
+  --line-strong: rgba(92, 225, 255, 0.65);
+  --cyan: #5ce1ff;
+  --cyan-soft: #8fd8f0;
+  --cyan-dim: #3d8fb3;
+  --amber: #f2b544;
+  --amber-ink: #241503;
+  --red: #ff5a5f;
+  --success: #4ff0a8;
+  --success-line: rgba(79, 240, 168, 0.6);
+  --text: #e9f3ff;
+  --muted: #8495ad;
+  --muted-2: #5b6c86;
+
+  --font-display: "Pixelify Sans", ui-monospace, monospace;
+  --font-micro: "Silkscreen", ui-monospace, monospace;
+  --font-body: "VT323", ui-monospace, monospace;
+
+  --glow: 0 0 10px rgba(92, 225, 255, 0.35);
+  --pixel-corners: polygon(
+    0 4px, 2px 4px, 2px 2px, 4px 2px, 4px 0,
+    calc(100% - 4px) 0, calc(100% - 4px) 2px, calc(100% - 2px) 2px, calc(100% - 2px) 4px, 100% 4px,
+    100% calc(100% - 4px), calc(100% - 2px) calc(100% - 4px), calc(100% - 2px) calc(100% - 2px), calc(100% - 4px) calc(100% - 2px), calc(100% - 4px) 100%,
+    4px 100%, 4px calc(100% - 2px), 2px calc(100% - 2px), 2px calc(100% - 4px), 0 calc(100% - 4px)
+  );
+}

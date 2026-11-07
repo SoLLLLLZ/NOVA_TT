@@ -1,6 +1,6 @@
-# NOVA API Contract v2.0
+# NOVA API Contract v2.1
 
-Updated November 7, 2026. This replaces v0.1. Frontend and backend must both report/use `contract_version: "2.0"`. The endpoint names are retained where practical; the richer configuration and run objects are a breaking schema change. This is the implementation contract, not a claim that its endpoints already run.
+Updated November 7, 2026. This replaces v0.1. Frontend and backend must both report/use `contract_version: "2.1"`. v2.1 only adds `GET /live` (section 9b) to v2.0; every v2.0 shape is unchanged. The endpoint names are retained where practical; the richer configuration and run objects are a breaking schema change. This is the implementation contract, not a claim that its endpoints already run.
 
 Repository: https://github.com/SoLLLLLZ/NOVA_TT
 
@@ -130,7 +130,7 @@ Wright compute uses Slurm device masks. Never launch inference on the headnode, 
 
 ### GET /health
 
-No auth. `{"ok":true,"contract_version":"2.0"}` confirms the API process only, not SSH/GPU readiness.
+No auth. `{"ok":true,"contract_version":"2.1"}` confirms the API process only, not SSH/GPU readiness.
 
 ### GET /capabilities?model=...&runtime_id=...&target_id=...
 
@@ -330,6 +330,22 @@ Body `{"rollback_id":"<ID returned by optimize/action>"}`. Required ID avoids re
 
 Request `{message,history?,model?,run_id?}`. history is an array of role/content pairs; caller content is untrusted. Backend supplies current config, evidence, capabilities and run results. Emit delta `{text}` then done `{suggested_questions, suggested_actions}` or error; run_id may be null for chat. Suggested action objects follow diagnose below. Chat does not execute configuration changes without an explicit optimize/action request. Keep user-facing explanations short; never expose secrets or hidden reasoning. OpenRouter failure returns ai_unavailable, not fabricated advice attributed to the model.
 
+## 9b. GET /live (streaming, added in v2.1)
+
+Lets the widget reveal real speed once the student runs the tuned model from their own terminal. Query `model` (required, catalog ID). Authenticated like every other route, so clients read it with fetch streaming (EventSource cannot send `X-Pairing-Token`). It reports activity on the backend-retained optimized service for that model; it starts nothing and changes nothing.
+
+Before streaming: unknown model returns 404 `model_not_found`; no retained optimized service for that model returns 404 `not_found` ("No optimized service is running for this model."). Otherwise the response is `text/event-stream` and stays open across many requests until the client disconnects. Heartbeats are SSE comments. Events carry `type`, `sequence` (per connection, from 1) and `at`:
+
+| Type | Fields / semantics |
+| --- | --- |
+| `waiting` | model, service_id; sent once on connect while no request is in flight |
+| `inference_started` | request_id, model, service_id, prompt_tokens (nullable); a request reached the tuned service |
+| `metrics` | request_id, decode_tps, prefill_tps (nullable numbers), output_tokens, timing_convention; running native-engine rates during generation, at most ~4 per second |
+| `inference_done` | request_id, measurement (full measurement object above, origin `live`) |
+| `error` | standard error object; e.g. the service was stopped or reverted. The stream ends after it |
+
+Rates come only from the live engine timings of requests to the retained service; never emit historical CANON rates, estimates or the optimize benchmark here. Prefill may be null until the prompt phase finishes. Requests that bypass the retained service (for example a separate Ollama process) are not reported. The mock implements a non-contract `POST /mock/inference` to simulate a terminal request; the real backend does not expose it.
+
 ## 10. POST /diagnose
 
 Request `{model,run_id?,error_code?,log_tail?}`; prefer server-owned logs and sanitize any user log. Read-only. Returns `{explanation,can_auto_repair,suggested_action}`. suggested_action is null or `{action,params,label,constraint_changes}`. Allowed actions: apply_config, revert, lower_context, switch_quantization, run_benchmark. `constraint_changes` explicitly lists changes needing a fresh user action; diagnose itself never applies them.
@@ -379,12 +395,12 @@ Special conversions: `gpu_layers="53/53 (actual target)"` is observed placement,
 
 ## 14. Migration and implementation checklist
 
-1. Change `/status` and `/health` contract_version to 2.0. Clients must check it before mutations and show an incompatibility message for 0.1; there is no silent mixed-version contract.
+1. Change `/status` and `/health` contract_version to 2.1 (2.0 plus `GET /live`). Clients must check it before mutations and show an incompatibility message for 0.1; there is no silent mixed-version contract.
 2. Replace flat v0.1 config objects with the full config envelope and settings. `threads` becomes settings.threads_decode; add threads_prefill. `kv_type` becomes distinct kv_type_k/kv_type_v. Boolean flash_attention becomes on/off/auto. Remaining old knobs move into settings; model/quant/engine stay identity fields. Do not accept both old and new spellings ambiguously.
 3. Replace gpu_index with resources allocation/GPU IDs and group requirements. Memory display now uses explicit MiB values. Add installed/loaded/ready distinctions and race availability.
 4. `changed` becomes `changes` with dotted paths and per-change reasons. Return evidence source IDs and independent validation. Measurements contain explicit timing/cache/token metadata; before/speedup can be null in verify_only.
 5. Implement the run store/idempotency/cancel behavior before allowing UI retries. Revert/action are streaming operations in v2. Keep authentication and terminal error handling consistent.
-6. Update frontend mocks and backend validation to the same version in the implementation work. At this contract revision, `tests/mocks/mock_server.py` is absent from the shared repository; this documentation change does not invent a working mock/backend. [DEMO_MODELS.md](../demo/DEMO_MODELS.md) and [OPTIMIZER_AGENT.md](../../backend/prompts/OPTIMIZER_AGENT.md) are updated with this contract.
+6. Update frontend mocks and backend validation to the same version in the implementation work. A stdlib mock now lives at `tests/mocks/mock_server.py` (v2.1, simulated data labelled as mock); it is not a working backend. [DEMO_MODELS.md](../demo/DEMO_MODELS.md) and [OPTIMIZER_AGENT.md](../../backend/prompts/OPTIMIZER_AGENT.md) are updated with this contract.
 7. Core demo acceptance: ByteShape candidate can express MTP5/temp0.75/threads2+6; Flash can require 3 L40s and MTP2 on CUDA2; Glimmer can express DFlash15/temp0.75 and reject draft17. Verify unknown settings, insufficient GPUs, failed quality, interrupted stream, duplicate request and cancellation paths. Do not populate live UI metrics from fixtures.
 
 ## 15. Source scope

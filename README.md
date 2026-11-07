@@ -4,7 +4,7 @@ A simple model/GPU setup tool that uses CANON evidence and an OpenRouter agent t
 
 Shared repository: https://github.com/SoLLLLLZ/NOVA_TT
 
-**Current status:** API v2 contract, agent instructions and inference evidence are available. Application, mock server and deployment code are not implemented in this repository yet. Placeholder folders reserve their locations; they are not working services.
+**Current status:** API v2.1 contract, agent instructions and inference evidence are available. The widget frontend ([frontend/](frontend/README.md)) and a contract mock server ([tests/mocks/](tests/mocks/README.md)) run locally. Backend and deployment code are not implemented yet; their folders are placeholders.
 
 ## Start here
 
@@ -53,7 +53,7 @@ Folders with no implementation contain a README or `.gitkeep` so Git tracks them
 | --- | --- |
 | backend, prompts, profiles, Wright deployment | Taeho: selection, OpenRouter, execution, benchmarking and lifecycle |
 | frontend | Partner: model/GPU selection, progress, comparison, error states and API client |
-| API contract and integration mocks | Shared: both sides must use contract version 2.0 |
+| API contract and integration mocks | Shared: both sides must use contract version 2.1 |
 | CANON evidence | Shared source of truth; preserve provenance and keep measured hardware distinct |
 
 Keep the normal UI simple. The backend applies the complete supported configuration and reports effective settings; the frontend displays them. Update the API contract, affected examples and implementations together when changing shapes. Match mocks to the same version and label simulated results.

@@ -2,7 +2,7 @@
 
 Updated November 7, 2026. Repository: https://github.com/SoLLLLLZ/NOVA_TT
 
-Build the model picker and results UI against [endpoint.md](../api/endpoint.md), contract v2.0. This document supplies the three demo model identities, supported Wright layouts and reference configurations. It does not change the API contract or prove that a backend endpoint has been implemented. Use [OPTIMIZER_AGENT.md](../../backend/prompts/OPTIMIZER_AGENT.md) for agent behavior and [CANON.csv](../../data/canon/CANON.csv) with [CANON_GUIDE.md](../../data/canon/CANON_GUIDE.md) for evidence.
+Build the model picker and results UI against [endpoint.md](../api/endpoint.md), contract v2.1. This document supplies the three demo model identities, supported Wright layouts and reference configurations. It does not change the API contract or prove that a backend endpoint has been implemented. Use [OPTIMIZER_AGENT.md](../../backend/prompts/OPTIMIZER_AGENT.md) for agent behavior and [CANON.csv](../../data/canon/CANON.csv) with [CANON_GUIDE.md](../../data/canon/CANON_GUIDE.md) for evidence.
 
 ## Model picker
 
@@ -331,7 +331,7 @@ Example ByteShape request (send `X-Pairing-Token` and an `Idempotency-Key`):
 
 For Glimmer use model `muse-glimmer` and quant `UD-Q4_K_XL`. For Flash use `qwen3.8-flash-next`, quant `UD-Q4_K_XL`, and resources.gpu_count=3 with same_node=true. Obtain target/allocation/GPU IDs from the backend; never hardcode historical physical GPU indices. This 32K minimum lets the tested optimized profiles retain their larger contexts. A caller explicitly requiring 256K cannot be served by Flash's 128K profile without changing that request. `allow_sampling_change: true` permits the documented candidate temperatures; false preserves the active/baseline sampler.
 
-- Check contract_version=2.0 before mutations. Follow the v2 POST SSE envelope and keep run_id for reconnect/cancel. The frontend never receives the OpenRouter key.
+- Check contract_version=2.1 before mutations. Follow the v2 POST SSE envelope and keep run_id for reconnect/cancel. The frontend never receives the OpenRouter key.
 - Render step events including allocation, loading, verification and repair. Progress may be null; show the actual detail instead of a fake percentage.
 - Render full config.settings, `changes` with dotted paths, evidence and independent validation. Announce success only on a terminal successful done result with applied=true and passed verification.
 - Use live benchmark measurement.decode_tps as primary and prefill_tps as secondary. Before/speedup are null in verify_only. Do not seed live meters with CANON values.

@@ -1,8 +1,8 @@
 # Tests and integration fixtures
 
-Reserved for future backend behavior, API-contract and frontend integration tests. No test suite or runner is implemented yet.
+Backend behavior, API-contract and frontend integration tests. Implemented so far: the mock contract suite (`python3 -m unittest tests/mocks/test_mock_server.py`); frontend unit tests run with `npm test` in `frontend/`.
 
 - `fixtures/`: small sanitized inputs, expected answers and API response fixtures; label synthetic measurements as mock.
-- [mocks/](mocks/): future frontend mock server implementing [API v2](../docs/api/endpoint.md).
+- [mocks/](mocks/): stdlib mock server implementing [API v2.1](../docs/api/endpoint.md), with its unittest suite.
 
 Keep large benchmark outputs in `var/`. Use real inference only in explicit integration checks with an owned allocation; ordinary tests should not consume GPUs or OpenRouter credit implicitly.
