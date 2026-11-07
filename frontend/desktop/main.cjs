@@ -1,4 +1,4 @@
-// TuneIt desktop widget: a small frameless window that floats above other apps,
+// CMUTuneIt desktop widget: a small frameless window that floats above other apps,
 // can be dragged anywhere, and toggles with Option+Space or the menu-bar icon.
 //
 //   npm run desktop        build the UI, then open the widget
@@ -74,7 +74,7 @@ function createWindow() {
     skipTaskbar: true,
     alwaysOnTop: true,
     hasShadow: true,
-    title: "TuneIt",
+    title: "CMUTuneIt",
     webPreferences: {
       preload: path.join(__dirname, "preload.cjs"),
       contextIsolation: true,
@@ -136,13 +136,13 @@ function bridgeBackendCors() {
 function createTray() {
   const icon = nativeImage.createFromPath(path.join(__dirname, "..", "public", "icons", "icon-32.png")).resize({ width: 18, height: 18 });
   tray = new Tray(icon);
-  tray.setToolTip("TuneIt (⌥Space)");
+  tray.setToolTip("CMUTuneIt (⌥Space)");
   tray.setContextMenu(
     Menu.buildFromTemplate([
-      { label: "Show / hide TuneIt", accelerator: SHORTCUT, click: toggleWidget },
+      { label: "Show / hide CMUTuneIt", accelerator: SHORTCUT, click: toggleWidget },
       { label: "Move to top-right corner", click: () => win?.setPosition(defaultPosition().x, defaultPosition().y) },
       { type: "separator" },
-      { label: "Quit TuneIt", click: () => { app.isQuitting = true; app.quit(); } },
+      { label: "Quit CMUTuneIt", click: () => { app.isQuitting = true; app.quit(); } },
     ]),
   );
 }
@@ -163,7 +163,7 @@ app.whenReady().then(() => {
   createTray();
 
   if (!globalShortcut.register(SHORTCUT, toggleWidget)) {
-    console.warn(`TuneIt: ${SHORTCUT} is taken by another app; use the menu-bar icon instead.`);
+    console.warn(`CMUTuneIt: ${SHORTCUT} is taken by another app; use the menu-bar icon instead.`);
   }
 
   ipcMain.on("widget:hide", () => win?.hide());

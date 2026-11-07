@@ -1,7 +1,7 @@
-// Speedometer scale from the UX brief: labels increase left to right, 20 sits at
-// the top centre and 200 at the far-right end. Between ticks the scale is linear.
+// Speedometer scale: labels increase left to right, 20 sits at the top centre and
+// the 150 tok/s maximum at the far-right end. Between ticks the scale is linear.
 
-export const GAUGE_TICKS = [0, 10, 20, 40, 80, 120, 160, 200] as const;
+export const GAUGE_TICKS = [0, 10, 20, 30, 60, 90, 120, 150] as const;
 export const GAUGE_POSITIONS = [0, 0.25, 0.5, 0.6, 0.7, 0.8, 0.9, 1] as const;
 
 /** Total arc in degrees; centred on straight up, so 0.5 is always the top. */

@@ -17,9 +17,9 @@
   --muted: #8495ad;
   --muted-2: #5b6c86;
 
-  --font-display: "Pixelify Sans", ui-monospace, monospace;
+  --font-display: "Press Start 2P", ui-monospace, monospace;
   --font-micro: "Silkscreen", ui-monospace, monospace;
-  --font-body: "VT323", ui-monospace, monospace;
+  --font-body: "JetBrains Mono", ui-monospace, monospace;
 
   --glow: 0 0 10px rgba(92, 225, 255, 0.35);
   --pixel-corners: polygon(

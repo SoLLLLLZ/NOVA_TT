@@ -1,5 +1,6 @@
 {
-  "name": "tuneit-extension",
+  "name": "cmutuneit-extension",
+  "productName": "CMUTuneIt",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -14,9 +15,9 @@
     "desktop:dev": "NOVA_DEV_URL=http://localhost:5173/widget.html electron ."
   },
   "dependencies": {
-    "@fontsource/pixelify-sans": "5.3.0",
+    "@fontsource/jetbrains-mono": "5.3.0",
+    "@fontsource/press-start-2p": "5.3.0",
     "@fontsource/silkscreen": "5.3.0",
-    "@fontsource/vt323": "5.3.0",
     "react": "19.3.1",
     "react-dom": "19.3.1"
   },

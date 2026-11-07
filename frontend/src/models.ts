@@ -13,7 +13,6 @@ export type CarPalette = {
 export type ModelLook = {
   /** Dropdown name from the UX brief; the backend display_name is the fallback. */
   name: string;
-  caption: string;
   car: string;
   /** Button fill and highlights follow the car's livery. */
   accent: string;
@@ -24,7 +23,6 @@ export type ModelLook = {
 export const MODEL_LOOKS: Record<string, ModelLook> = {
   "qwen3.8-27b": {
     name: "ByteShape Qwen3.8 27B",
-    caption: "Stable / high-throughput setup.",
     car: byteshapeCar,
     accent: "#C6F432",
     accentInk: "#0B1405",
@@ -32,7 +30,6 @@ export const MODEL_LOOKS: Record<string, ModelLook> = {
   },
   "qwen3.8-flash-next": {
     name: "Qwen3.8 Flash Next",
-    caption: "Lightweight / 3-GPU long-context setup.",
     car: flashCar,
     accent: "#5CE1FF",
     accentInk: "#04131F",
@@ -40,7 +37,6 @@ export const MODEL_LOOKS: Record<string, ModelLook> = {
   },
   "muse-glimmer": {
     name: "Muse Glimmer",
-    caption: "Playful / long-reasoning setup.",
     car: glimmerCar,
     accent: "#FF9F8A",
     accentInk: "#25101A",
@@ -49,5 +45,5 @@ export const MODEL_LOOKS: Record<string, ModelLook> = {
 };
 
 export function lookFor(modelId: string, displayName?: string): ModelLook {
-  return MODEL_LOOKS[modelId] ?? { ...MODEL_LOOKS["qwen3.8-27b"], name: displayName ?? modelId, caption: "" };
+  return MODEL_LOOKS[modelId] ?? { ...MODEL_LOOKS["qwen3.8-27b"], name: displayName ?? modelId };
 }

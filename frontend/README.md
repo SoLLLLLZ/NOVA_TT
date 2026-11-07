@@ -1,4 +1,4 @@
-# Frontend: TuneIt widget
+# Frontend: CMUTuneIt widget
 
 Owner: partner. One UI, two shells: a **floating desktop widget** (Electron) and a **Chrome Manifest V3 extension**. Built with Vite, React and TypeScript against [API contract v2.1](../docs/api/endpoint.md) and the [demo model catalog](../docs/demo/DEMO_MODELS.md).
 
@@ -40,7 +40,7 @@ Without the real backend, start the [mock](../tests/mocks/README.md) first and p
 | `src/state/steps.ts` | Maps contract step names onto the five checklist rows |
 | `src/api/` | Contract types, fetch client with pairing/idempotency headers, SSE parser |
 | `src/lib/changes.ts` | Turns `changes` into readable rows (merges decode/prompt threads and K/V cache) |
-| `src/lib/gauge.ts` | Speedometer scale `0 10 20 40 80 120 160 200`; 20 at top centre, 200 far right |
+| `src/lib/gauge.ts` | Speedometer scale `0 10 20 30 60 90 120 150`; 20 at top centre, 150 far right (higher speeds pin the needle; the number still shows the real value) |
 | `src/screens/`, `src/components/` | UI; styles in `src/styles/` |
 | `src/models.ts` | Per-model names, captions, car sprites and colours |
 | `desktop/main.cjs`, `desktop/preload.cjs` | Electron floating widget: always on top, Option+Space, menu-bar icon, position memory |

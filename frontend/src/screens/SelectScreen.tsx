@@ -74,7 +74,6 @@ export function SelectScreen({ status, offline, clusterId, gpuType, model, onClu
       <CarStage look={look} variant="select" modelKey={model} />
       <div className="car-caption">
         <p className="car-caption__name">{look.name}</p>
-        <p className="car-caption__desc">{look.caption}</p>
         {note && <p className="note">{note}</p>}
       </div>
 

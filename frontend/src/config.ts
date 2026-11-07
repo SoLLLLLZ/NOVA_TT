@@ -1,5 +1,5 @@
 // Product name is still a placeholder; change it here only.
-export const APP_NAME = "TuneIt";
+export const APP_NAME = "CMUTuneIt";
 
 export const DEFAULT_API_BASE = "http://localhost:8000";
 

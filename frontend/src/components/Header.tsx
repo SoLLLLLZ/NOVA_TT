@@ -22,7 +22,7 @@ export function Wordmark({ boltColor }: { boltColor?: string }) {
 
 export function Header({ gpu, connection, variant = "card", boltColor }: Props) {
   const statusText =
-    connection === "detecting" ? "Detecting GPU…" : connection === "offline" ? "Disconnected" : variant === "line" ? "Backend connected" : "Connected";
+    connection === "detecting" ? "Detecting…" : connection === "offline" ? "Disconnected" : variant === "line" ? "Backend connected" : "Connected";
   return (
     <header className={`header header--${variant}`}>
       <Wordmark boltColor={boltColor} />
@@ -31,7 +31,7 @@ export function Header({ gpu, connection, variant = "card", boltColor }: Props) 
           <ChipIcon size={18} className="gpu-pill__chip" />
           <div className="gpu-pill__gpu">
             <span className="micro">{connection === "detecting" ? "GPU" : "GPU detected"}</span>
-            <span className="gpu-pill__name">{connection === "detecting" ? "Detecting…" : gpu ?? "—"}</span>
+            <span className="gpu-pill__name">{connection === "detecting" ? "…" : gpu ?? "—"}</span>
           </div>
           <span className="gpu-pill__divider" aria-hidden="true" />
           <span className={`status-dot status-dot--${connection}`} aria-hidden="true" />

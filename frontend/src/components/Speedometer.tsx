@@ -7,8 +7,8 @@ const CX = 150;
 const CY = 140;
 const R = 112;
 const SEGMENTS = 72;
-/** Arc turns amber from 40 tok/s upward, as in the mockup. */
-const WARM_FROM = valueToFraction(40);
+/** Arc turns amber from the fourth tick (30 tok/s) upward, as in the mockup. */
+const WARM_FROM = GAUGE_POSITIONS[3];
 
 /** Tweens a number toward `target`: count-up on first value, short glide after. */
 function useTweened(target: number | null, reduced: boolean): number | null {

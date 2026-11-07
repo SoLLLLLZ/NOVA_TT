@@ -1,10 +1,10 @@
 {
   "manifest_version": 3,
-  "name": "TuneIt",
+  "name": "CMUTuneIt",
   "description": "Pit-stop tuning for local LLM inference on CMU GPUs.",
   "version": "0.1.0",
   "action": {
-    "default_title": "Open TuneIt",
+    "default_title": "Open CMUTuneIt",
     "default_icon": {
       "16": "icons/icon-16.png",
       "32": "icons/icon-32.png",
