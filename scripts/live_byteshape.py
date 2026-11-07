@@ -1,11 +1,12 @@
 """Opt-in live API rehearsal. Reads Keychain internally; never prints credentials."""
 
-import json, time, sys
+import argparse, json, time
 from nova_backend.catalog import PROFILES
 from nova_backend.schemas import Resources
 from fastapi.testclient import TestClient
 from nova_backend.app import create_app
 from nova_backend.common import ROOT, MODEL
+from nova_backend.engine import PROBE_PROMPT
 
 
 def events(r):
@@ -13,15 +14,21 @@ def events(r):
 
 
 def main():
-    root = ROOT / "var/live-byteshape"
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--simultaneous", action="store_true")
+    parser.add_argument("--profile-only", action="store_true")
+    parser.add_argument("--output-dir", default="var/live-byteshape")
+    args = parser.parse_args()
+    root = ROOT / args.output_dir
     root.mkdir(parents=True, exist_ok=True)
     app = create_app(root / "state", mock=False)
-    simultaneous = "--simultaneous" in sys.argv
+    simultaneous = args.simultaneous
     resources = Resources(gpu_count=2 if simultaneous else 1)
     report_path = root / ("simultaneous-report.json" if simultaneous else "report.json")
     report = {
         "started": time.time(),
         "model": MODEL,
+        "prompt": PROBE_PROMPT,
         "race_mode": "simultaneous" if simultaneous else "sequential",
     }
     with TestClient(app) as c:
@@ -53,7 +60,7 @@ def main():
                 "resources": resources.model_dump(),
                 **(
                     {"profile_id": PROFILES[1]["config"]["profile_id"]}
-                    if "--profile-only" in sys.argv
+                    if args.profile_only
                     else {}
                 ),
                 "budget": {"deadline_seconds": 180 if simultaneous else 300, "max_repair_attempts": 2},
@@ -88,8 +95,8 @@ def main():
                         "model": MODEL,
                         "mode": "simultaneous" if simultaneous else "sequential",
                         "resources": resources.model_dump(),
-                        "prompt": "Explain how a rainbow forms in three concise sentences.",
-                        "max_tokens": 256,
+                        "prompt": PROBE_PROMPT,
+                        "max_tokens": 2048,
                         "budget": {"deadline_seconds": 180},
                     },
                 )

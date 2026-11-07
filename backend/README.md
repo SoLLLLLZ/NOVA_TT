@@ -42,9 +42,12 @@ The backend never relaxes host-key checking. It allocates through account/partit
 
 `/action` shares the same runner for apply, context lowering, quant selection and benchmark. `/chat` and `/diagnose` are read-only OpenRouter assistance. Unknown settings are rejected. Capability controls marked unsupported are descriptive coverage, not executable flags.
 
+The default throughput test uses exactly `Write a short essay explaining the causes of the Industrial Revolution`, capped at 256 generated tokens. Basic correctness is checked separately with arithmetic. For the full demo essay, send this same prompt to `/race` with `max_tokens: 2048` so reasoning and the final essay have room to complete. The rehearsal script does this automatically. Historical CANON ledger rates do not predict essay speed. `workload` selects the historical evidence category; the demo probe itself remains the exact prompt above.
+
 ## Boundaries
 
 - OpenRouter model: `openai/gpt-6-astra`, high effort, latency routing. No silent model/effort substitution. Priority service is requested first; an explicit unsupported-tier rejection retries the same model at high effort on the default tier. The returned effective tier is recorded. Other API errors remain visible; no model substitution occurs.
+- No web search: the OpenRouter selector has only `select_configuration`, no web plugin or online model suffix. Local essay generation has no tools or retrieval. Astra uses the supplied CANON evidence and profiles.
 - Defaults: 180-second operation deadline, at most two repairs, plus bounded cleanup. The live rehearsal can use 300 seconds to separate first allocation/hash startup from the presentation budget.
 - One model process / one request slot per GPU. ByteShape contexts 2K–64K, fixed quant/runtime/KV precision, draft size 1–5. Experimental combinations require `allow_experimental`; exact recorded MTP5/0.75 does not.
 - Allocation reuse is limited to this backend's owned allocation. Resource expansion requires reverting to unloaded first. Two-GPU racing must reserve two lanes up front.

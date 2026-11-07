@@ -201,6 +201,8 @@ Download presence does not imply loaded, allocated or ready. Database confidence
 
 Select a conservative compatible profile, apply it, verify a completed answer and retain the working service. Default objective is decode, preset fastest, workload short. Optional sequential baseline benchmarking is explicit.
 
+Current ByteShape demo adapter: the throughput prompt is exactly `Write a short essay explaining the causes of the Industrial Revolution`, with a 256-token output cap. A separate arithmetic task checks basic correctness. `workload` selects short/long historical CANON evidence; it does not repeat or alter this demo prompt. For the live essay race, submit that exact prompt to `/race` with `max_tokens: 2048`; natural stopping is enabled, and completion status must remain visible if the cap is reached.
+
 Request example:
 ```json
 {

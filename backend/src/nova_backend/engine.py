@@ -7,13 +7,7 @@ from .schemas import Optimize, Race, Revert, Benchmark
 from .store import TERMINAL
 
 QUALITY_PROMPT = 'A shop starts with 17 notebooks, receives 8, then sells 6. Return only a JSON object with integer keys "remaining" (notebooks left) and "doubled" (twice that number).'
-PROBE_PROMPT = (
-    "Analyze the following fictional ledger carefully and explain a general algorithm to reconcile it, then work through all entries in detail.\n"
-    + "\n".join(
-        f"Entry {i}: received {17 + i % 9}, sold {6 + i % 7}, returned {i % 3}."
-        for i in range(80)
-    )
-)
+PROBE_PROMPT = "Write a short essay explaining the causes of the Industrial Revolution"
 DIFFERENCES = [
     "Default Ollama versus optimized llama.cpp: templates, context, cache precision, sampling, speculation and timing conventions differ. This is a whole-configuration comparison, not an MTP-only ablation."
 ]
@@ -388,7 +382,7 @@ class Engine:
             if prompt is not None
             else QUALITY_PROMPT
             if purpose == "quality"
-            else PROBE_PROMPT * (4 if workload == "long" else 1)
+            else PROBE_PROMPT
         )
         cap = cap or (2048 if purpose == "quality" else 256)
         mid = uid("measurement")

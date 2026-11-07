@@ -1,0 +1,215 @@
+{
+  "date": "2026-11-07",
+  "prompt": "Write a short essay explaining the causes of the Industrial Revolution",
+  "model": "qwen3.8-27b",
+  "allocation_id": "268019",
+  "mode": "sequential same GPU",
+  "agent": {
+    "model": "openai/gpt-6-astra",
+    "reasoning_effort": "high",
+    "requested_service_tier": "priority",
+    "effective_service_tier": "priority",
+    "available": true
+  },
+  "web_search_enabled": false,
+  "preparation_seconds": 28.035311959218234,
+  "optimize_seconds": 86.87990987533703,
+  "selection_reason": "Select the complete registered cfg_549fe546f2fd44a6 profile for short-prompt, single-request decode on one L40. Its comparable uncached CANON observation reports 141.765 decode tok/s versus 125.165 for the registered MTP3 fallback, with 1812.131 prefill tok/s and one passed short completed-answer check; these are historical individual observations, not live measurements or broad quality proof. Sampling changes are authorized: use MTP5 and temperature 0.75, preserving IQ3_S hybrid 3.23bpw, 65536-token context, one slot/replica, target and draft q8_0 K/V, batch/microbatch 2048/512, decode/prefill threads 2/6, top_k 20, top_p 0.95, min_p 0 and medium reasoning. No overrides or experimental combinations. Assume concurrency one. Backend must establish an active owned Slurm allocation and device mask, verify installed artifacts/runtime and GPU placement, retain at least 1024 MiB GPU headroom under load, and perform naturally completed correct-answer validation. Honor sequential_compare with a comparable current-demo Ollama baseline and real engine timing/token metadata; historical Ollama rates cannot substitute. Preserve rollback state and report actual retained state if comparison cannot complete. Use profile_e3ff607f68dd7ceaa58d8deb (cfg_aee1c8396d18230b, MTP3/temperature 1) only as the complete compatible fallback if live failure warrants it, without reducing context or changing quantization. Stop after verified success within the deadline.",
+  "config": {
+    "model": "qwen3.8-27b",
+    "artifact_id": "byteshape-iq3s-40171062",
+    "quant": "IQ3_S hybrid 3.23bpw",
+    "engine": "llama.cpp",
+    "runtime_id": "llama-l40-b10820",
+    "settings": {
+      "context_tokens": 65536,
+      "context_per_slot": 65536,
+      "parallel_slots_per_process": 1,
+      "replicas": 1,
+      "gpu_layers": 99,
+      "main_gpu": 0,
+      "split_mode": "none",
+      "tensor_split": [],
+      "tensor_overrides": [
+        {
+          "pattern": "token_embd.weight",
+          "buffer": "CUDA0"
+        }
+      ],
+      "batch_size": 2048,
+      "microbatch_size": 512,
+      "threads_decode": 2,
+      "threads_prefill": 6,
+      "kv_type_k": "q8_0",
+      "kv_type_v": "q8_0",
+      "flash_attention": "on",
+      "fit": "off",
+      "speculative_mode": "draft-mtp",
+      "draft_model": null,
+      "draft_device": [
+        "CUDA0"
+      ],
+      "draft_gpu_layers": 99,
+      "draft_tokens": 5,
+      "draft_kv_k": "q8_0",
+      "draft_kv_v": "q8_0",
+      "backend_sampling": true,
+      "mps": false,
+      "prompt_cache_ram_mib": 1024,
+      "checkpoint_min_step": 512,
+      "temperature": 0.75,
+      "top_k": 20,
+      "top_p": 0.95,
+      "min_p": 0.0,
+      "reasoning_effort": "medium",
+      "repeat_penalty": 1.0,
+      "presence_penalty": 0.0,
+      "jinja": true,
+      "reasoning_format": "deepseek",
+      "chat_template_id": "byteshape-embedded",
+      "chat_template_kwargs": {
+        "enable_thinking": true,
+        "reasoning_effort": "medium"
+      },
+      "vision_projector": null
+    },
+    "unresolved_fields": [],
+    "profile_id": "profile_fc0784b84a8a540b58b19171"
+  },
+  "quick_probe": {
+    "default": {
+      "measurement_id": "measurement_ec78081f5b27341baea7",
+      "profile_id": "profile_e5cfd82624a3408021949617",
+      "engine": "ollama",
+      "runtime_id": "ollama-0.40.13",
+      "prompt_hash": "56c4a433270d7aad3a7d4a8125456adf4d4d40d653d18a5b60787943e75be041",
+      "prompt_tokens": 63,
+      "output_tokens": 256,
+      "decode_timed_tokens": 256,
+      "prefill_seconds": 0.612094,
+      "decode_seconds": 9.360521,
+      "decode_tps": 27.348905044922176,
+      "prefill_tps": 102.92536767228563,
+      "completed": false,
+      "stop_reason": "length",
+      "cached_tokens": 0,
+      "cache_state": "uncached",
+      "output_cap": 256,
+      "timing_convention": "eval_count / eval_duration",
+      "gpu_ids": [
+        "GPU-b88255ea-7355-ce97-d8c1-82a5beadfabe"
+      ],
+      "artifact_ref": "measurement_ec78081f5b27341baea7-raw.json"
+    },
+    "tuned": {
+      "measurement_id": "measurement_ebf7f61d022d6512c727",
+      "profile_id": "profile_fc0784b84a8a540b58b19171",
+      "engine": "llama.cpp",
+      "runtime_id": "llama-l40-b10820",
+      "prompt_hash": "56c4a433270d7aad3a7d4a8125456adf4d4d40d653d18a5b60787943e75be041",
+      "prompt_tokens": 21,
+      "output_tokens": 256,
+      "decode_timed_tokens": 255,
+      "prefill_seconds": 0.272352,
+      "decode_seconds": 3.4239520000000003,
+      "decode_tps": 74.47534311228661,
+      "prefill_tps": 77.1060979908354,
+      "completed": false,
+      "stop_reason": "limit",
+      "cached_tokens": 0,
+      "cache_state": "uncached",
+      "output_cap": 256,
+      "timing_convention": "(predicted_n - 1) / predicted_ms",
+      "gpu_ids": [
+        "GPU-b88255ea-7355-ce97-d8c1-82a5beadfabe"
+      ],
+      "artifact_ref": "measurement_ebf7f61d022d6512c727-raw.json"
+    },
+    "decode_speedup": 2.723156301502985
+  },
+  "completed_essay": {
+    "default": {
+      "measurement_id": "measurement_284ff85995061fac7125",
+      "profile_id": "profile_e5cfd82624a3408021949617",
+      "engine": "ollama",
+      "runtime_id": "ollama-0.40.13",
+      "prompt_hash": "56c4a433270d7aad3a7d4a8125456adf4d4d40d653d18a5b60787943e75be041",
+      "prompt_tokens": 63,
+      "output_tokens": 450,
+      "decode_timed_tokens": 450,
+      "prefill_seconds": 1.497863,
+      "decode_seconds": 17.346113,
+      "decode_tps": 25.942411420933325,
+      "prefill_tps": 42.059921367975576,
+      "completed": true,
+      "stop_reason": "stop",
+      "cached_tokens": 0,
+      "cache_state": "uncached",
+      "output_cap": 2048,
+      "timing_convention": "eval_count / eval_duration",
+      "gpu_ids": [
+        "GPU-b88255ea-7355-ce97-d8c1-82a5beadfabe"
+      ],
+      "artifact_ref": "measurement_284ff85995061fac7125-raw.json",
+      "native_sha256": "6895a3b39675bf3c3d93651fc4a85fc852da191a74248b0e18676f8b1d3531fe"
+    },
+    "tuned": {
+      "measurement_id": "measurement_5f5f7448214b9413d6bd",
+      "profile_id": "profile_fc0784b84a8a540b58b19171",
+      "engine": "llama.cpp",
+      "runtime_id": "llama-l40-b10820",
+      "prompt_hash": "56c4a433270d7aad3a7d4a8125456adf4d4d40d653d18a5b60787943e75be041",
+      "prompt_tokens": 21,
+      "output_tokens": 764,
+      "decode_timed_tokens": 763,
+      "prefill_seconds": 0.330291,
+      "decode_seconds": 11.029536,
+      "decode_tps": 69.17788744694246,
+      "prefill_tps": 63.58029737413372,
+      "completed": true,
+      "stop_reason": "eos",
+      "cached_tokens": 0,
+      "cache_state": "uncached",
+      "output_cap": 2048,
+      "timing_convention": "(predicted_n - 1) / predicted_ms",
+      "gpu_ids": [
+        "GPU-b88255ea-7355-ce97-d8c1-82a5beadfabe"
+      ],
+      "artifact_ref": "measurement_5f5f7448214b9413d6bd-raw.json",
+      "draft_acceptance": 0.3079470198675497,
+      "native_sha256": "97f63cc72f059551b3cef570ee56a1eb1751a6e7d2b736a2004b7167fce35e53"
+    },
+    "decode_speedup": 2.6665943394576566,
+    "operation_seconds": 77.13720125006512
+  },
+  "runtime_validation": {
+    "status": "passed",
+    "completed_answer": true,
+    "answer_correct": true,
+    "service_healthy": true,
+    "placement_matches": true,
+    "context_matches": true,
+    "memory_guard_pass": true,
+    "configured_context_per_slot": 65536,
+    "tested_prompt_tokens": 56,
+    "checked_at": "2026-11-07T17:40:05.216806+00:00",
+    "scope": "Short arithmetic completed-answer check only.",
+    "issues": []
+  },
+  "cleanup": {
+    "revert_success": true,
+    "active_user_jobs_after_run": []
+  },
+  "validation": {
+    "pytest_passed": 46,
+    "native_receipts_read_back": true
+  },
+  "limitations": [
+    "One observation per engine per test; not an average over repeats.",
+    "Native decode rates include reasoning tokens as well as final-answer tokens.",
+    "Templates, context, KV precision and sampling differ between untouched Ollama and optimized llama.cpp.",
+    "Full answers have different lengths; decode speedup is not the completed-answer latency ratio.",
+    "Arithmetic validation is separate; no historical factual audit of the essays.",
+    "The 256-token probes are capped and did not finish the essays."
+  ]
+}
