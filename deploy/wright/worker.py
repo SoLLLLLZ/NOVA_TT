@@ -734,6 +734,51 @@ def shutdown(*_):
     EXIT.set()
 
 
+def allocated_gpu_uuids(environ, entries, gres_text, proc_information, node):
+    """Resolve Slurm GRES IDs through device files, never remapped NVML indices.
+
+    Wright exposes some unallocated devices to NVML. Visibility or matching
+    inventory counts therefore cannot prove ownership of a device.
+    """
+    assigned = (environ.get("SLURM_STEP_GPUS") or environ.get("SLURM_JOB_GPUS") or "").split(",")
+    job = environ.get("SLURM_JOB_GPUS")
+    if not all(assigned) or len(set(assigned)) != len(assigned):
+        raise RuntimeError("allocation_mapping_failed: missing or duplicate Slurm GPU IDs")
+    if job and not set(assigned).issubset(job.split(",")):
+        raise RuntimeError("allocation_mapping_failed: step exceeds job GPUs")
+    files = []
+    for line in gres_text.splitlines():
+        fields = dict(part.split("=", 1) for part in line.split("#", 1)[0].split() if "=" in part)
+        if fields.get("NodeName") == node.split(".")[0] and fields.get("Name") == "gpu":
+            match = re.fullmatch(r"/dev/nvidia(\d+)", fields.get("File", ""))
+            if not match:
+                raise RuntimeError("allocation_mapping_failed: unsupported GRES device mapping")
+            files.append(match.group(1))
+    minors = {}
+    for info in proc_information:
+        values = dict(line.split(":", 1) for line in info.splitlines() if ":" in line)
+        minor = values.get("Device Minor", "").strip()
+        uuid = values.get("GPU UUID", "").strip()
+        if minor in minors or not minor.isdigit() or not uuid.startswith("GPU-"):
+            raise RuntimeError("allocation_mapping_failed: invalid physical GPU metadata")
+        minors[minor] = uuid
+    selected = []
+    for assigned_id in assigned:
+        if assigned_id.startswith("GPU-"):
+            uuid = assigned_id
+        elif assigned_id.isdigit() and int(assigned_id) < len(files):
+            uuid = minors.get(files[int(assigned_id)])
+        else:
+            raise RuntimeError("allocation_mapping_failed: unresolved Slurm GPU ID")
+        matches = [entry for entry in entries if entry[1] == uuid and entry[2] == "NVIDIA L40"]
+        if len(matches) != 1:
+            raise RuntimeError("allocation_mapping_failed: allocated GPU is unavailable")
+        selected.append(uuid)
+    if len(set(selected)) != len(selected):
+        raise RuntimeError("allocation_mapping_failed: duplicate physical GPU")
+    return selected
+
+
 for sig in (signal.SIGTERM, signal.SIGINT):
     signal.signal(sig, shutdown)
 RUNTIME_HASHES = {}
@@ -744,18 +789,15 @@ try:
         ["nvidia-smi", "--query-gpu=index,uuid,name", "--format=csv,noheader,nounits"]
     )
     entries = [[x.strip() for x in line.split(",")] for line in inventory.splitlines()]
-    assigned = os.environ.get("SLURM_JOB_GPUS", "").split(",")
-    if len(entries) == len(assigned):
-        chosen = entries
-    else:
-        chosen = [r for r in entries if r[0] in assigned or r[1] in assigned]
-    if (
-        len(chosen) != len(assigned)
-        or len(chosen) != GPUS_PER_ENGINE
-        or any(r[2] != "NVIDIA L40" for r in chosen)
-    ):
+    GPUS = allocated_gpu_uuids(os.environ, entries, pathlib.Path("/etc/slurm/gres.conf").read_text(),
+        [path.read_text() for path in pathlib.Path("/proc/driver/nvidia/gpus").glob("*/information")],
+        socket.gethostname())
+    if len(GPUS) != GPUS_PER_ENGINE:
         raise RuntimeError("allocation_mapping_failed")
-    GPUS = [r[1] for r in chosen]
+    save(ROOT / "gpu-admission.json", {"job_id": os.environ["SLURM_JOB_ID"],
+        "job_gpus": os.environ.get("SLURM_JOB_GPUS"), "step_gpus": os.environ.get("SLURM_STEP_GPUS"),
+        "cuda_visible_devices": os.environ["CUDA_VISIBLE_DEVICES"], "gpu_ids": GPUS,
+        "mapping": "Slurm GRES file -> physical device minor -> UUID; verified in visible inventory"})
     if any(processes(g) for g in GPUS):
         raise RuntimeError("gpu_busy")
     cpus = sorted(os.sched_getaffinity(0))

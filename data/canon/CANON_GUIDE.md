@@ -1,29 +1,29 @@
 # CANON: compact inference configuration retrieval
 
-Use **CANON.csv** as the primary retrieval table. It has **144 rows and 83 columns**, weighs **103,769 bytes**, and contains **128 configuration records followed by 16 qualitative takeaways**. No cell exceeds 335 characters. Created November 4, 2026; updated November 7, 2026. The original 128 records retain all 79 original field values exactly.
+Use **CANON.csv** as the primary retrieval table. It has **160 rows and 83 columns**, weighs **118,116 bytes**, and contains **143 configuration records followed by 17 qualitative takeaways**. No cell exceeds 335 characters. Created November 4, 2026; updated November 7, 2026. The original 128 records retain all 79 original field values exactly.
 
 ## Configuration records and qualitative takeaways
 
-Filter `record_type=configuration` before ranking measured settings or calculating hardware/model coverage. These 128 records include 126 measured configurations and two explicit memory failures. Qualitative rows have `record_type=qualitative_takeaway`; their inference-setting, throughput, token-count and observation fields are blank. They are guidance, not additional experiments or deployable presets.
+Filter `record_type=configuration` before ranking measured settings or calculating hardware/model coverage. These 143 records include 141 measured records and two explicit memory failures. The 15 November 7 experiment records include three separately measured identical controls; record count is not unique-setting count. Qualitative rows have `record_type=qualitative_takeaway`; their inference-setting, throughput, token-count and observation fields are blank. They are guidance, not additional experiments or deployable presets.
 
 The four appended columns are:
 
 - `record_type`: `configuration` or `qualitative_takeaway`.
 - `takeaway`: the general engineering rule, populated only for takeaway rows.
 - `evidence_config_ids`: semicolon-separated supporting configuration IDs already in CANON.
-- `evidence_ref`: the supporting entry in `qualitative_lessons.json`, identified by its `id` after `#`.
+- `evidence_ref`: the supporting entry in `qualitative_lessons.json` for lessons, or the campaign JSON under `experiments/` for new measurements, identified by its `id` after `#`.
 
 Lesson IDs use the `lesson_001` namespace in `config_id`, distinct from measured `cfg_...` IDs. Their short title is in `candidate`; `cautions` carries limits of the evidence. General rules must not be read as universal performance guarantees. Blank lesson measurements are not zero throughput.
 
-The lessons occupy spreadsheet rows **130–145**, after the header and 128 original configuration rows. Retrieve their relevant guidance alongside hardware-compatible configurations. The model should use the rules to choose what to test, retain the selected workload and constraints, and verify proposed settings locally. Do not use a lesson as a substitute for a matching measured configuration or as a numerical speed prediction.
+The lessons occupy spreadsheet rows **145–161**, after the header and 143 configuration records. The 15 November 7 experiments occupy rows **130–144**. Retrieve their relevant guidance alongside hardware-compatible configurations. The model should use the rules to choose what to test, retain the selected workload and constraints, and verify proposed settings locally. Do not use a lesson as a substitute for a matching measured configuration or as a numerical speed prediction.
 
 `qualitative_lessons.json` contains the observed values, raw-record locators, scopes and parent review decisions. Its `path` values are relative to the **P100 Project research workspace**, not necessarily the shared GitHub repository. The shared repo's compact CSV/guide/supplement are not a mirror of all raw records or the full historical archive.
 
-The November 7 append consolidates 23 proposals from four GPT-6.1 Sol xhigh reviewers into 16 parent-reviewed rules. The review used local L40 raw records and local/remote V100 historical records; it started no inference. Preservation checks compared all 10,112 existing data cells exactly, verified all lesson references to configuration IDs, and confirmed every lesson measurement field remains blank. `build_canon.py` appends the qualitative supplement after sorting configuration rows so a rebuild retains the lessons at the bottom.
+The earlier November 7 lesson append consolidated 23 proposals from four GPT-6.1 Sol xhigh reviewers into 16 parent-reviewed rules. The review used local L40 raw records and local/remote V100 historical records; it started no inference. Preservation checks compared all 10,112 existing data cells exactly, verified all lesson references to configuration IDs, and confirmed every lesson measurement field remains blank. `build_canon.py` appends the qualitative supplement after sorting configuration rows so a rebuild retains the lessons at the bottom.
 
 ## Included and removed
 
-Each `configuration` row represents one configuration with recorded evidence: 126 measured records and two explicit memory-guard failures. Their inventory contains 92 Qwen3.8 27B, 16 Qwen3.8 Flash Next and 20 Muse Glimmer records. Hardware is explicit: 114 V100 records and 14 L40 records. These counts exclude the 16 qualitative rows and describe available evidence, not validated deployment recommendations.
+Each `configuration` row represents a configuration with recorded evidence: 141 measured records and two explicit memory-guard failures. The November 7 campaign preserves each experimental observation as a separate record, including repeated controls. Their inventory contains 107 Qwen3.8 27B, 16 Qwen3.8 Flash Next and 20 Muse Glimmer records. Hardware is explicit: 114 V100 records and 29 L40 records. These counts exclude the 17 qualitative rows and describe available evidence, not validated deployment recommendations.
 
 The retained settings cover GPU count/power, context and concurrency, replica layout, tensor placement, batch/microbatch, decode/prefill threads, KV precision, Flash Attention, auto-fit, MTP/DFlash/ngram settings, CUDA controls, model loading, prompt caching, sampling and reasoning. Runtime variant/reference is retained because different libraries or custom kernels can produce different performance with otherwise identical flags.
 
@@ -96,10 +96,24 @@ Two additional three-GPU rows cover default Ollama and the ordinary V100 product
 
 ## November 5 Muse Glimmer on one Wright L40
 
-Three rows cover default Ollama, the saved production DFlash11/temperature1 profile adapted to one GPU and one slot, and that profile with DFlash15/temperature0.75. All ran sequentially on the same physical L40 in Slurm job 266776, with 12 logical CPUs, 64GiB host RAM and the cluster's 300W limit. The supplement `canon_additions/wright-glimmer-1l40-20261105.json` retains twelve cold fixed-512 speed probes and three completed short final-answer checks. All final-channel JSON answers matched exactly. Raw completions include native reasoning and channel markers, so they require final-channel extraction; the original harness's formatting failures are preserved separately from verified semantic correctness.
+Three rows cover default Ollama, the saved production DFlash11/temperature1 profile adapted to one GPU and one slot, and that profile with DFlash15/temperature 0.75. All ran sequentially on the same physical L40 in Slurm job 266776, with 12 logical CPUs, 64GiB host RAM and the cluster's 300W limit. The supplement `canon_additions/wright-glimmer-1l40-20261105.json` retains twelve cold fixed-512 speed probes and three completed short final-answer checks. All final-channel JSON answers matched exactly. Raw completions include native reasoning and channel markers, so they require final-channel extraction; the original harness's formatting failures are preserved separately from verified semantic correctness.
 
 Draft 17 was initially requested and prepared, but exceeds this DFlash runtime's effective 15-token cap for the trained 16-position block. The user approved explicit draft15 before execution. No separate draft17 timed run occurred. The candidate records draft_tokens=15 and this history in cautions.
 
 Both llama.cpp runs retain 262,144 context per slot, F16 target/draft KV, 8/12 decode/prefill threads, 4096/512 batch/microbatch, FlashAttention and high reasoning. The exact production source patch was rebuilt for the Wright runtime. Ollama resolved to 32K context, 128/128 threads constrained by the allocation, 1024/1024 batching, F16 KV, temperature0.8/top-k40/top-p0.9, and no DFlash. This is a full-configuration comparison, not a causal isolation of speculative decoding.
 
 The report pools two trials per length: candidate decode was +17.55% short and +4.82% long versus production; long prefill was -5.87%. Long candidate decode ranged from 110.62 to 148.64 t/s, so the small pooled gain is not a reliable general improvement claim. CANON retains individual lower-middle decode examples and their paired prefill, not these pooled rates. Minimum free GPU memory remained at least 23,466MiB and peak temperature was 50C. All 125 previous rows were preserved exactly, six new selected timing pairs were checked, and 10,191 exported cells were verified. The GPU allocation was released.
+
+## November 7 Industrial Revolution optimization campaign
+
+Fifteen new experiment records cover ByteShape draft depths 5/3/7/9/12, temperatures 0.75/0.5/0.25/0.1/0, and decode-thread/batch changes. Three GPT-6.1 Sol xhigh agents ran five tests each without SubagentComms, using two working Slurm L40s; the third track reused a released GPU. An explicitly approved temporary reservation held an unusable slot without inference. Startup staggering meant the recorded generation requests did not overlap. All allocations were released.
+
+Every test used exactly `Write a short essay explaining the causes of the Industrial Revolution`, seed 71430, natural EOS with a 2048-token ceiling, 64K context, Q8 target/draft KV, and no prompt-cache reuse. All 15 completed with placement/context/memory/service guards passing. Native rates use 21 formatted prompt tokens and `(predicted_n - 1) / decode_seconds`. These are naturally completed essay observations, not the historical fixed-512/4K-input probes.
+
+Best observed decode was **77.103 tokens/s** at draft 3, temperature 0.75, decode/prefill threads 2/6 and batch/microbatch 2048/512. The 100 tokens/s target was not reached. Draft depths above 5 became slower in this sweep; temperature and thread/batch changes did not establish a repeatable improvement. One observation per setting does not establish a universal optimum. Answer text and length change across some settings; visible wording/coherence issues are retained without a broad factual-quality pass.
+
+`experiments/wright-byteshape-industrial-20261107.json` embeds every new request, native response, full configuration, effective launch, timing, essay and cleanup receipt. Its A1/B1/C1 records deliberately repeat the same configuration on separate occasions. Config IDs identify experimental records; `config.profile_id` identifies identical settings. All 144 previously published rows retain every one of their 83 field values. No long-workload values are fabricated.
+
+Existing lessons 001/003/005/006/011 remain applicable. New lesson 017 records a distinct admission finding: NVIDIA visibility and remapped indices cannot establish Slurm device ownership; resolve allocation IDs to physical UUIDs before loading. No inference was launched on the rejected device. The worker mapping fix and experimental ByteShape draft range 1–16 are included in the repository, while registered profiles remain unchanged.
+
+The external research `build_canon.py` is not maintained in this repository. A future rebuild must explicitly retain this experiment supplement and its 15 records, plus lesson 017; rebuilding only the older research archive would lose this update. See the [campaign report](../../docs/experiments/wright-byteshape-industrial-20261107.md) and current validation receipt.

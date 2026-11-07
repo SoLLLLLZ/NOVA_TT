@@ -44,7 +44,7 @@ def test_auth_and_contract(client):
         client.get("/capabilities").json()["fields"]["settings.draft_tokens"]["schema"][
             "maximum"
         ]
-        == 5
+        == 16
     )
     assert client.get("/status").json()["simulation"] is True
 

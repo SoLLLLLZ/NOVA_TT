@@ -13,6 +13,23 @@ from test_worker import load_function
 MODELS = [MODEL, 'muse-glimmer', 'qwen3.8-flash-next']
 
 
+def test_byteshape_experimental_draft_range_preserves_gates():
+    base = profiles_for(MODEL)[1]['config']['profile_id']
+    for draft in (7, 9, 12, 16):
+        request = dict(model=MODEL, profile_id=base, overrides={'settings': {'draft_tokens': draft}})
+        with pytest.raises(Problem) as error:
+            resolve(Optimize(**request))
+        assert error.value.error['code'] == 'constraint_violation'
+        config = resolve(Optimize(**request, constraints={'allow_experimental': True}))
+        assert config['settings']['draft_tokens'] == draft
+        assert config['settings']['context_per_slot'] == 65536
+        assert config['settings']['kv_type_k'] == 'q8_0'
+    for draft in (0, 17):
+        with pytest.raises(Problem):
+            resolve(Optimize(model=MODEL, profile_id=base, constraints={'allow_experimental': True},
+                overrides={'settings': {'draft_tokens': draft}}))
+
+
 @pytest.mark.parametrize('model', MODELS)
 def test_production_pipeline_never_loads_ollama(tmp_path, model):
     class ProductionDriver(MockDriver):

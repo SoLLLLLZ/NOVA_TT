@@ -2,7 +2,7 @@ import pytest
 
 """Exercise pure worker functions without importing its Slurm-only bootstrap."""
 
-import ast, math, signal, time
+import ast, math, re, signal, time
 from types import SimpleNamespace
 from nova_backend.common import ROOT
 
@@ -17,6 +17,24 @@ def load_function(name, namespace):
         namespace,
     )
     return namespace[name]
+
+
+def test_gpu_admission_uses_physical_minor_not_remapped_nvml_index():
+    resolve = load_function('allocated_gpu_uuids', {'re': re})
+    gres = '\n'.join(f'NodeName=n03 Name=gpu Type=nvidia-l40 File=/dev/nvidia{i}' for i in range(3))
+    proc = [f'Device Minor: {i}\nGPU UUID: GPU-{i}' for i in range(8)]
+    # Recorded third-slot failure: STEP_GPUS=2, NVML sees assigned minor2
+    # as index0 and unallocated minor7 as index1. CUDA mask is remapped0.
+    visible = [['0', 'GPU-2', 'NVIDIA L40'], ['1', 'GPU-7', 'NVIDIA L40']]
+    assert resolve({'SLURM_STEP_GPUS': '2', 'CUDA_VISIBLE_DEVICES': '0'}, visible, gres, proc, 'n03') == ['GPU-2']
+    # The old same-count fallback incorrectly admitted minor7 for assigned1.
+    with pytest.raises(RuntimeError, match='allocated GPU is unavailable'):
+        resolve({'SLURM_JOB_GPUS': '1'}, [visible[1]], gres, proc, 'n03')
+    with pytest.raises(RuntimeError, match='step exceeds job'):
+        resolve({'SLURM_JOB_GPUS': '0', 'SLURM_STEP_GPUS': '2'}, visible, gres, proc, 'n03')
+    with pytest.raises(RuntimeError, match='missing or duplicate'):
+        resolve({}, visible, gres, proc, 'n03')
+    assert resolve({'SLURM_JOB_GPUS': '0,2'}, [['0','GPU-0','NVIDIA L40'],visible[0]], gres, proc, 'n03') == ['GPU-0','GPU-2']
 
 
 def test_native_sampler_float_precision():

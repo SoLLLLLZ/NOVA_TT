@@ -94,3 +94,7 @@ Each rehearsal prepares an owned Slurm allocation, checks all model/runtime hash
 - Standard operation deadline 180 seconds, caller maximum 300, at most two repairs, bounded cleanup. Short arithmetic verification is not broad or full-context quality certification. Natural completion and cap status remain separate from throughput.
 - OpenRouter uses `openai/gpt-6-astra`, high reasoning, priority tier when accepted. An explicit unsupported-tier response retries the same model/effort without that tier; no silent model substitution. Returned tier is recorded.
 - Restart cleans only the recorded owned allocation and marks interrupted operations failed. It never replays completed work. Stopping the backend releases its allocation.
+
+ByteShape draft depth now accepts 1–16 for explicitly experimental overrides. Registered defaults remain MTP3/MTP5; expanding the accepted range is not a performance or memory-fit guarantee. Glimmer and Flash draft caps are unchanged. Refresh capabilities after updating the backend.
+
+Wright GPU admission resolves Slurm step/job GRES IDs through the node-specific `/etc/slurm/gres.conf` device files and `/proc/driver/nvidia/gpus/*/information` UUIDs. NVML visibility alone is not allocation ownership: an extra visible GPU is never substituted for an unavailable assigned device. Unsupported or inconsistent mappings fail closed.

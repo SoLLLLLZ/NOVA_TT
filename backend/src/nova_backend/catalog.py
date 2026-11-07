@@ -15,7 +15,7 @@ BASELINE = PROFILES[2]["config"]
 WRITABLE = {
     "context_tokens": ("integer", 2048, 65536, "--ctx-size"),
     "context_per_slot": ("integer", 2048, 65536, None),
-    "draft_tokens": ("integer", 1, 5, "--spec-draft-n-max"),
+    "draft_tokens": ("integer", 1, 16, "--spec-draft-n-max"),
     "threads_decode": ("integer", 1, 12, "--threads"),
     "threads_prefill": ("integer", 1, 12, "--threads-batch"),
     "batch_size": ("integer", 128, 2048, "--batch-size"),
@@ -27,7 +27,7 @@ WRITABLE = {
 }
 SAMPLING = {"temperature", "top_p", "top_k", "min_p"}
 UNSUPPORTED = """context_override fit_target_mib extra_speculation draft_tensor_overrides draft_probability_min cuda_launch_queues force_mmq_runtime load_mode lazy_mode draft_tokens_min draft_probability_split draft_threads_decode draft_threads_prefill draft_backend_sampling cpu_mask cpu_mask_prefill draft_cpu_mask draft_cpu_mask_prefill cpu_range cpu_range_prefill draft_cpu_range draft_cpu_range_prefill cpu_strict cpu_strict_prefill draft_cpu_strict draft_cpu_strict_prefill cpu_priority cpu_priority_prefill draft_cpu_priority draft_cpu_priority_prefill cpu_poll cpu_poll_prefill draft_cpu_poll draft_cpu_poll_prefill numa cpu_moe draft_cpu_moe kv_offload op_offload repack no_host kv_unified swa_full n_cpu_moe draft_n_cpu_moe n_cpu_ffn fit_context_min cache_prompt cache_idle_slots continuous_batching context_shift cache_reuse context_checkpoints swa_checkpoints keep_tokens slot_prompt_similarity sleep_idle_seconds seed frequency_penalty typical_p top_n_sigma dynamic_temperature_range dynamic_temperature_exponent xtc_probability xtc_threshold adaptive_target adaptive_decay mirostat_tau mirostat_eta dry_multiplier dry_base repeat_last_n dry_penalty_last_n dry_allowed_length mirostat samplers dry_sequence_breakers stop logit_bias max_output_tokens ignore_eos reasoning_budget reasoning_budget_message reasoning_preserve skip_chat_parsing prefill_assistant rope_scaling rope_scale rope_freq_base rope_freq_scale yarn_ext_factor yarn_attn_factor yarn_beta_slow yarn_beta_fast yarn_orig_ctx group_attention_n group_attention_w grammar_id json_schema projector_offload projector_device image_min_tokens image_max_tokens multimodal_batch_max_tokens lora_adapters control_vectors http_threads request_timeout_seconds sse_ping_interval_seconds verbosity warmup metrics perf check_tensors runtime_options""".split()
-REVISION = "three-models-v1-" + digest(MANIFESTS)[:12]
+REVISION = "three-models-v1-" + digest({"manifests": MANIFESTS, "writable": WRITABLE})[:12]
 
 
 def model_check(model):
@@ -58,7 +58,7 @@ def writable_for(model):
     for key in ("context_tokens", "context_per_slot"):
         t, lo, _, flag = result[key]
         result[key] = (t, lo, maximum, flag)
-    result["draft_tokens"] = ("integer", 1, {MODEL: 5, "muse-glimmer": 15, "qwen3.8-flash-next": 2}[model], "--spec-draft-n-max")
+    result["draft_tokens"] = ("integer", 1, {MODEL: WRITABLE["draft_tokens"][2], "muse-glimmer": 15, "qwen3.8-flash-next": 2}[model], "--spec-draft-n-max")
     if model == "muse-glimmer":
         result["batch_size"] = ("integer", 128, 4096, "--batch-size")
     if model == "qwen3.8-flash-next":

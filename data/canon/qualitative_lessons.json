@@ -2432,6 +2432,34 @@
           "The fastest single run, the CANON representative row, or a +4.82% pooled mean proves a stable long-prompt speedup."
         ]
       }
+    },
+    {
+      "id": "lesson_017",
+      "title": "Verify allocated devices before inference",
+      "takeaway": "GPU visibility does not prove scheduler ownership. Resolve allocated device IDs to physical UUIDs before loading a model; remapped device indices and matching GPU counts can select the wrong device.",
+      "config_ids": [
+        "cfg_e346ca350393a0a5",
+        "cfg_55f2031ef921ec3a"
+      ],
+      "observed_support": [
+        {
+          "path": "experiments/wright-byteshape-industrial-20261107.json",
+          "locator": "#/admission; A1/C1 effective_launch.gpu_ids",
+          "values": {
+            "unallocated_gpu_visible": true,
+            "rejected_preflight_model_loads": 0,
+            "rejected_preflight_generations": 0,
+            "slurm_step_gpu": "2",
+            "cuda_local_index": "0",
+            "physical_gpu_minor": 2
+          }
+        }
+      ],
+      "scope": "Scheduler-managed GPU inference; observed Wright device remapping and extra NVML-visible device.",
+      "source_limitations": [
+        "Admission evidence, not a throughput improvement; no inference was run on the rejected device."
+      ],
+      "parent_review": "Accepted after checking live Slurm GRES mapping, physical device metadata and successful allocated-device runs."
     }
   ]
 }
