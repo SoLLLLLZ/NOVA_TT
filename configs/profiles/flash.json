@@ -12,7 +12,10 @@
     {
       "label": "Flash Next MTP2 three L40s",
       "source_config_ids": [
-        "cfg_22bd103c1aadb59c"
+        "cfg_22bd103c1aadb59c",
+        "cfg_11d1391160bbf856",
+        "cfg_7926c529c771d408",
+        "cfg_2f04f93f9d365d16"
       ],
       "config": {
         "model": "qwen3.8-flash-next",
@@ -104,6 +107,148 @@
         },
         "unresolved_fields": [],
         "profile_id": "profile_8013d5f78b03b89776d94c48"
+      }
+    },
+    {
+      "label": "Industrial Revolution flash A5: draft2, temperature 0.5, batch 2048/1024",
+      "source_config_ids": [
+        "cfg_a29eda3be71d4808"
+      ],
+      "config": {
+        "model": "qwen3.8-flash-next",
+        "artifact_id": "flash-udq4-44481862",
+        "quant": "UD-Q4_K_XL",
+        "engine": "llama.cpp",
+        "runtime_id": "llama-l40-b10820",
+        "settings": {
+          "context_tokens": 131072,
+          "context_per_slot": 131072,
+          "parallel_slots_per_process": 1,
+          "replicas": 1,
+          "batch_size": 2048,
+          "microbatch_size": 1024,
+          "threads_decode": 8,
+          "threads_prefill": 12,
+          "draft_tokens": 2,
+          "draft_gpu_layers": 99,
+          "prompt_cache_ram_mib": 4096,
+          "kv_type_k": "f16",
+          "kv_type_v": "f16",
+          "flash_attention": "on",
+          "fit": "on",
+          "speculative_mode": "draft-mtp",
+          "draft_kv_k": "f16",
+          "draft_kv_v": "f16",
+          "split_mode": "layer",
+          "reasoning_effort": "medium",
+          "temperature": 0.5,
+          "top_p": 0.95,
+          "min_p": 0.0,
+          "top_k": 20,
+          "draft_device": [
+            "CUDA2"
+          ],
+          "fit_target_mib": [
+            1024,
+            1024,
+            4096
+          ],
+          "backend_sampling": true,
+          "force_mmq_runtime": true,
+          "load_mode": "none",
+          "lazy_mode": "on",
+          "draft_probability_min": 0.5,
+          "draft_model": "flash-draft-5ff54097",
+          "repeat_penalty": 1.0,
+          "presence_penalty": 0.0,
+          "jinja": true,
+          "reasoning_format": "deepseek",
+          "reasoning_preserve": true,
+          "mps": false,
+          "tensor_split": [],
+          "chat_template_id": "qwen3.8-flash-next-embedded",
+          "chat_template_kwargs": {
+            "enable_thinking": true,
+            "reasoning_effort": "medium"
+          },
+          "vision_projector": "flash-projector-1f7b7f0b",
+          "gpu_layers": "auto",
+          "main_gpu": 0,
+          "tensor_overrides": []
+        },
+        "unresolved_fields": [],
+        "profile_id": "profile_53ef18616a3237778d60ef95"
+      }
+    },
+    {
+      "label": "Industrial Revolution flash C5: draft2, temperature 1.0, batch 2048/256",
+      "source_config_ids": [
+        "cfg_546018f984a4c8ff"
+      ],
+      "config": {
+        "model": "qwen3.8-flash-next",
+        "artifact_id": "flash-udq4-44481862",
+        "quant": "UD-Q4_K_XL",
+        "engine": "llama.cpp",
+        "runtime_id": "llama-l40-b10820",
+        "settings": {
+          "context_tokens": 131072,
+          "context_per_slot": 131072,
+          "parallel_slots_per_process": 1,
+          "replicas": 1,
+          "batch_size": 2048,
+          "microbatch_size": 256,
+          "threads_decode": 8,
+          "threads_prefill": 12,
+          "draft_tokens": 2,
+          "draft_gpu_layers": 99,
+          "prompt_cache_ram_mib": 4096,
+          "kv_type_k": "f16",
+          "kv_type_v": "f16",
+          "flash_attention": "on",
+          "fit": "on",
+          "speculative_mode": "draft-mtp",
+          "draft_kv_k": "f16",
+          "draft_kv_v": "f16",
+          "split_mode": "layer",
+          "reasoning_effort": "medium",
+          "temperature": 1.0,
+          "top_p": 0.95,
+          "min_p": 0.0,
+          "top_k": 20,
+          "draft_device": [
+            "CUDA2"
+          ],
+          "fit_target_mib": [
+            1024,
+            1024,
+            4096
+          ],
+          "backend_sampling": true,
+          "force_mmq_runtime": true,
+          "load_mode": "none",
+          "lazy_mode": "on",
+          "draft_probability_min": 0.5,
+          "draft_model": "flash-draft-5ff54097",
+          "repeat_penalty": 1.0,
+          "presence_penalty": 0.0,
+          "jinja": true,
+          "reasoning_format": "deepseek",
+          "reasoning_preserve": true,
+          "mps": false,
+          "tensor_split": [],
+          "chat_template_id": "qwen3.8-flash-next-embedded",
+          "chat_template_kwargs": {
+            "enable_thinking": true,
+            "reasoning_effort": "medium"
+          },
+          "vision_projector": "flash-projector-1f7b7f0b",
+          "gpu_layers": "auto",
+          "main_gpu": 0,
+          "tensor_overrides": []
+        },
+        "unresolved_fields": [],
+        "profile_id": "profile_6b0f566776beab535b51ddec"
       }
     }
   ],

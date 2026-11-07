@@ -1,0 +1,246 @@
+{
+  "date": "2026-11-07",
+  "scope": "Live Astra selection only; no GPU deployment or new inference benchmark in this audit. Production Optimize still applies and verifies each selected profile.",
+  "openrouter_model": "openai/gpt-6-astra",
+  "reasoning_effort": "high",
+  "web_search_enabled": false,
+  "recent_observations_by_model": {
+    "qwen3.8-27b": 15,
+    "muse-glimmer": 20,
+    "qwen3.8-flash-next": 15
+  },
+  "new_registered_candidates": 6,
+  "backend_tests_passed": 74,
+  "commands": {
+    "google_doc": "https://docs.google.com/document/d/1xQQXhorkL4drHkqtOYHXWrzy1S2fI5zRfhqcTU6Lprw",
+    "corrected_launcher": "./scripts/cmutuneit run MODEL --verbose",
+    "corrected_app": "frontend/release/CMUTuneIt.app",
+    "model_picker_label": "Qwen3.8 27B",
+    "cli_help_checks": "passed",
+    "trusted_host_file_exists": true,
+    "ssh_master_check": "passed",
+    "squeue_read_only_check": "passed; no jobs at audit time",
+    "no_baseline_rerun": true
+  },
+  "sha256": {
+    "data/canon/CANON.csv": "92f48e846e7252f3e39f2714451fd8024ca36e11ae8c3724b551c7da96fb09fe",
+    "backend/prompts/OPTIMIZER_AGENT.md": "910cedac6718d9867814267b1fc6f9b861f94e47744b6802db9ecfdf969a9895",
+    "backend/src/nova_backend/agent.py": "b0c7be85400aa1ca48af46d753eeada6a543d68610d18523adc373bce2694c3e",
+    "configs/profiles/byteshape.json": "3a2708ea5f1b62827b14cb12b14039932913cb5accfd1d47001b1d11dbcd2bca",
+    "configs/profiles/glimmer.json": "fa5ddb05847069168ab29efe42abce57b949993ffd46e94e0da69904e51cae51",
+    "configs/profiles/flash.json": "9a1324600fa8f9c9662c1680f44f2204671b754d917d8cef96dda7210bbc293d"
+  },
+  "selections": [
+    {
+      "model": "qwen3.8-27b",
+      "status": "selected",
+      "profile_id": "profile_9c5ee8366f7b3ed0f9486ba3",
+      "settings": {
+        "context_tokens": 65536,
+        "context_per_slot": 65536,
+        "parallel_slots_per_process": 1,
+        "replicas": 1,
+        "gpu_layers": 99,
+        "main_gpu": 0,
+        "split_mode": "none",
+        "tensor_split": [],
+        "tensor_overrides": [
+          {
+            "pattern": "token_embd.weight",
+            "buffer": "CUDA0"
+          }
+        ],
+        "batch_size": 2048,
+        "microbatch_size": 512,
+        "threads_decode": 2,
+        "threads_prefill": 6,
+        "kv_type_k": "q8_0",
+        "kv_type_v": "q8_0",
+        "flash_attention": "on",
+        "fit": "off",
+        "speculative_mode": "draft-mtp",
+        "draft_model": null,
+        "draft_device": [
+          "CUDA0"
+        ],
+        "draft_gpu_layers": 99,
+        "draft_tokens": 3,
+        "draft_kv_k": "q8_0",
+        "draft_kv_v": "q8_0",
+        "backend_sampling": true,
+        "mps": false,
+        "prompt_cache_ram_mib": 1024,
+        "checkpoint_min_step": 512,
+        "temperature": 0.75,
+        "top_k": 20,
+        "top_p": 0.95,
+        "min_p": 0.0,
+        "reasoning_effort": "medium",
+        "repeat_penalty": 1.0,
+        "presence_penalty": 0.0,
+        "jinja": true,
+        "reasoning_format": "deepseek",
+        "chat_template_id": "byteshape-embedded",
+        "chat_template_kwargs": {
+          "enable_thinking": true,
+          "reasoning_effort": "medium"
+        },
+        "vision_projector": null
+      },
+      "source_config_ids": [
+        "cfg_8f6054cbe8f82879"
+      ],
+      "reason": "Select complete registered cfg_8f6054cbe8f82879 (Industrial Revolution A2) for short-prompt, single-request decode on one L40; assume one slot and preserve its 65,536-token context and IQ3_S hybrid 3.23bpw quantization. Matching essay evidence favors MTP3/temperature 0.75: historical decode 77.103 t/s and prefill 64.279 t/s versus MTP5 control decode 69.566 t/s. This is one uncached, natural-EOS observation (21 input/812 output tokens including reasoning), not a live measurement or broad quality certification; older fixed-512 rates are not comparable. Reuse the profile unchanged: batch/microbatch 2048/512, decode/prefill threads 2/6, target/draft K/V q8_0, top_k 20, top_p 0.95, min_p 0, medium reasoning, llama-l40-b10820. Conservative fallback, only if required, is profile_e3ff607f68dd7ceaa58d8deb (cfg_aee1c8396d18230b). Backend must resolve an owned Slurm allocation/device mask, verify staged assets and effective GPU placement, retain at least 1,024 MiB free GPU memory with no CPU offload, and pass the naturally completed arithmetic check plus capped essay timing probe within the 180-second verify_only budget. No baseline or race; before/speedup remain null.",
+      "elapsed_seconds": 6.581,
+      "openrouter_model": "openai/gpt-6-astra",
+      "effective_service_tier": "priority",
+      "selection_only": true,
+      "inference_started": false
+    },
+    {
+      "model": "muse-glimmer",
+      "status": "selected",
+      "profile_id": "profile_f1bf4643bf92723882b9309a",
+      "settings": {
+        "context_tokens": 262144,
+        "context_per_slot": 262144,
+        "parallel_slots_per_process": 1,
+        "replicas": 1,
+        "batch_size": 4096,
+        "microbatch_size": 512,
+        "threads_decode": 8,
+        "threads_prefill": 12,
+        "draft_tokens": 15,
+        "draft_gpu_layers": 99,
+        "prompt_cache_ram_mib": 4096,
+        "kv_type_k": "f16",
+        "kv_type_v": "f16",
+        "flash_attention": "on",
+        "fit": "off",
+        "speculative_mode": "draft-dflash",
+        "draft_kv_k": "f16",
+        "draft_kv_v": "f16",
+        "split_mode": "none",
+        "reasoning_effort": "high",
+        "temperature": 0.25,
+        "top_p": 0.95,
+        "min_p": 0.0,
+        "top_k": 64,
+        "draft_device": [
+          "CUDA0"
+        ],
+        "draft_model": "glimmer-draft-27d9a805",
+        "repeat_penalty": 1.0,
+        "presence_penalty": 0.0,
+        "jinja": true,
+        "reasoning_format": "deepseek",
+        "reasoning_preserve": true,
+        "mps": false,
+        "tensor_split": [],
+        "chat_template_id": "muse-glimmer-embedded",
+        "chat_template_kwargs": {
+          "reasoning_strength": "high"
+        },
+        "vision_projector": null,
+        "gpu_layers": 99,
+        "main_gpu": 0,
+        "backend_sampling": false,
+        "tensor_overrides": [
+          {
+            "pattern": "token_embd.weight",
+            "buffer": "CUDA0"
+          }
+        ],
+        "draft_tensor_overrides": [
+          {
+            "pattern": "token_embd.weight",
+            "buffer": "CUDA0"
+          }
+        ],
+        "context_override": {
+          "muse-glimmer.context_length": 262144,
+          "dflash.context_length": 262144
+        }
+      },
+      "source_config_ids": [
+        "cfg_e53e9357cdad567e"
+      ],
+      "reason": "Select complete registered B3 (source cfg_e53e9357cdad567e) for single-request short-essay decode on one L40. Its matching Industrial Revolution observation achieved 59.339 decode t/s and 90.957 prefill t/s, versus D3's 54.090 and A3's 53.571 decode t/s; older ledger rates are not essay predictions. Evidence is provisional: one uncached 67-input/730-output-token observation, natural EOS, reasoning included, without a factual-quality pass. Sampling changes are authorized; retain tested temperature 0.25 rather than synthesizing settings or applying lesson_019 despite measured higher-temperature cost. Preserve UD-Q4_K_XL, 262144 context, one slot/replica, DFlash15, batch/microbatch 4096/512, decode/prefill threads 8/12, top_p 0.95, top_k 64, min_p 0, high reasoning and f16 target/draft KV. Use the matching registered patched runtime without overrides. Conservative fallback if validation fails: profile_b0992299198b4bf335d64412 (cfg_91cf36411e6d4895), pending failure-specific suitability. Backend must verify Slurm ownership/device mask, staged assets, full GPU placement and at least 1024 MiB free memory, then apply and validate a naturally completed correct arithmetic final answer and separate capped essay timings within the 180-second deadline. No baseline or race; before/speedup remain null.",
+      "elapsed_seconds": 7.185,
+      "openrouter_model": "openai/gpt-6-astra",
+      "effective_service_tier": "priority",
+      "selection_only": true,
+      "inference_started": false
+    },
+    {
+      "model": "qwen3.8-flash-next",
+      "status": "selected",
+      "profile_id": "profile_53ef18616a3237778d60ef95",
+      "settings": {
+        "context_tokens": 131072,
+        "context_per_slot": 131072,
+        "parallel_slots_per_process": 1,
+        "replicas": 1,
+        "batch_size": 2048,
+        "microbatch_size": 1024,
+        "threads_decode": 8,
+        "threads_prefill": 12,
+        "draft_tokens": 2,
+        "draft_gpu_layers": 99,
+        "prompt_cache_ram_mib": 4096,
+        "kv_type_k": "f16",
+        "kv_type_v": "f16",
+        "flash_attention": "on",
+        "fit": "on",
+        "speculative_mode": "draft-mtp",
+        "draft_kv_k": "f16",
+        "draft_kv_v": "f16",
+        "split_mode": "layer",
+        "reasoning_effort": "medium",
+        "temperature": 0.5,
+        "top_p": 0.95,
+        "min_p": 0.0,
+        "top_k": 20,
+        "draft_device": [
+          "CUDA2"
+        ],
+        "fit_target_mib": [
+          1024,
+          1024,
+          4096
+        ],
+        "backend_sampling": true,
+        "force_mmq_runtime": true,
+        "load_mode": "none",
+        "lazy_mode": "on",
+        "draft_probability_min": 0.5,
+        "draft_model": "flash-draft-5ff54097",
+        "repeat_penalty": 1.0,
+        "presence_penalty": 0.0,
+        "jinja": true,
+        "reasoning_format": "deepseek",
+        "reasoning_preserve": true,
+        "mps": false,
+        "tensor_split": [],
+        "chat_template_id": "qwen3.8-flash-next-embedded",
+        "chat_template_kwargs": {
+          "enable_thinking": true,
+          "reasoning_effort": "medium"
+        },
+        "vision_projector": "flash-projector-1f7b7f0b",
+        "gpu_layers": "auto",
+        "main_gpu": 0,
+        "tensor_overrides": []
+      },
+      "source_config_ids": [
+        "cfg_a29eda3be71d4808"
+      ],
+      "reason": "Select the complete registered A5 profile from cfg_a29eda3be71d4808 for the requested fastest short-prompt, single-request decode objective. It matches Flash Next UD-Q4_K_XL on three same-node L40s and the actual Industrial Revolution essay workload: historical uncached decode 73.844 t/s, prefill 10.574 t/s, 21 input and 912 generated tokens including reasoning, natural EOS. This is provisional single-observation evidence, not a proven repeatable improvement over the established temperature-1 profile (~72.6 t/s); C5 has better prefill but lower observed decode. Sampling changes are authorized: use A5 intact, temperature 0.5, MTP2, batch/microbatch 2048/1024, decode/prefill threads 8/12, target and draft f16 KV, 131072 context, one slot, draft on allocation-local CUDA2, fit reserves [1024,1024,4096] MiB. Do not mix settings or change quantization, context, GPU count, power or CPU offload. Conservative fallback is profile_e2faa2ae2dc646404a56a088 with established MTP2/temperature 1. Backend must resolve an active owned Slurm allocation and physical device mask, verify staged assets/runtime and per-GPU headroom, apply and validate within the 180-second total deadline. Require a correct naturally completed arithmetic answer, an uncached capped essay timing probe and a healthy retained service; verify_only, with before/speedup null and no Ollama comparison.",
+      "elapsed_seconds": 11.545,
+      "openrouter_model": "openai/gpt-6-astra",
+      "effective_service_tier": "priority",
+      "selection_only": true,
+      "inference_started": false
+    }
+  ]
+}

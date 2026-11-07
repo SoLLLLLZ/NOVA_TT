@@ -86,7 +86,11 @@
     {
       "label": "Glimmer DFlash15 temperature 0.75",
       "source_config_ids": [
-        "cfg_0956f7625217646c"
+        "cfg_0956f7625217646c",
+        "cfg_8c190a298808f87f",
+        "cfg_a2026ce2bb3d31ca",
+        "cfg_5b27c278f7199380",
+        "cfg_e3146a75b0d9f04f"
       ],
       "config": {
         "model": "muse-glimmer",
@@ -183,6 +187,234 @@
         },
         "unresolved_fields": [],
         "profile_id": "profile_f19b07b669d7f961a5b49f09"
+      }
+    },
+    {
+      "label": "Industrial Revolution glimmer A3: draft7, temperature 0.75, batch 4096/512",
+      "source_config_ids": [
+        "cfg_46c0b83d9e9b50be"
+      ],
+      "config": {
+        "model": "muse-glimmer",
+        "artifact_id": "glimmer-udq4-82bece30",
+        "quant": "UD-Q4_K_XL",
+        "engine": "llama.cpp",
+        "runtime_id": "glimmer-patched-l40-b10820",
+        "settings": {
+          "context_tokens": 262144,
+          "context_per_slot": 262144,
+          "parallel_slots_per_process": 1,
+          "replicas": 1,
+          "batch_size": 4096,
+          "microbatch_size": 512,
+          "threads_decode": 8,
+          "threads_prefill": 12,
+          "draft_tokens": 7,
+          "draft_gpu_layers": 99,
+          "prompt_cache_ram_mib": 4096,
+          "kv_type_k": "f16",
+          "kv_type_v": "f16",
+          "flash_attention": "on",
+          "fit": "off",
+          "speculative_mode": "draft-dflash",
+          "draft_kv_k": "f16",
+          "draft_kv_v": "f16",
+          "split_mode": "none",
+          "reasoning_effort": "high",
+          "temperature": 0.75,
+          "top_p": 0.95,
+          "min_p": 0.0,
+          "top_k": 64,
+          "draft_device": [
+            "CUDA0"
+          ],
+          "draft_model": "glimmer-draft-27d9a805",
+          "repeat_penalty": 1.0,
+          "presence_penalty": 0.0,
+          "jinja": true,
+          "reasoning_format": "deepseek",
+          "reasoning_preserve": true,
+          "mps": false,
+          "tensor_split": [],
+          "chat_template_id": "muse-glimmer-embedded",
+          "chat_template_kwargs": {
+            "reasoning_strength": "high"
+          },
+          "vision_projector": null,
+          "gpu_layers": 99,
+          "main_gpu": 0,
+          "backend_sampling": false,
+          "tensor_overrides": [
+            {
+              "pattern": "token_embd.weight",
+              "buffer": "CUDA0"
+            }
+          ],
+          "draft_tensor_overrides": [
+            {
+              "pattern": "token_embd.weight",
+              "buffer": "CUDA0"
+            }
+          ],
+          "context_override": {
+            "muse-glimmer.context_length": 262144,
+            "dflash.context_length": 262144
+          }
+        },
+        "unresolved_fields": [],
+        "profile_id": "profile_a70a978aec2027a055230452"
+      }
+    },
+    {
+      "label": "Industrial Revolution glimmer D3: draft15, temperature 0.75, batch 1024/512",
+      "source_config_ids": [
+        "cfg_744a5d0206dc1fd9"
+      ],
+      "config": {
+        "model": "muse-glimmer",
+        "artifact_id": "glimmer-udq4-82bece30",
+        "quant": "UD-Q4_K_XL",
+        "engine": "llama.cpp",
+        "runtime_id": "glimmer-patched-l40-b10820",
+        "settings": {
+          "context_tokens": 262144,
+          "context_per_slot": 262144,
+          "parallel_slots_per_process": 1,
+          "replicas": 1,
+          "batch_size": 1024,
+          "microbatch_size": 512,
+          "threads_decode": 8,
+          "threads_prefill": 12,
+          "draft_tokens": 15,
+          "draft_gpu_layers": 99,
+          "prompt_cache_ram_mib": 4096,
+          "kv_type_k": "f16",
+          "kv_type_v": "f16",
+          "flash_attention": "on",
+          "fit": "off",
+          "speculative_mode": "draft-dflash",
+          "draft_kv_k": "f16",
+          "draft_kv_v": "f16",
+          "split_mode": "none",
+          "reasoning_effort": "high",
+          "temperature": 0.75,
+          "top_p": 0.95,
+          "min_p": 0.0,
+          "top_k": 64,
+          "draft_device": [
+            "CUDA0"
+          ],
+          "draft_model": "glimmer-draft-27d9a805",
+          "repeat_penalty": 1.0,
+          "presence_penalty": 0.0,
+          "jinja": true,
+          "reasoning_format": "deepseek",
+          "reasoning_preserve": true,
+          "mps": false,
+          "tensor_split": [],
+          "chat_template_id": "muse-glimmer-embedded",
+          "chat_template_kwargs": {
+            "reasoning_strength": "high"
+          },
+          "vision_projector": null,
+          "gpu_layers": 99,
+          "main_gpu": 0,
+          "backend_sampling": false,
+          "tensor_overrides": [
+            {
+              "pattern": "token_embd.weight",
+              "buffer": "CUDA0"
+            }
+          ],
+          "draft_tensor_overrides": [
+            {
+              "pattern": "token_embd.weight",
+              "buffer": "CUDA0"
+            }
+          ],
+          "context_override": {
+            "muse-glimmer.context_length": 262144,
+            "dflash.context_length": 262144
+          }
+        },
+        "unresolved_fields": [],
+        "profile_id": "profile_ef3a723a22d91a59153f5d1e"
+      }
+    },
+    {
+      "label": "Industrial Revolution glimmer B3: draft15, temperature 0.25, batch 4096/512",
+      "source_config_ids": [
+        "cfg_e53e9357cdad567e"
+      ],
+      "config": {
+        "model": "muse-glimmer",
+        "artifact_id": "glimmer-udq4-82bece30",
+        "quant": "UD-Q4_K_XL",
+        "engine": "llama.cpp",
+        "runtime_id": "glimmer-patched-l40-b10820",
+        "settings": {
+          "context_tokens": 262144,
+          "context_per_slot": 262144,
+          "parallel_slots_per_process": 1,
+          "replicas": 1,
+          "batch_size": 4096,
+          "microbatch_size": 512,
+          "threads_decode": 8,
+          "threads_prefill": 12,
+          "draft_tokens": 15,
+          "draft_gpu_layers": 99,
+          "prompt_cache_ram_mib": 4096,
+          "kv_type_k": "f16",
+          "kv_type_v": "f16",
+          "flash_attention": "on",
+          "fit": "off",
+          "speculative_mode": "draft-dflash",
+          "draft_kv_k": "f16",
+          "draft_kv_v": "f16",
+          "split_mode": "none",
+          "reasoning_effort": "high",
+          "temperature": 0.25,
+          "top_p": 0.95,
+          "min_p": 0.0,
+          "top_k": 64,
+          "draft_device": [
+            "CUDA0"
+          ],
+          "draft_model": "glimmer-draft-27d9a805",
+          "repeat_penalty": 1.0,
+          "presence_penalty": 0.0,
+          "jinja": true,
+          "reasoning_format": "deepseek",
+          "reasoning_preserve": true,
+          "mps": false,
+          "tensor_split": [],
+          "chat_template_id": "muse-glimmer-embedded",
+          "chat_template_kwargs": {
+            "reasoning_strength": "high"
+          },
+          "vision_projector": null,
+          "gpu_layers": 99,
+          "main_gpu": 0,
+          "backend_sampling": false,
+          "tensor_overrides": [
+            {
+              "pattern": "token_embd.weight",
+              "buffer": "CUDA0"
+            }
+          ],
+          "draft_tensor_overrides": [
+            {
+              "pattern": "token_embd.weight",
+              "buffer": "CUDA0"
+            }
+          ],
+          "context_override": {
+            "muse-glimmer.context_length": 262144,
+            "dflash.context_length": 262144
+          }
+        },
+        "unresolved_fields": [],
+        "profile_id": "profile_f1bf4643bf92723882b9309a"
       }
     }
   ],

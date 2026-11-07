@@ -75,7 +75,7 @@ In Terminal A, press Control+C once. Wait for:
 Ollama stopped. Owned Slurm allocation released.
 ```
 
-Open CMUTuneIt with Option+Space. Select Wright / L40 / ByteShape Qwen3.8 27B, then click PITSTOP · OPTIMIZE. Wait for SETUP OPTIMIZED. Scroll the Model settings panel to show the 20 key applied settings. Arrows identify changed values; other rows show their current value. CMUTuneIt calls Astra through OpenRouter and verifies the selected configuration. This does not launch Ollama.
+Open CMUTuneIt with Option+Space. Select Wright / L40 / Qwen3.8 27B, then click PITSTOP · OPTIMIZE. Wait for SETUP OPTIMIZED. Scroll the Model settings panel to show the 20 key applied settings. Arrows identify changed values; other rows show their current value. CMUTuneIt calls Astra through OpenRouter and verifies the selected configuration. This does not launch Ollama.
 
 ## 4. Terminal B: select the optimized model and run the prompt
 
@@ -138,6 +138,6 @@ After selecting and optimizing Flash Next in CMUTuneIt:
 
 ## Reading the numbers
 
-Decode is generation speed; prefill is prompt-processing speed. Compare the two final decode lines. The last ByteShape rehearsal measured 27.14 tokens/s for Ollama and 70.10 tokens/s for the optimized profile (2.58×). These are recorded results, not promised live rates. Settings, contexts, prompt tokenization and answer lengths differ, so this is a whole-configuration demo rather than an isolated MTP comparison. Source: docs/demo/widget-integration-validation-20261107.json.
+Decode is generation speed; prefill is prompt-processing speed. Compare the two final decode lines. An earlier ByteShape rehearsal measured 27.14 tokens/s for Ollama and 70.10 tokens/s for the optimized profile (2.58×). These are recorded results, not promised live rates. Settings, contexts, prompt tokenization and answer lengths differ, so this is a whole-configuration demo rather than an isolated MTP comparison. Source: docs/demo/widget-integration-validation-20261107.json.
 
 Private raw receipts are under var/ollama-demo/ and var/terminal/. They are excluded from Git. No API key needs to be copied into these commands.

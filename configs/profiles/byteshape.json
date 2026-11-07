@@ -70,7 +70,10 @@
     {
       "label": "ByteShape MTP5 temperature 0.75",
       "source_config_ids": [
-        "cfg_549fe546f2fd44a6"
+        "cfg_549fe546f2fd44a6",
+        "cfg_e346ca350393a0a5",
+        "cfg_01ac12052180d678",
+        "cfg_55f2031ef921ec3a"
       ],
       "config": {
         "model": "qwen3.8-27b",
@@ -158,6 +161,73 @@
         },
         "unresolved_fields": [],
         "profile_id": "profile_e5cfd82624a3408021949617"
+      }
+    },
+    {
+      "label": "Industrial Revolution byteshape A2: draft3, temperature 0.75, batch 2048/512",
+      "source_config_ids": [
+        "cfg_8f6054cbe8f82879"
+      ],
+      "config": {
+        "model": "qwen3.8-27b",
+        "artifact_id": "byteshape-iq3s-40171062",
+        "quant": "IQ3_S hybrid 3.23bpw",
+        "engine": "llama.cpp",
+        "runtime_id": "llama-l40-b10820",
+        "settings": {
+          "context_tokens": 65536,
+          "context_per_slot": 65536,
+          "parallel_slots_per_process": 1,
+          "replicas": 1,
+          "gpu_layers": 99,
+          "main_gpu": 0,
+          "split_mode": "none",
+          "tensor_split": [],
+          "tensor_overrides": [
+            {
+              "pattern": "token_embd.weight",
+              "buffer": "CUDA0"
+            }
+          ],
+          "batch_size": 2048,
+          "microbatch_size": 512,
+          "threads_decode": 2,
+          "threads_prefill": 6,
+          "kv_type_k": "q8_0",
+          "kv_type_v": "q8_0",
+          "flash_attention": "on",
+          "fit": "off",
+          "speculative_mode": "draft-mtp",
+          "draft_model": null,
+          "draft_device": [
+            "CUDA0"
+          ],
+          "draft_gpu_layers": 99,
+          "draft_tokens": 3,
+          "draft_kv_k": "q8_0",
+          "draft_kv_v": "q8_0",
+          "backend_sampling": true,
+          "mps": false,
+          "prompt_cache_ram_mib": 1024,
+          "checkpoint_min_step": 512,
+          "temperature": 0.75,
+          "top_k": 20,
+          "top_p": 0.95,
+          "min_p": 0.0,
+          "reasoning_effort": "medium",
+          "repeat_penalty": 1.0,
+          "presence_penalty": 0.0,
+          "jinja": true,
+          "reasoning_format": "deepseek",
+          "chat_template_id": "byteshape-embedded",
+          "chat_template_kwargs": {
+            "enable_thinking": true,
+            "reasoning_effort": "medium"
+          },
+          "vision_projector": null
+        },
+        "unresolved_fields": [],
+        "profile_id": "profile_9c5ee8366f7b3ed0f9486ba3"
       }
     }
   ],

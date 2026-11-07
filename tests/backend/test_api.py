@@ -52,7 +52,7 @@ def test_auth_and_contract(client):
 def test_optimized_candidate_and_replay(client):
     result = optimize(client)
     assert result["type"] == "done", result
-    assert result["config"]["settings"]["draft_tokens"] == 5
+    assert result["config"]["settings"]["draft_tokens"] == 3
     assert result["config"]["settings"]["temperature"] == 0.75
     assert result["validation"]["status"] == "passed"
     assert result["before"] is None and result["speedup"] is None
