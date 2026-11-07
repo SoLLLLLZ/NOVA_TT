@@ -2,7 +2,7 @@ from __future__ import annotations
 import asyncio, copy, time
 from datetime import datetime, timezone
 from .common import Problem, digest, now, uid
-from .catalog import BASELINE, PROFILES, evidence, model_check, profile, resolve
+from .catalog import profiles_for, evidence, model_check, profile, resolve
 from .schemas import Optimize, Race, Revert, Benchmark, Generate
 from .store import TERMINAL
 from .live import LiveFeed
@@ -108,17 +108,21 @@ class Engine:
             )
         if hasattr(req, "model"):
             model_check(req.model)
+        if isinstance(req, Race) or (isinstance(req, Optimize) and req.mode != "verify_only"):
+            raise Problem("unsupported_setting", "Ollama baselines and races are standalone demo tests, not production tool operations. Use Optimize verify_only.", 409)
         if isinstance(req, Optimize):
+            if self.driver.session and self.driver.session.get("model", "qwen3.8-27b") != req.model:
+                raise Problem("allocation_unavailable", "Revert the retained model to unloaded before selecting another model.", 409)
             if req.baseline_run_id:
                 raise Problem(
                     "unsupported_setting",
-                    "Baseline reuse is not enabled; omit baseline_run_id to measure a fresh baseline.",
+                    "Ollama comparisons are standalone tests; baseline_run_id is not accepted by Optimize.",
                 )
             # Validate explicit overrides before sending any work to Wright.
             candidates = (
                 [self.lookup_profile(req.profile_id)]
                 if req.profile_id
-                else [p["config"] for p in PROFILES[:2]]
+                else [p["config"] for p in profiles_for(req.model)]
             )
             failures = []
             for candidate in candidates:
@@ -129,34 +133,6 @@ class Engine:
                     failures.append(error)
             else:
                 raise failures[0]
-        if isinstance(req, Race):
-            if not self.current or self.current["profile_id"] not in self.verified:
-                raise Problem(
-                    "validation_failed",
-                    "Optimize and verify ByteShape before racing.",
-                    409,
-                )
-            if (
-                req.tuned_profile_id
-                and req.tuned_profile_id != self.current["profile_id"]
-            ):
-                raise Problem(
-                    "constraint_violation",
-                    "Race must use the currently verified profile.",
-                )
-            if req.mode == "simultaneous" and (
-                not self.driver.session or self.driver.session["gpu_count"] < 2
-            ):
-                raise Problem(
-                    "allocation_unavailable",
-                    "Simultaneous racing needs two preallocated L40s. Revert, then optimize with resources.gpu_count=2, or explicitly choose sequential.",
-                    409,
-                )
-            if req.seed is not None:
-                raise Problem(
-                    "unsupported_setting",
-                    "A seed override would alter untouched Ollama defaults; omit seed.",
-                )
         if isinstance(req, Revert):
             snapshot = self.store.prior(req.rollback_id)
             if snapshot["generation"] != self.generation:
@@ -166,7 +142,7 @@ class Engine:
                     409,
                 )
         if isinstance(req, Benchmark):
-            if not self.current or (
+            if not self.current or self.current["model"] != req.model or (
                 req.profile_id and req.profile_id != self.current["profile_id"]
             ):
                 raise Problem(
@@ -175,7 +151,7 @@ class Engine:
                     409,
                 )
         if isinstance(req, Generate):
-            if not self.live_ready or not self.current or self.current["profile_id"] not in self.verified or not self.driver.session:
+            if not self.live_ready or not self.current or self.current["model"] != req.model or self.current["profile_id"] not in self.verified or not self.driver.session:
                 raise Problem("not_found", "No optimized service is running for this model.", 404)
         budget = getattr(req, "budget", None)
         seconds = budget.deadline_seconds if budget else 180
@@ -210,25 +186,6 @@ class Engine:
             task.cancel()
         return "cancelling"
 
-    def race_resources(self, mode):
-        observation = getattr(self.driver, "observed", None) or {}
-        gpus = observation.get("gpus", [])
-        if self.driver.simulated and not gpus:
-            gpus = [
-                {"id": "MOCK-GPU-" + str(i), "node_id": "MOCK"}
-                for i in range(self.driver.session["gpu_count"])
-            ]
-        indices = {"default": 1 if mode == "simultaneous" else 0, "tuned": 0}
-        return {
-            lane: {
-                "gpu_ids": [gpus[i]["id"]],
-                "node_id": gpus[i]["node_id"],
-                "allocation_id": self.driver.session["job_id"],
-            }
-            for lane, i in indices.items()
-            if i < len(gpus)
-        }
-
     async def run(self, rid, req, deadline):
         prior = copy.deepcopy(self.current)
         prior_headroom = self.current_headroom
@@ -243,21 +200,11 @@ class Engine:
             started_at=snapshot["started_at"],
             deadline_at=snapshot["deadline_at"],
             simulation=self.driver.simulated,
-            **(
-                {
-                    "lanes": ["default", "tuned"],
-                    "lane_resources": self.race_resources(req.mode),
-                }
-                if isinstance(req, Race)
-                else {}
-            ),
         )
         try:
             async with asyncio.timeout(max(0.1, deadline - time.time())):
                 if isinstance(req, Optimize):
                     result = await self.optimize(rid, req, deadline)
-                elif isinstance(req, Race):
-                    result = await self.race(rid, req, deadline)
                 elif isinstance(req, Generate):
                     result = await self.generate(rid, req, deadline)
                 elif isinstance(req, Revert):
@@ -497,7 +444,7 @@ class Engine:
         c = resolve(req, selected, self.current)
         ev = evidence(c)
         self.patch(rid, latest_config=c, evidence=ev)
-        old = self.current or BASELINE
+        old = self.current or profiles_for(req.model)[0]["config"]
         changes = [
             {
                 "path": "settings." + k,
@@ -512,7 +459,7 @@ class Engine:
             rid, "config", phase="proposed", config=c, changes=changes, evidence=ev
         )
         self.step(rid, "allocate")
-        await self.driver.ensure(req.resources, deadline)
+        await self.driver.ensure(req.resources, deadline, model=req.model)
         if self.driver.session:
             self.patch(
                 rid,
@@ -522,28 +469,6 @@ class Engine:
                 },
             )
         before = None
-        before_validation = None
-        if req.mode == "sequential_compare":
-            self.step(rid, "test_configs")
-            await self.driver.stop("tuned", deadline)
-            await self.driver.load(
-                BASELINE,
-                deadline,
-                "default",
-                headroom=req.constraints.min_free_gpu_memory_mib,
-            )
-            before, before_validation = await self.measure(
-                rid, BASELINE, "throughput", req.workload, deadline, "default"
-            )
-            _, bv = await self.measure(
-                rid, BASELINE, "quality", "short", deadline, "default"
-            )
-            if bv["status"] != "passed":
-                raise Problem(
-                    "validation_failed",
-                    "Default baseline failed its completed-answer verification.",
-                )
-            await self.driver.stop("default", deadline)
         repairs = []
         for attempt in range(req.budget.max_repair_attempts + 1):
             try:
@@ -564,9 +489,12 @@ class Engine:
                         "Completed-answer or service checks failed: "
                         + ", ".join(validation["issues"]),
                     )
-                after, _ = await self.measure(
+                after, probe_validation = await self.measure(
                     rid, c, "throughput", req.workload, deadline
                 )
+                if not all(probe_validation[k] is True for k in (
+                    "service_healthy", "placement_matches", "context_matches", "memory_guard_pass")):
+                    raise Problem("validation_failed", "Throughput probe failed service or placement checks.")
                 break
             except Problem as error:
                 if (
@@ -610,8 +538,6 @@ class Engine:
                     fallback_profile_id=c["profile_id"] if record["fallback"] else None,
                 )
         comparison = self.comparison(before, after, req.mode)
-        if req.mode == "sequential_compare" and not comparison["available"]:
-            raise Problem("benchmark_failed", comparison["reason"])
         self.generation += 1
         rollback = self.store.snapshot(
             {
@@ -680,179 +606,6 @@ class Engine:
             "conditions_differ": DIFFERENCES,
         }
 
-    async def race(self, rid, req, deadline):
-        c = copy.deepcopy(self.current)
-        await self.driver.ensure(req.resources, deadline)
-        if self.driver.session:
-            self.patch(
-                rid,
-                execution={
-                    "deployment_id": self.driver.session.get("tag", "MOCK"),
-                    "allocation_id": self.driver.session["job_id"],
-                },
-            )
-        before = None
-        after = None
-        ms = {}
-        vs = {}
-        try:
-            if req.mode == "sequential":
-                await self.driver.stop("tuned", deadline)
-                await self.driver.load(
-                    BASELINE, deadline, "default", headroom=self.current_headroom
-                )
-                before, vs["default"] = await self.measure(
-                    rid,
-                    BASELINE,
-                    "throughput",
-                    "custom",
-                    deadline,
-                    "default",
-                    req.prompt,
-                    req.max_tokens,
-                    stream=True,
-                )
-                ms["default"] = before
-                self.emit(
-                    rid,
-                    "lane_done",
-                    lane="default",
-                    measurement=before,
-                    validation=vs["default"],
-                )
-                await self.driver.stop("default", deadline)
-                await self.driver.load(c, deadline, headroom=self.current_headroom)
-                after, vs["tuned"] = await self.measure(
-                    rid,
-                    c,
-                    "throughput",
-                    "custom",
-                    deadline,
-                    "tuned",
-                    req.prompt,
-                    req.max_tokens,
-                    stream=True,
-                )
-                ms["tuned"] = after
-                self.emit(
-                    rid,
-                    "lane_done",
-                    lane="tuned",
-                    measurement=after,
-                    validation=vs["tuned"],
-                )
-            else:
-                await self.driver.load(
-                    BASELINE,
-                    deadline,
-                    "default",
-                    gpu_index=1,
-                    headroom=self.current_headroom,
-                )
-                observation = await self.driver.inspect(deadline)
-                self.emit(
-                    rid,
-                    "step",
-                    name="test_configs",
-                    status="running",
-                    progress=None,
-                    detail=None,
-                    lane_resources={
-                        k: {"gpu_ids": [v["gpu_id"]]}
-                        for k, v in observation["services"].items()
-                    },
-                )
-                race_id = uid("race")
-                raw = await self.driver.rpc(
-                    "race",
-                    {
-                        "prompt": req.prompt,
-                        "max_tokens": req.max_tokens,
-                        "purpose": "throughput",
-                        "fixed_length": False,
-                        "measurement_id": race_id,
-                    },
-                    deadline,
-                    on_event=lambda e: self.emit(rid, "token", **e),
-                )
-                for lane, conf in [("default", BASELINE), ("tuned", c)]:
-                    if lane not in raw["lanes"]:
-                        continue
-                    m, v = self.record(
-                        rid,
-                        conf,
-                        raw["lanes"][lane],
-                        race_id + "-" + lane,
-                        "throughput",
-                        "custom",
-                        req.prompt,
-                    )
-                    ms[lane] = m
-                    vs[lane] = v
-                    self.emit(rid, "lane_done", lane=lane, measurement=m, validation=v)
-                if raw["errors"]:
-                    raise Problem(
-                        "benchmark_failed",
-                        "A race lane failed; completed lane measurements are retained.",
-                    )
-                before = ms["default"]
-                after = ms["tuned"]
-            for lane, validation in vs.items():
-                if not all(
-                    validation[k] is True
-                    for k in (
-                        "service_healthy",
-                        "placement_matches",
-                        "context_matches",
-                        "memory_guard_pass",
-                    )
-                ):
-                    raise Problem(
-                        "benchmark_failed",
-                        lane + " lane failed service or placement checks.",
-                    )
-            # Short check confirms service after temporary baseline switching; race text isn't a correctness test.
-            _, v = await self.measure(rid, c, "quality", "short", deadline)
-            if v["status"] != "passed":
-                raise Problem(
-                    "validation_failed", "Post-race service verification failed."
-                )
-            self.verified[c["profile_id"]] = v
-        except BaseException:
-            # Interrupt an active generation before any stop RPC can queue behind it.
-            try:
-                await self.driver.cancel()
-            except Exception:
-                pass
-            raise
-        else:
-            await self.driver.stop("default", deadline)
-        comparison = self.comparison(before, after, req.mode)
-        ratio = (
-            after["decode_tps"] / before["decode_tps"]
-            if comparison["available"]
-            else None
-        )
-        return {
-            "status": "success",
-            "mode": req.mode,
-            "measurements": ms,
-            "winner": None
-            if ratio is None
-            else "tuned"
-            if ratio > 1
-            else "default"
-            if ratio < 1
-            else "tie",
-            "speedup": ratio,
-            "comparison": comparison,
-            "cleanup": {
-                "status": "completed",
-                "retained_service_id": self.service()["id"],
-                "issues": [],
-            },
-        }
-
     async def revert(self, rid, req, deadline):
         snapshot = self.store.prior(req.rollback_id)
         prior = snapshot["prior"]
@@ -889,7 +642,7 @@ class Engine:
         }
 
     async def benchmark(self, rid, req, deadline):
-        await self.driver.ensure(req.resources, deadline)
+        await self.driver.ensure(req.resources, deadline, model=req.model)
         if self.driver.session:
             self.patch(
                 rid,

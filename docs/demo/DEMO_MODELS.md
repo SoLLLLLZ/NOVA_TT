@@ -310,7 +310,7 @@ Example ByteShape request (send `X-Pairing-Token` and an `Idempotency-Key`):
   "preset": "fastest",
   "objective": "decode",
   "workload": "short",
-  "mode": "sequential_compare",
+  "mode": "verify_only",
   "resources": {
     "target_id": "wright",
     "gpu_type": "L40",
@@ -331,19 +331,15 @@ Example ByteShape request (send `X-Pairing-Token` and an `Idempotency-Key`):
 
 For Glimmer use model `muse-glimmer` and quant `UD-Q4_K_XL`. For Flash use `qwen3.8-flash-next`, quant `UD-Q4_K_XL`, and resources.gpu_count=3 with same_node=true. Obtain target/allocation/GPU IDs from the backend; never hardcode historical physical GPU indices. This 32K minimum lets the tested optimized profiles retain their larger contexts. A caller explicitly requiring 256K cannot be served by Flash's 128K profile without changing that request. `allow_sampling_change: true` permits the documented candidate temperatures; false preserves the active/baseline sampler.
 
-- Check contract_version=2.0 before mutations. Follow the v2 POST SSE envelope and keep run_id for reconnect/cancel. The frontend never receives the OpenRouter key.
+- Check contract_version=2.1 before mutations. Follow the v2 POST SSE envelope and keep run_id for reconnect/cancel. The frontend never receives the OpenRouter key.
 - Render step events including allocation, loading, verification and repair. Progress may be null; show the actual detail instead of a fake percentage.
 - Render full config.settings, `changes` with dotted paths, evidence and independent validation. Announce success only on a terminal successful done result with applied=true and passed verification.
 - Use live benchmark measurement.decode_tps as primary and prefill_tps as secondary. Before/speedup are null in verify_only. Do not seed live meters with CANON values.
 - Use `/runs/{run_id}` after a lost stream instead of reposting the operation. Lock conflicting model changes while active; use `/runs/{run_id}/cancel` if cancellation is requested. `/revert` is streaming and takes the returned rollback_id.
 
-### Multiple GPUs and race availability
+### GPU requirements and external baseline
 
-One ByteShape or Glimmer engine needs one L40. A simultaneous race needs **two separate equivalent L40 allocations total**. Flash needs **three L40s on one node per engine**, so a simultaneous race needs **six L40s total**, with each engine's trio on a single node. Never run both lanes on the same GPUs and present the contention result as standalone speed.
-
-The planned live presentation is a **sequential** default-then-optimized comparison, which only needs one profile's allocation (1 / 3 / 1 L40s). Do not label a sequential comparison as a simultaneous race or replay saved text as live output.
-
-V2 exposes resource groups and model/race readiness through `/status`, `/capabilities` and structured `resources`. The backend validates actual allocation, not only the count visible in a widget. Show readiness reasons when Flash or simultaneous race resources are unavailable. `installed: true` alone never enables a race.
+ByteShape and Glimmer each use one L40; Flash requires three L40s on one node. All three production Optimize pipelines only select, apply and verify optimized llama.cpp. Default Ollama is a separate demo baseline. Do not show an in-tool race action: `/race` and Optimize's old `sequential_compare` mode are disabled. Use `/generate` plus `/live` for the optimized terminal demonstration, and `scripts/check_live_models.py` for standalone comparison tests.
 
 ## Historical speed reference (not live UI values)
 

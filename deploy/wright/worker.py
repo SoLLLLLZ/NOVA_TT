@@ -9,6 +9,10 @@ from datetime import datetime, timezone
 ROOT = pathlib.Path(sys.argv[1]).resolve()
 MANIFEST = json.loads((ROOT / "manifest.json").read_text())
 ASSETS = pathlib.Path(MANIFEST["asset_root"])
+SHARED = pathlib.Path(MANIFEST.get("shared_root", str(ASSETS)))
+RUNTIME = pathlib.Path(MANIFEST.get("runtime_dir", str(SHARED / "build-l40/bin")))
+MODEL_ID = MANIFEST["artifact"]["model"]
+GPUS_PER_ENGINE = MANIFEST.get("gpu_count", 1)
 MODEL = ASSETS / MANIFEST["artifact"]["files"][0]["name"]
 SERVICES = {}
 EXIT = threading.Event()
@@ -134,7 +138,7 @@ def stop(lane):
             p.wait(timeout=5)
     entry["log"].close()
     for _ in range(12):
-        if not processes(GPUS[entry["gpu_index"]]):
+        if all(not processes(GPUS[i]) for i in entry["gpu_indices"]):
             break
         time.sleep(0.3)
     else:
@@ -177,6 +181,7 @@ def inspect():
                 "config": s["config"],
                 "healthy": s["process"].poll() is None,
                 "gpu_id": GPUS[s["gpu_index"]],
+                "gpu_ids": [GPUS[i] for i in s["gpu_indices"]],
                 "context_per_slot": s.get("context"),
             }
             for k, s in SERVICES.items()
@@ -192,18 +197,12 @@ def guard():
         try:
             samples = telemetry()
             for s in list(SERVICES.values()):
-                g = samples[s["gpu_index"]]
-                s["min_free"] = min(
-                    s.get("min_free", g["memory_free_mib"]), g["memory_free_mib"]
-                )
-                s["max_temp"] = max(
-                    s.get("max_temp", g["temperature_c"]), g["temperature_c"]
-                )
-                if (
-                    g["memory_free_mib"] < s.get("headroom", 1024)
-                    or g["temperature_c"] >= 80
-                ):
-                    VIOLATIONS.append("memory_or_thermal_guard")
+                for gi in s.get("gpu_indices", [s["gpu_index"]]):
+                    g = samples[gi]
+                    s.setdefault("min_free_by_gpu", {})[gi] = min(s.get("min_free_by_gpu", {}).get(gi, g["memory_free_mib"]), g["memory_free_mib"])
+                    s.setdefault("max_temp_by_gpu", {})[gi] = max(s.get("max_temp_by_gpu", {}).get(gi, g["temperature_c"]), g["temperature_c"])
+                    if g["memory_free_mib"] < s.get("headroom", 1024) or g["temperature_c"] >= 80:
+                        VIOLATIONS.append("memory_or_thermal_guard")
         except Exception:
             VIOLATIONS.append("telemetry_unavailable")
         abort = (
@@ -226,18 +225,19 @@ def load(body):
     gi = body.get("gpu_index", 0)
     c = body["config"]
     settings = c["settings"]
-    if gi not in range(len(GPUS)):
+    indices = list(range(gi, gi + GPUS_PER_ENGINE))
+    if gi % GPUS_PER_ENGINE or any(i not in range(len(GPUS)) for i in indices):
         raise RuntimeError("allocation_unavailable")
     stop(lane)
     check()
-    if any(s["gpu_index"] == gi for s in SERVICES.values()) or processes(GPUS[gi]):
+    if any(set(s["gpu_indices"]) & set(indices) for s in SERVICES.values()) or any(processes(GPUS[i]) for i in indices):
         raise RuntimeError("gpu_busy")
-    if float(query(GPUS[gi], "memory.free")) < 40000:
+    if any(float(query(GPUS[i], "memory.free")) < 40000 for i in indices):
         raise RuntimeError("insufficient_startup_headroom")
-    if c["artifact_id"] != MANIFEST["artifact"]["id"] or c["model"] != "qwen3.8-27b":
+    if c["artifact_id"] != MANIFEST["artifact"]["id"] or c["model"] != MODEL_ID:
         raise RuntimeError("unsupported_artifact")
     ollama = c["engine"] == "ollama"
-    if c["runtime_id"] != ("ollama-0.40.13" if ollama else "llama-l40-b10820"):
+    if c["runtime_id"] != ("ollama-0.40.13" if ollama else MANIFEST["profiles"][0]["config"]["runtime_id"]):
         raise RuntimeError("unsupported_runtime")
     with socket.socket() as sock:
         sock.bind(("127.0.0.1", 0))
@@ -245,29 +245,34 @@ def load(body):
     env = {
         k: v
         for k, v in os.environ.items()
-        if not k.startswith(("OLLAMA_", "LLAMA_", "GGML_", "APPTAINERENV_"))
+        if not k.startswith(("OLLAMA_", "LLAMA_", "GGML_", "FLASH_NEXT_", "APPTAINERENV_"))
         and k != "LD_LIBRARY_PATH"
     }
     for key in ("GPU_DEVICE_ORDINAL", "ROCR_VISIBLE_DEVICES", "HIP_VISIBLE_DEVICES"):
         env.pop(key, None)
-    env["CUDA_VISIBLE_DEVICES"] = GPUS[gi]
+    visible_devices = ",".join(GPUS[i] for i in indices)
+    env["CUDA_VISIBLE_DEVICES"] = visible_devices
     if ollama:
+        # Only standalone comparison tests depend on the Ollama installation.
+        if sha(SHARED / "ollama-0.40.13/bin/ollama") != MANIFEST["runtime_hashes"]["ollama"]:
+            raise RuntimeError("runtime_hash_mismatch: ollama")
         store = ROOT / "ollama-models"
         (store / "blobs").mkdir(parents=True, exist_ok=True)
-        blob = (
-            store / "blobs" / ("sha256-" + MANIFEST["artifact"]["files"][0]["sha256"])
-        )
-        if not blob.exists():
-            os.link(MODEL, blob)
+        for file in MANIFEST["artifact"]["files"]:
+            if file.get("role", "target") != "target":
+                continue
+            blob = store / "blobs" / ("sha256-" + file["sha256"])
+            if not blob.exists():
+                os.link(ASSETS / file["name"], blob)
         env.update(
             OLLAMA_HOST="127.0.0.1:" + str(port),
             OLLAMA_MODELS=str(store),
             OLLAMA_VULKAN="0",
             OLLAMA_NOPRUNE="1",
         )
-        argv = [str(ASSETS / "ollama-0.40.13/bin/ollama"), "serve"]
+        argv = [str(SHARED / "ollama-0.40.13/bin/ollama"), "serve"]
     else:
-        argv = [str(ASSETS / "build-l40/bin/llama-server")] + MANIFEST[
+        argv = [str(RUNTIME / "llama-server")] + MANIFEST[
             "llama_argv"
         ].copy()
         mapping = {
@@ -285,7 +290,7 @@ def load(body):
         for flag, value in [
             ("--model", str(MODEL)),
             ("--port", str(port)),
-            ("--alias", "nova-byteshape"),
+            ("--alias", "nova-" + MODEL_ID),
         ] + [(flag, settings[key]) for key, flag in mapping.items()]:
             argv[argv.index(flag) + 1] = str(value)
         container = [
@@ -296,13 +301,15 @@ def load(body):
             "--bind",
             "/home/export/taeholee/nova:/home/export/taeholee/nova",
             "--env",
-            "CUDA_VISIBLE_DEVICES=" + GPUS[gi],
+            "CUDA_VISIBLE_DEVICES=" + visible_devices,
             "--env",
-            "LD_LIBRARY_PATH=" + str(ASSETS / "build-l40/bin"),
-            str(ASSETS / "cuda-12.9.1-devel-ubuntu24.04.sif"),
+            "LD_LIBRARY_PATH=" + str(RUNTIME),
+            str(SHARED / "cuda-12.9.1-devel-ubuntu24.04.sif"),
         ]
+        container[-1:-1] = [v for k, value in MANIFEST.get("runtime_env", {}).items() for v in ("--env", k + "=" + value)]
         devices = command(container + [argv[0], "--list-devices"], env=env)
-        if devices.count("CUDA0:") != 1 or "CUDA1:" in devices:
+        found = re.findall(r"CUDA(\d+):", devices)
+        if sorted(found) != [str(i) for i in range(GPUS_PER_ENGINE)]:
             raise RuntimeError("device_mapping_failed")
         argv = container + argv
     argv = ["taskset", "-c", ",".join(map(str, CPU_GROUPS[gi]))] + argv
@@ -319,6 +326,7 @@ def load(body):
         "port": port,
         "config": c,
         "gpu_index": gi,
+        "gpu_indices": indices,
         "headroom": body.get("headroom", 1024),
         "log_offset": log_offset,
         "log_path": log_path,
@@ -329,6 +337,7 @@ def load(body):
             "argv": argv,
             "config": c,
             "gpu_uuid": GPUS[gi],
+            "gpu_ids": [GPUS[i] for i in indices],
             "cpu_affinity": CPU_GROUPS[gi],
             "runtime_hashes": RUNTIME_HASHES,
         },
@@ -345,32 +354,32 @@ def load(body):
     if ollama:
         if ready.get("version") != "0.40.13":
             raise RuntimeError("runtime_version_mismatch")
-        # The verified GGUF is already a local blob. Avoid CLI re-hashing/uploading 11 GB.
+        # Verified target shards are local blobs; avoid re-uploading model weights.
         created = req(
             port,
             "/api/create",
             {
-                "model": "nova-byteshape",
+                "model": "nova-" + MODEL_ID,
                 "files": {
-                    MODEL.name: "sha256:" + MANIFEST["artifact"]["files"][0]["sha256"]
+                    f["name"]: "sha256:" + f["sha256"] for f in MANIFEST["artifact"]["files"] if f.get("role", "target") == "target"
                 },
                 "stream": False,
             },
-            timeout=60,
+            timeout=180,
         )
         if created.get("status") != "success":
             raise RuntimeError("ollama_model_registration_failed")
         save(
             ROOT / "ollama-model-show.json",
-            req(port, "/api/show", {"model": "nova-byteshape"}),
+            req(port, "/api/show", {"model": "nova-" + MODEL_ID}),
         )
-        # Load without a prompt or inference overrides, so both race lanes are ready.
+        # Standalone baseline preload uses no prompt or inference overrides.
         preload_start = time.monotonic()
         loaded = req(
             port,
             "/api/generate",
-            {"model": "nova-byteshape", "stream": False},
-            timeout=90,
+            {"model": "nova-" + MODEL_ID, "stream": False},
+            timeout=180,
         )
         if not loaded.get("done"):
             raise RuntimeError("ollama_preload_failed")
@@ -401,10 +410,21 @@ def load(body):
     }
 
 
-def final_text(text):
+def final_text(text, model=None, streaming=False):
+    if model == "muse-glimmer":
+        marker = "<|start|>assistant to=user<|message|>"
+        if marker not in text:
+            return ""  # An unfinished reasoning channel is never a final answer.
+        text = text.split(marker, 1)[1]
+        # Never forward native channel/end markers, including partial markers.
+        text = text.split("<|", 1)[0]
+        if streaming and text.endswith("<"):
+            text = text[:-1]
+        return text if streaming else text.strip()
     if "</think>" in text:
-        return text.rsplit("</think>", 1)[1].strip()
-    if "<think>" in text:
+        text = text.split("</think>", 1)[1]
+        return text if streaming else text.strip()
+    if "<think>" in text or streaming:
         return ""
     return text.strip()
 
@@ -470,13 +490,9 @@ def stream_request(port, path, request, lane, ollama, live=False):
             text += item.get("response" if ollama else "content", "")
             separate_thinking = separate_thinking or bool(item.get("thinking"))
             # Thinking is always enabled. Native completion may start inside a think block.
-            visible = (
-                text
-                if ollama and separate_thinking
-                else text.split("</think>", 1)[1]
-                if "</think>" in text
-                else ""
-            )
+            model = SERVICES[lane]["config"]["model"]
+            visible = (text if ollama and separate_thinking and model != "muse-glimmer"
+                       else final_text(text, model, streaming=True))
             delta = visible[visible_sent:]
             visible_sent = len(visible)
             if delta and EVENT_PATH:
@@ -525,7 +541,7 @@ def generate(body):
     quality = body.get("purpose") == "quality"
     if ollama:
         request = {
-            "model": "nova-byteshape",
+            "model": "nova-" + MODEL_ID,
             "prompt": text,
             "stream": False,
             "options": {"num_predict": cap},
@@ -596,7 +612,7 @@ def generate(body):
         cache = t.get("cache_n")
         completed = r.get("stop_type") == "eos"
         stop_reason = r.get("stop_type")
-        content = final_text(r.get("content", ""))
+        content = r.get("content", "")
         convention = "(predicted_n - 1) / predicted_ms"
         actual = r.get("generation_settings", {})
         for key in ("temperature", "top_p", "top_k", "min_p"):
@@ -604,7 +620,7 @@ def generate(body):
             observed = actual.get(key)
             if not sampler_matches(observed, wanted, integer=key == "top_k"):
                 raise RuntimeError("effective_sampling_mismatch")
-    visible = final_text(content)
+    visible = final_text(content, c["model"])
     correct = None
     if quality:
         try:
@@ -618,7 +634,7 @@ def generate(body):
             )
         except (ValueError, IndexError):
             correct = False
-    gpu_processes = processes(GPUS[s["gpu_index"]])
+    gpu_processes = {i: processes(GPUS[i]) for i in s["gpu_indices"]}
 
     def owned(pid):
         for _ in range(16):
@@ -639,12 +655,9 @@ def generate(body):
                 return False
         return False
 
-    pids = [
-        int(line.split(",")[0].strip())
-        for line in gpu_processes.splitlines()
-        if line.strip()
-    ]
-    placement = bool(pids) and all(owned(pid) for pid in pids)
+    pids = {i: [int(line.split(",")[0].strip()) for line in value.splitlines() if line.strip()]
+            for i, value in gpu_processes.items()}
+    placement = all(ids and all(owned(pid) for pid in ids) for ids in pids.values())
     if ollama:
         placement = placement and models[0].get("size_vram", 0) >= models[0].get(
             "size", 1
@@ -653,17 +666,22 @@ def generate(body):
         with s["log_path"].open() as log:
             log.seek(s["log_offset"])
             launch_log = log.read(4 * 1024 * 1024)
-        placement = (
-            placement
-            and bool(re.search(r"offloaded 66/66 layers to GPU", launch_log))
-            and launch_log.count("CUDA0 KV buffer size") >= 2
-            and "ctx_dft=yes, devices=[CUDA0]" in launch_log
-        )
+        target_layers = MANIFEST.get("target_layers", 66)
+        placement = placement and f"offloaded {target_layers}/{target_layers} layers to GPU" in launch_log
+        buffers = {int(i): float(size) for i, size in re.findall(r"CUDA([0-9]+) model buffer size\s*=\s*([0-9.]+) MiB", launch_log.split("llama_context: constructing", 1)[0])}
+        placement = placement and all(buffers.get(i, 0) > 0 for i in range(GPUS_PER_ENGINE))
+        if MODEL_ID == "muse-glimmer":
+            placement = placement and "offloaded 6/6 layers to GPU" in launch_log
+        elif MODEL_ID == "qwen3.8-27b":
+            placement = placement and launch_log.count("CUDA0 KV buffer size") >= 2 and "ctx_dft=yes, devices=[CUDA0]" in launch_log
+        elif MODEL_ID == "qwen3.8-flash-next":
+            placement = placement and "ctx_dft=yes, devices=[CUDA2]" in launch_log
     healthy = req(port, "/api/version" if ollama else "/health") is not None
     context_ok = s["context"] == c["settings"]["context_per_slot"]
-    t = telemetry()[s["gpu_index"]]
-    free = min(s.get("min_free", t["memory_free_mib"]), t["memory_free_mib"])
-    temp = max(s.get("max_temp", t["temperature_c"]), t["temperature_c"])
+    samples = telemetry()
+    free_by_gpu = {GPUS[i]: min(s.get("min_free_by_gpu", {}).get(i, samples[i]["memory_free_mib"]), samples[i]["memory_free_mib"]) for i in s["gpu_indices"]}
+    temp_by_gpu = {GPUS[i]: max(s.get("max_temp_by_gpu", {}).get(i, samples[i]["temperature_c"]), samples[i]["temperature_c"]) for i in s["gpu_indices"]}
+    free, temp = min(free_by_gpu.values()), max(temp_by_gpu.values())
     return {
         "prompt_tokens": n,
         "output_tokens": o,
@@ -690,9 +708,9 @@ def generate(body):
         "stop_reason": stop_reason,
         "completed": completed,
         "quality_pass": correct,
-        "gpu_ids": [GPUS[s["gpu_index"]]],
-        "min_free_gpu_memory_mib": {GPUS[s["gpu_index"]]: free},
-        "peak_temperature_c": {GPUS[s["gpu_index"]]: temp},
+        "gpu_ids": [GPUS[i] for i in s["gpu_indices"]],
+        "min_free_gpu_memory_mib": free_by_gpu,
+        "peak_temperature_c": temp_by_gpu,
         "request_hash": hashlib.sha256(
             json.dumps(request, sort_keys=True).encode()
         ).hexdigest(),
@@ -733,7 +751,7 @@ try:
         chosen = [r for r in entries if r[0] in assigned or r[1] in assigned]
     if (
         len(chosen) != len(assigned)
-        or not 1 <= len(chosen) <= 2
+        or len(chosen) != GPUS_PER_ENGINE
         or any(r[2] != "NVIDIA L40" for r in chosen)
     ):
         raise RuntimeError("allocation_mapping_failed")
@@ -741,30 +759,25 @@ try:
     if any(processes(g) for g in GPUS):
         raise RuntimeError("gpu_busy")
     cpus = sorted(os.sched_getaffinity(0))
-    per_lane = int(os.environ.get("SLURM_CPUS_PER_TASK", "0")) // len(GPUS)
-    if per_lane < 12 or len(cpus) < per_lane * len(GPUS):
+    lanes = len(GPUS) // GPUS_PER_ENGINE
+    per_lane = int(os.environ.get("SLURM_CPUS_PER_TASK", "0")) // lanes
+    if per_lane < 12 or len(cpus) < per_lane * lanes:
         raise RuntimeError("insufficient_cpu_allocation")
-    CPU_GROUPS = [cpus[i * per_lane : (i + 1) * per_lane] for i in range(len(GPUS))]
-    if (
-        MODEL.stat().st_size != MANIFEST["artifact"]["files"][0]["size_bytes"]
-        or sha(MODEL) != MANIFEST["artifact"]["files"][0]["sha256"]
-    ):
-        raise RuntimeError("artifact_hash_mismatch")
-    for p in (ASSETS / "build-l40/bin").iterdir():
-        if p.is_file() and not p.is_symlink():
-            RUNTIME_HASHES[p.name] = sha(p)
-    RUNTIME_HASHES["ollama"] = sha(ASSETS / "ollama-0.40.13/bin/ollama")
-    if RUNTIME_HASHES != MANIFEST["runtime_hashes"]:
+    CPU_GROUPS = [cpus[(i // GPUS_PER_ENGINE) * per_lane: (i // GPUS_PER_ENGINE + 1) * per_lane] for i in range(len(GPUS))]
+    for file in MANIFEST["artifact"]["files"]:
+        path = ASSETS / file["name"]
+        if path.stat().st_size != file["size_bytes"] or sha(path) != file["sha256"]:
+            raise RuntimeError("artifact_hash_mismatch: " + file["name"])
+    native_hashes = {name: value for name, value in MANIFEST["runtime_hashes"].items() if name != "ollama"}
+    for name in native_hashes:
+        path = RUNTIME / name
+        RUNTIME_HASHES[name] = sha(path)
+    if RUNTIME_HASHES != native_hashes:
         raise RuntimeError("runtime_hash_mismatch")
-    for p in (ASSETS / "build-l40/bin").iterdir():
-        if p.is_symlink():
-            target = p.resolve(strict=True)
-            if (
-                target.parent != (ASSETS / "build-l40/bin").resolve()
-                or target.name not in RUNTIME_HASHES
-            ):
-                raise RuntimeError("runtime_symlink_mismatch")
-            if sha(p) != RUNTIME_HASHES[target.name]:
+    for path in RUNTIME.iterdir():
+        if path.is_symlink():
+            target = path.resolve(strict=True)
+            if target.name not in RUNTIME_HASHES or sha(path) != RUNTIME_HASHES[target.name]:
                 raise RuntimeError("runtime_symlink_hash_mismatch")
     save(ROOT / "ready.json", inspect())
     threading.Thread(target=guard, daemon=True).start()

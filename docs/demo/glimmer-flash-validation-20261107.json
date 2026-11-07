@@ -1,0 +1,273 @@
+{
+  "date": "2026-11-07",
+  "hardware": "Wright Slurm L40",
+  "prompt": "Write a short essay explaining the causes of the Industrial Revolution",
+  "comparison_scope": "One completed essay per engine; whole configurations differ. Native total decode includes reasoning tokens, not only visible words.",
+  "production_policy": {
+    "models": [
+      "qwen3.8-27b",
+      "muse-glimmer",
+      "qwen3.8-flash-next"
+    ],
+    "ollama_in_optimize": false,
+    "race_enabled": false,
+    "before": null,
+    "speedup": null,
+    "web_tools": false
+  },
+  "glimmer": {
+    "status": "passed",
+    "gpu_count": 1,
+    "standalone_ollama": {
+      "prompt_tokens": 67,
+      "output_tokens": 839,
+      "cached_tokens": 0,
+      "decode_timed_tokens": 839,
+      "prefill_seconds": 0.473707,
+      "decode_seconds": 35.557847,
+      "wall_seconds": 36.08032411895692,
+      "request_started_at": "2026-11-07T18:07:50.469183+00:00",
+      "request_finished_at": "2026-11-07T18:08:26.549509+00:00",
+      "load_seconds": 38.89541230350733,
+      "load_timing_source": "preload_wall",
+      "decode_tps": 23.59535435314742,
+      "prefill_tps": 141.43763972244446,
+      "timing_convention": "eval_count / eval_duration",
+      "output_cap": 2048,
+      "stop_reason": "stop",
+      "completed": true,
+      "gpu_ids": [
+        "GPU-b88255ea-7355-ce97-d8c1-82a5beadfabe"
+      ],
+      "min_free_gpu_memory_mib": {
+        "GPU-b88255ea-7355-ce97-d8c1-82a5beadfabe": 29590.0
+      },
+      "peak_temperature_c": {
+        "GPU-b88255ea-7355-ce97-d8c1-82a5beadfabe": 41.0
+      },
+      "service_healthy": true,
+      "placement_matches": true,
+      "context_matches": true,
+      "configured_context_per_slot": 32768,
+      "memory_guard_pass": true,
+      "warnings": []
+    },
+    "optimized": {
+      "prompt_tokens": 67,
+      "output_tokens": 762,
+      "cached_tokens": 0,
+      "decode_timed_tokens": 761,
+      "prefill_seconds": 0.07489499999999999,
+      "decode_seconds": 13.872207,
+      "wall_seconds": 13.970005042850971,
+      "request_started_at": "2026-11-07T18:10:07.909195+00:00",
+      "request_finished_at": "2026-11-07T18:10:21.879201+00:00",
+      "load_seconds": 5.973067980259657,
+      "load_timing_source": "service_startup_wall",
+      "decode_tps": 54.8578895917571,
+      "prefill_tps": 894.5857533880768,
+      "timing_convention": "(predicted_n - 1) / predicted_ms",
+      "output_cap": 2048,
+      "stop_reason": "eos",
+      "completed": true,
+      "gpu_ids": [
+        "GPU-b88255ea-7355-ce97-d8c1-82a5beadfabe"
+      ],
+      "min_free_gpu_memory_mib": {
+        "GPU-b88255ea-7355-ce97-d8c1-82a5beadfabe": 23492.0
+      },
+      "peak_temperature_c": {
+        "GPU-b88255ea-7355-ce97-d8c1-82a5beadfabe": 43.0
+      },
+      "warnings": [],
+      "measurement_id": "measurement_7b604f210a0bd139b963",
+      "run_id": "run_abc6cc2c74500e9547fc",
+      "profile_id": "profile_d51bab500a564f8d9e79ccb8",
+      "origin": "live",
+      "purpose": "throughput",
+      "workload": "short",
+      "prompt_hash": "56c4a433270d7aad3a7d4a8125456adf4d4d40d653d18a5b60787943e75be041",
+      "engine": "llama.cpp",
+      "runtime_id": "glimmer-patched-l40-b10820",
+      "rate_scope": "per_request",
+      "cache_state": "uncached",
+      "settings_hash": "63f99e4cad4e647322836d0b8ee8635b1ae51a9464c86efd241e0dfc03506dc3",
+      "sample_count": 1,
+      "simulation": false
+    },
+    "decode_ratio": 2.3249445111401568,
+    "agent": {
+      "model": "openai/gpt-6-astra",
+      "available": true,
+      "effective_tier": "default"
+    },
+    "config": {
+      "model": "muse-glimmer",
+      "artifact_id": "glimmer-udq4-82bece30",
+      "quant": "UD-Q4_K_XL",
+      "engine": "llama.cpp",
+      "runtime_id": "glimmer-patched-l40-b10820",
+      "settings": {
+        "context_tokens": 262144,
+        "context_per_slot": 262144,
+        "parallel_slots_per_process": 1,
+        "replicas": 1,
+        "batch_size": 4096,
+        "microbatch_size": 512,
+        "threads_decode": 8,
+        "threads_prefill": 12,
+        "draft_tokens": 15,
+        "draft_gpu_layers": 99,
+        "prompt_cache_ram_mib": 4096,
+        "kv_type_k": "f16",
+        "kv_type_v": "f16",
+        "flash_attention": "on",
+        "fit": "off",
+        "speculative_mode": "draft-dflash",
+        "draft_kv_k": "f16",
+        "draft_kv_v": "f16",
+        "split_mode": "none",
+        "reasoning_effort": "high",
+        "temperature": 0.75,
+        "top_p": 0.95,
+        "min_p": 0.0,
+        "top_k": 64,
+        "draft_device": [
+          "CUDA0"
+        ],
+        "draft_model": "glimmer-draft-27d9a805",
+        "repeat_penalty": 1.0,
+        "presence_penalty": 0.0,
+        "jinja": true,
+        "reasoning_format": "deepseek",
+        "reasoning_preserve": true,
+        "mps": false,
+        "tensor_split": [],
+        "chat_template_id": "muse-glimmer-embedded",
+        "chat_template_kwargs": {
+          "reasoning_strength": "high"
+        },
+        "vision_projector": null,
+        "gpu_layers": 99,
+        "main_gpu": 0,
+        "backend_sampling": false,
+        "tensor_overrides": [
+          {
+            "pattern": "token_embd.weight",
+            "buffer": "CUDA0"
+          }
+        ],
+        "draft_tensor_overrides": [
+          {
+            "pattern": "token_embd.weight",
+            "buffer": "CUDA0"
+          }
+        ],
+        "context_override": {
+          "muse-glimmer.context_length": 262144,
+          "dflash.context_length": 262144
+        }
+      },
+      "unresolved_fields": [],
+      "profile_id": "profile_d51bab500a564f8d9e79ccb8"
+    },
+    "validation": {
+      "status": "passed",
+      "completed_answer": true,
+      "answer_correct": true,
+      "service_healthy": true,
+      "placement_matches": true,
+      "context_matches": true,
+      "memory_guard_pass": true,
+      "configured_context_per_slot": 262144,
+      "tested_prompt_tokens": 100,
+      "checked_at": "2026-11-07T18:10:02.559655+00:00",
+      "scope": "Short arithmetic completed-answer check only.",
+      "issues": []
+    },
+    "optimization_seconds": 23.256155415903777,
+    "preparation_seconds": 15.688457790762186,
+    "live": {
+      "metrics_count": 70,
+      "delivery_hz": 4.974351869282303,
+      "final_measurement_matches_generate": true,
+      "revert_and_stream_closure_passed": true
+    },
+    "baseline_reused": true,
+    "baseline_receipt_sha256": "d37cd4ff1a16fb72c3359413a39818917ec8833e55f268e528313dd6555a0b41",
+    "receipt_sha256": "fee66ddac6e9de949599d3bb47b2f30f9f5c107583d2550d81b37fd0f6621757",
+    "notes": [
+      "The first Glimmer harness had an incorrect HTTP assertion after successful optimization. Its completed baseline was preserved and explicitly reused; the second production run passed end to end.",
+      "Final run returned OpenRouter default tier despite requesting priority.",
+      "The later optional startup preparation and stricter target-buffer checks have local regression coverage but were added after this hardware run."
+    ]
+  },
+  "flash": {
+    "status": "blocked",
+    "gpu_count": 3,
+    "standalone_ollama": {
+      "prompt_tokens": 63,
+      "output_tokens": 554,
+      "cached_tokens": 0,
+      "decode_timed_tokens": 554,
+      "prefill_seconds": 2.285262,
+      "decode_seconds": 36.501995,
+      "wall_seconds": 38.8130999263376,
+      "request_started_at": "2026-11-07T18:16:44.307968+00:00",
+      "request_finished_at": "2026-11-07T18:17:23.121068+00:00",
+      "load_seconds": 162.61735107935965,
+      "load_timing_source": "preload_wall",
+      "decode_tps": 15.177252640574851,
+      "prefill_tps": 27.567955009097425,
+      "timing_convention": "eval_count / eval_duration",
+      "output_cap": 2048,
+      "stop_reason": "stop",
+      "completed": true,
+      "gpu_ids": [
+        "GPU-e7716227-6a9f-318d-c437-0b162a6704dd",
+        "GPU-7144eac3-d656-4f7a-e05e-17a1ffdf8116",
+        "GPU-262a7035-9692-6ae1-2dcd-90ad0cf90ace"
+      ],
+      "min_free_gpu_memory_mib": {
+        "GPU-e7716227-6a9f-318d-c437-0b162a6704dd": 13828.0,
+        "GPU-7144eac3-d656-4f7a-e05e-17a1ffdf8116": 15826.0,
+        "GPU-262a7035-9692-6ae1-2dcd-90ad0cf90ace": 16510.0
+      },
+      "peak_temperature_c": {
+        "GPU-e7716227-6a9f-318d-c437-0b162a6704dd": 33.0,
+        "GPU-7144eac3-d656-4f7a-e05e-17a1ffdf8116": 33.0,
+        "GPU-262a7035-9692-6ae1-2dcd-90ad0cf90ace": 33.0
+      },
+      "service_healthy": true,
+      "placement_matches": true,
+      "context_matches": true,
+      "configured_context_per_slot": 262144,
+      "memory_guard_pass": true,
+      "warnings": []
+    },
+    "preparation_seconds": 331.63942691730335,
+    "optimized": null,
+    "agent": {
+      "model": "openai/gpt-6-astra",
+      "reasoning_effort": "high",
+      "request_status": 403,
+      "selected_configuration": false
+    },
+    "blocker": "OpenRouter API key total spending limit reached. User chose to finish with the Astra test blocked.",
+    "receipt_sha256": "a090ecddc958afc8ca6df40a1a379eedbb39d2afe8647f9b0bf33fc75991b377",
+    "notes": [
+      "All six installed assets and runtime hashes passed Slurm compute-node verification.",
+      "Default Ollama target offload and device placement passed on all three assigned L40s.",
+      "No optimized Flash throughput or live-speed result is claimed."
+    ]
+  },
+  "validation": {
+    "local_tests_passed": 67,
+    "owned_test_allocations_released": [
+      "268030",
+      "268031",
+      "268032"
+    ],
+    "final_squeue_own_jobs_empty": true
+  }
+}

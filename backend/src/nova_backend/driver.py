@@ -1,8 +1,8 @@
 from __future__ import annotations
 import asyncio, base64, copy, json, os, shlex, time
 from pathlib import Path
-from .common import ROOT, Problem, private_json, uid, now
-from .catalog import MANIFEST
+from .common import ROOT, MODEL, Problem, private_json, uid, now
+from .catalog import manifest_for, gpu_count
 
 
 class WrightDriver:
@@ -90,8 +90,14 @@ class WrightDriver:
         except json.JSONDecodeError:
             return None  # in-place result write not yet complete
 
-    async def ensure(self, resources, deadline):
+    async def ensure(self, resources, deadline, model=MODEL):
+        manifest = manifest_for(model)
+        required = gpu_count(model)
+        if resources.gpu_count != required:
+            raise Problem("allocation_unavailable", f"This model needs {required} L40s per engine.", 409)
         if self.session:
+            if self.session.get("model", MODEL) != model:
+                raise Problem("allocation_unavailable", "Revert before changing models.", 409)
             if (
                 resources.allocation_id
                 and resources.allocation_id != self.session["job_id"]
@@ -132,6 +138,8 @@ class WrightDriver:
         self.session = {
             "root": "/home/export/taeholee/nova/backend-runs/" + sid,
             "tag": sid,
+            "model": model,
+            "gpus_per_engine": required,
             "job_id": None,
             "gpu_count": resources.gpu_count,
             "expires_at": None,
@@ -150,7 +158,7 @@ class WrightDriver:
                 "startup-error.json": b"null",
                 "stopped.json": b"null",
                 "worker.py": (ROOT / "deploy/wright/worker.py").read_bytes(),
-                "manifest.json": json.dumps(MANIFEST).encode(),
+                "manifest.json": json.dumps(manifest).encode(),
             }
         )
         root = self.session["root"]
@@ -174,7 +182,7 @@ class WrightDriver:
             "--nodes=1",
             "--ntasks=1",
             "--gres=gpu:nvidia-l40:" + str(g),
-            "--cpus-per-task=" + str(resources.cpus_per_task * g),
+            "--cpus-per-task=" + str(resources.cpus_per_task * (g // required)),
             "--mem=" + str(resources.host_memory_mib * g) + "M",
             "--time=" + str((resources.wall_time_seconds + 59) // 60),
             "--no-requeue",
@@ -471,9 +479,11 @@ class MockDriver:
     async def recover(self):
         pass
 
-    async def ensure(self, r, deadline):
+    async def ensure(self, r, deadline, model=MODEL):
         self.session = {
             "job_id": "MOCK",
+            "model": model,
+            "gpus_per_engine": gpu_count(model),
             "gpu_count": r.gpu_count,
             "expires_at": time.time() + 3600,
         }

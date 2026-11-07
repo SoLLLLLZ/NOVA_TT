@@ -17,7 +17,7 @@ class Resources(Strict):
     target_id: Literal["wright"] = "wright"
     allocation_id: str | None = None
     gpu_type: Literal["L40"] = "L40"
-    gpu_count: Annotated[int, Field(ge=1, le=2)] = 1
+    gpu_count: Annotated[int, Field(ge=1, le=6)] = 1
     gpu_ids: list[str] | None = None
     same_node: bool = True
     replica_gpu_groups: list[list[str]] | None = None
@@ -37,7 +37,7 @@ class Resources(Strict):
             raise ValueError("Wright power limits are read-only")
         if self.replica_gpu_groups is not None:
             raise ValueError(
-                "Replica groups are not supported by the ByteShape adapter"
+                "Replica groups are not supported by the production adapters"
             )
         if not self.same_node:
             raise ValueError("The demo adapter requires one node")
