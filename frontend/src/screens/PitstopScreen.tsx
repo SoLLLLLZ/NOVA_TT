@@ -1,6 +1,6 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { Checklist } from "../components/Checklist";
-import { PhaseTiles, PitstopScene, type PitPhase } from "../components/PitstopScene";
+import { PitstopScene, type PitPhase } from "../components/PitstopScene";
 import { usePrefersReducedMotion } from "../lib/motion";
 import type { ModelLook } from "../models";
 import type { ChecklistItem } from "../state/steps";
@@ -36,7 +36,6 @@ export function PitstopScreen({ look, items, detail, onArrived }: Props) {
 
   return (
     <main className={`screen screen--pitstop${reduced ? " reduced" : ""}`} style={{ "--accent": look.accent } as CSSProperties}>
-      <PhaseTiles phase={phase} look={look} />
       <PitstopScene look={look} phase={phase} />
       <h1 className="pit-title">
         <span className="pit-title__accent">PITSTOP</span> IN PROGRESS.

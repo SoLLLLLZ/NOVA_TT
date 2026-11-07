@@ -133,7 +133,7 @@ export type ReplayResponse = {
 
 export type LiveEvent =
   | { type: "waiting"; model: string; service_id: string | null }
-  | { type: "inference_started"; request_id: string; prompt_tokens: number | null }
+  | { type: "inference_started"; request_id: string; prompt_tokens: number | null; engine?: string; tuned?: boolean }
   | { type: "metrics"; request_id: string; decode_tps: number | null; prefill_tps: number | null; output_tokens: number }
   | { type: "inference_done"; request_id: string; measurement: Measurement }
   | { type: "error"; error: ErrorBody };

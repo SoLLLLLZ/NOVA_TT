@@ -192,6 +192,45 @@ class MockServerTest(unittest.TestCase):
         self.assertEqual(paths["settings.temperature"]["from"], 0.8)
         self.assertEqual(paths["settings.top_p"]["to"], 0.95)
 
+    def listen_live(self, model, received):
+        with self.request("GET", f"/live?model={model}") as r:
+            for raw in r:
+                line = raw.decode().strip()
+                if line.startswith("data: "):
+                    received.append(json.loads(line[6:]))
+                    if received[-1]["type"] == "inference_done":
+                        return
+
+    def test_default_run_streams_default_speed(self):
+        events = self.stream("/action", {"action": "apply_default", "params": {"model": "qwen3.8-27b"}})
+        done = events[-1]
+        self.assertEqual(done["type"], "done")
+        self.assertEqual(done["config"]["engine"], "ollama")
+        self.assertIsNone(done["validation"])
+        self.assertTrue(done["rollback_id"])
+        _, status = self.json("GET", "/status")
+        self.assertFalse(status["is_tuned"])
+        self.assertEqual(status["current_config"]["engine"], "ollama")
+
+        received = []
+        listener = threading.Thread(target=self.listen_live, args=("qwen3.8-27b", received), daemon=True)
+        listener.start()
+        for _ in range(100):
+            if received:
+                break
+            time.sleep(0.01)
+        self.assertEqual(self.json("POST", "/mock/inference", {"model": "qwen3.8-27b"})[0], 202)
+        listener.join(timeout=10)
+        started = [e for e in received if e["type"] == "inference_started"][0]
+        self.assertFalse(started["tuned"])
+        self.assertEqual(started["engine"], "ollama")
+        self.assertLess(received[-1]["measurement"]["decode_tps"], 40)
+
+        # Optimizing afterwards compares against the running default.
+        events = self.optimize()
+        effective = [e for e in events if e["type"] == "config" and e["phase"] == "effective"][0]
+        self.assertIn("engine", {c["path"] for c in effective["changes"]})
+
     def test_run_snapshot(self):
         done = self.optimize()[-1]
         status, snap = self.json("GET", f"/runs/{done['run_id']}")

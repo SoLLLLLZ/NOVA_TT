@@ -124,3 +124,15 @@ export function diffConfigs(before: Config, after: Config): Change[] {
   }
   return changes;
 }
+
+// Performance settings worth comparing against the tuned profile (sampling is left out).
+const CONFIG_SUMMARY = new Set([
+  "engine", "settings.threads", "settings.threads_decode", "settings.context_per_slot", "settings.context_tokens",
+  "settings.batch_size", "settings.kv_type", "settings.kv_type_k", "settings.flash_attention", "settings.speculative_mode",
+]);
+
+/** Key performance settings of a single config (no before/after), e.g. the untouched default. */
+export function configRows(config: Config): ChangeRow[] {
+  const empty: Config = { ...config, engine: "", quant: null, settings: {} };
+  return changeRows(diffConfigs(empty, config)).filter((row) => CONFIG_SUMMARY.has(row.key));
+}

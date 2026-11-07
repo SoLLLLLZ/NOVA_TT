@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { changeRows, diffConfigs } from "./changes";
+import { changeRows, configRows, diffConfigs } from "./changes";
 
 describe("changeRows", () => {
   const changes = [
@@ -61,5 +61,19 @@ describe("diffConfigs", () => {
       { ...base, engine: "llama.cpp", settings: { batch_size: 2048, top_k: 20, private_thing: 1 } },
     );
     expect(diff.map((c) => c.path)).toEqual(["engine", "settings.batch_size"]);
+  });
+});
+
+describe("configRows", () => {
+  it("summarises performance settings only", () => {
+    const rows = configRows({
+      profile_id: null, model: "m", artifact_id: null, quant: "q", runtime_id: null, engine: "ollama",
+      settings: { threads_decode: 128, threads_prefill: 128, context_tokens: 32768, batch_size: 1024,
+        kv_type_k: "f16", kv_type_v: "f16", flash_attention: "on", speculative_mode: "none", temperature: 1, top_k: 20 },
+    });
+    expect(rows.map((r) => [r.label, r.to])).toEqual([
+      ["Engine", "Ollama"], ["Threads", "128"], ["Context length", "32K"], ["Batch size", "1024"],
+      ["KV cache", "f16"], ["Flash attention", "On"], ["Speculative decoding", "Off"],
+    ]);
   });
 });

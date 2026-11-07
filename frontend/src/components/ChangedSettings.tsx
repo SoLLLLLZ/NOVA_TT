@@ -2,24 +2,35 @@ import { useState } from "react";
 import type { ChangeRow } from "../lib/changes";
 import { GearIcon } from "./icons";
 
-function Rows({ rows }: { rows: ChangeRow[] }) {
+function Rows({ rows, valuesOnly }: { rows: ChangeRow[]; valuesOnly: boolean }) {
   return (
     <>
       {rows.map((row) => (
         <tr key={row.key} title={row.reason || undefined}>
           <th scope="row">{row.label}</th>
-          <td className="changes__from">{row.from}</td>
-          <td className="changes__arrow" aria-hidden="true">
-            →
-          </td>
-          <td className="changes__to">{row.to}</td>
+          {!valuesOnly && (
+            <>
+              <td className="changes__from">{row.from}</td>
+              <td className="changes__arrow" aria-hidden="true">
+                →
+              </td>
+            </>
+          )}
+          <td className={valuesOnly ? "changes__value" : "changes__to"}>{row.to}</td>
         </tr>
       ))}
     </>
   );
 }
 
-export function ChangedSettings({ rows }: { rows: ChangeRow[] }) {
+type Props = {
+  rows: ChangeRow[];
+  /** Show one value per setting instead of before → after. */
+  valuesOnly?: boolean;
+  title?: string;
+};
+
+export function ChangedSettings({ rows, valuesOnly = false, title = "Changed settings" }: Props) {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const key = rows.filter((row) => !row.advanced);
   const advanced = rows.filter((row) => row.advanced);
@@ -27,7 +38,7 @@ export function ChangedSettings({ rows }: { rows: ChangeRow[] }) {
     <section className="changes" aria-labelledby="changes-title">
       <h2 className="changes__title" id="changes-title">
         <GearIcon size={16} />
-        <span>Changed settings</span>
+        <span>{title}</span>
         <span className="changes__rule" aria-hidden="true" />
       </h2>
       {rows.length === 0 ? (
@@ -38,13 +49,13 @@ export function ChangedSettings({ rows }: { rows: ChangeRow[] }) {
             <thead className="sr-only">
               <tr>
                 <th scope="col">Setting</th>
-                <th scope="col">Before</th>
-                <th scope="col">After</th>
+                {!valuesOnly && <th scope="col">Before</th>}
+                <th scope="col">{valuesOnly ? "Value" : "After"}</th>
               </tr>
             </thead>
             <tbody>
-              <Rows rows={key} />
-              {showAdvanced && <Rows rows={advanced} />}
+              <Rows rows={key} valuesOnly={valuesOnly} />
+              {showAdvanced && <Rows rows={advanced} valuesOnly={valuesOnly} />}
             </tbody>
           </table>
         </div>

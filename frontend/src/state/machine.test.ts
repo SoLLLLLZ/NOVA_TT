@@ -88,6 +88,32 @@ describe("reducer", () => {
     expect(live.live).toMatchObject({ decode: 54, prefill: 2192, active: true });
   });
 
+  it("runs the untouched default and keeps its speed as the baseline", () => {
+    const defaultDone = done({ validation: null, evidence: null, rollback_id: "rb-default",
+      config: { ...done().config, engine: "ollama" } });
+    const ready2 = run([{ type: "default_start", idempotencyKey: "d" }, { type: "run_event", event: defaultDone }], ready);
+    expect(ready2.phase).toBe("optimized");
+    expect(ready2.result).toMatchObject({ kind: "default", rollbackId: "rb-default", changes: [] });
+
+    const measured = run([
+      { type: "live_event", event: { type: "metrics", request_id: "q", decode_tps: 20, prefill_tps: 1200, output_tokens: 5 } },
+      { type: "live_event", event: { type: "inference_done", request_id: "q", measurement: { decode_tps: 21.5, prefill_tps: 1240, output_tokens: 256, prompt_tokens: 400 } } },
+    ], ready2);
+    expect(measured.phase).toBe("live_speed");
+    expect(measured.baselines["qwen3.8-27b"]).toEqual({ decode: 21.5, prefill: 1240 });
+
+    // Tuning afterwards keeps the baseline and does not overwrite it with tuned speed.
+    const tuned = run([
+      { type: "optimize_start", idempotencyKey: "k", before: null },
+      { type: "animation_ready" },
+      { type: "run_event", event: done() },
+      { type: "live_event", event: { type: "metrics", request_id: "t", decode_tps: 138, prefill_tps: 1800, output_tokens: 9 } },
+    ], measured);
+    expect(tuned.result?.kind).toBe("tuned");
+    expect(tuned.live.decode).toBe(138);
+    expect(tuned.baselines["qwen3.8-27b"].decode).toBe(21.5);
+  });
+
   it("returns to model selection with a toast after revert", () => {
     const state = run([
       { type: "optimize_start", idempotencyKey: "k", before: null },

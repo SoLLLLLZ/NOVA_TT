@@ -1,8 +1,8 @@
 # Frontend: TuneIt widget
 
-Owner: partner. Chrome Manifest V3 extension. Clicking the toolbar icon opens a small standalone 400×820 window that stays open while you run the model in a terminal. Built with Vite, React and TypeScript against [API contract v2.1](../docs/api/endpoint.md) and the [demo model catalog](../docs/demo/DEMO_MODELS.md).
+Owner: partner. One UI, two shells: a **floating desktop widget** (Electron) and a **Chrome Manifest V3 extension**. Built with Vite, React and TypeScript against [API contract v2.1](../docs/api/endpoint.md) and the [demo model catalog](../docs/demo/DEMO_MODELS.md).
 
-Flow: pair → choose cluster, GPU and model (the car changes with the model) → **PITSTOP · OPTIMIZE** (spin → drive → service animation with the live step checklist) → **SETUP OPTIMIZED** (changed settings only, no speeds) → the student runs the model in a terminal → **LIVE SPEED** gauge from `GET /live`. **REVERT TO DEFAULTS** is available on both tuned screens.
+Flow: pair → choose cluster, GPU and model (the car changes with the model) → optionally **run with default settings first** (untouched Ollama via `/action apply_default`; run the model in a terminal to see its live speed) → **PITSTOP · OPTIMIZE** (spin → drive → service animation with the live step checklist) → **SETUP OPTIMIZED** (changed settings only, no speeds) → the student runs the model in a terminal → **LIVE SPEED** gauge from `GET /live`, with the default run's speed and the speedup shown beside it when one was measured. **REVERT TO DEFAULTS** is available on both tuned screens.
 
 ## Run
 
@@ -15,6 +15,17 @@ npm run dev          # http://localhost:5173/widget.html in a normal tab
 npm test             # vitest: SSE parser, gauge scale, change rows, checklist, state machine
 npm run build        # typecheck + build the extension into frontend/dist
 ```
+
+### Desktop widget (recommended for the demo)
+
+```bash
+npm run desktop       # build, then open the widget
+npm run desktop:dev   # with `npm run dev` running: live-reloading UI
+```
+
+A 380×740 frameless window floats above every app and every Space. Drag it by the top strip or the header. **Option+Space** shows or hides it from anywhere, and so do the menu-bar bolt and the × button; Escape hides it too. It remembers where you left it, and the menu-bar item can snap it back to the top-right corner. Quit from the menu-bar icon. The packaged UI loads from `app://widget`. `desktop/main.cjs` presents the backend's allowed dev origin for `localhost`/`127.0.0.1` requests, so the backend needs no CORS change.
+
+### Chrome extension
 
 Load the extension: open `chrome://extensions`, enable Developer mode, choose **Load unpacked** and select `frontend/dist`. Click the toolbar bolt to pop the widget open; clicking again focuses the existing window.
 
@@ -32,7 +43,8 @@ Without the real backend, start the [mock](../tests/mocks/README.md) first and p
 | `src/lib/gauge.ts` | Speedometer scale `0 10 20 40 80 120 160 200`; 20 at top centre, 200 far right |
 | `src/screens/`, `src/components/` | UI; styles in `src/styles/` |
 | `src/models.ts` | Per-model names, captions, car sprites and colours |
-| `src/background.ts`, `public/manifest.json` | Toolbar button → pop-out window |
+| `desktop/main.cjs`, `desktop/preload.cjs` | Electron floating widget: always on top, Option+Space, menu-bar icon, position memory |
+| `src/background.ts`, `public/manifest.json` | Chrome toolbar button → pop-out window |
 | `assets/design/` | Source mockup and car sheet supplied for the design |
 | `scripts/extract-cars.mjs` | Cuts the car sheet into transparent sprites (`npm run assets`, needs `sharp`) |
 

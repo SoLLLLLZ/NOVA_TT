@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { ApiError, Client, newIdempotencyKey, parseVersion } from "./api/client";
 import type { Config, ErrorBody, ReplayResponse, RunEvent } from "./api/types";
+import { DesktopBar } from "./components/DesktopBar";
 import { Wordmark } from "./components/Header";
+import { desktop } from "./lib/desktop";
 import { PairingForm } from "./components/PairingForm";
 import { Toast } from "./components/Toast";
 import { CONTRACT_MAJOR, DEFAULT_API_BASE, LIVE_MIN_MINOR } from "./config";
@@ -9,15 +11,16 @@ import { changeRows } from "./lib/changes";
 import { gpuLabel } from "./lib/format";
 import { KEYS, load, remove, save } from "./lib/storage";
 import { lookFor } from "./models";
+import { DefaultScreen } from "./screens/DefaultScreen";
 import { ErrorScreen } from "./screens/ErrorScreen";
 import { LiveScreen } from "./screens/LiveScreen";
 import { OptimizedScreen } from "./screens/OptimizedScreen";
 import { PitstopScreen } from "./screens/PitstopScreen";
 import { SelectScreen } from "./screens/SelectScreen";
-import { initialState, reducer, type TunedResult } from "./state/machine";
+import { initialState, reducer, type Baseline, type RunKind, type TunedResult } from "./state/machine";
 import { deriveChecklist } from "./state/steps";
 
-type PendingRun = { runId: string | null; model: string; gpuType: string; idempotencyKey: string; before: Config | null };
+type PendingRun = { runId: string | null; model: string; gpuType: string; idempotencyKey: string; before: Config | null; kind?: RunKind };
 
 const POLL_MS = 1500;
 const STATUS_REFRESH_MS = 15000;
@@ -72,6 +75,8 @@ export function App() {
       setClient(authed);
       setOffline(false);
       dispatch({ type: "status_loaded", status });
+      const baselines = await load<Record<string, Baseline>>(KEYS.baselines);
+      if (baselines) dispatch({ type: "baselines_loaded", baselines });
 
       // Pick up where a closed widget left off.
       if (status.active_run_id) {
@@ -83,10 +88,15 @@ export function App() {
           gpuType: pending?.gpuType ?? status.all_gpus[0]?.label ?? "L40",
           idempotencyKey: pending?.idempotencyKey ?? newIdempotencyKey(),
           before: pending?.before ?? null,
+          kind: pending?.kind,
         });
-      } else if (status.is_tuned) {
-        const tuned = await load<TunedResult>(KEYS.tuned);
-        if (tuned && status.current_config?.model === tuned.model) dispatch({ type: "resume_tuned", result: tuned });
+      } else if (status.current_config) {
+        // Reopen on the retained service: tuned, or the untouched default run.
+        const stored = await load<TunedResult>(KEYS.tuned);
+        const result = stored ? { ...stored, kind: stored.kind ?? "tuned" } : null;
+        if (result && status.current_config.model === result.model && (result.kind === "tuned") === status.is_tuned) {
+          dispatch({ type: "resume_tuned", result });
+        }
       }
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) {
@@ -152,64 +162,98 @@ export function App() {
     if (resumedRunId && !opAbort.current) void pollRun(resumedRunId);
   }, [resumedRunId, pollRun]);
 
-  const optimize = useCallback(async () => {
-    if (!client || !state.status) return;
-    const selected = state.status.models.find((m) => m.id === state.model);
-    if (!selected) return;
-    const idempotencyKey = newIdempotencyKey();
-    // Only a config for the same model is a meaningful "before" for the changes fallback.
-    const before = state.status.current_config?.model === state.model ? state.status.current_config : null;
-    const gpuType = state.gpuType ?? selected.requirements.gpu_type;
-    const pending: PendingRun = { runId: null, model: state.model, gpuType, idempotencyKey, before };
-    dispatch({ type: "optimize_start", idempotencyKey, before });
-    await save(KEYS.pendingRun, pending);
+  /** POSTs a streaming run, falling back to polling if the stream drops or is replayed. */
+  const streamRun = useCallback(
+    async (path: string, body: unknown, pending: PendingRun, resumeOnConflict: boolean) => {
+      if (!client) return;
+      const controller = new AbortController();
+      opAbort.current = controller;
+      let runId: string | null = null;
+      let terminal = false;
+      const onEvent = (event: RunEvent) => {
+        if (event.type === "start" && !runId) {
+          runId = event.run_id;
+          void save(KEYS.pendingRun, { ...pending, runId });
+        }
+        if (event.type === "done" || event.type === "error") terminal = true;
+        dispatch({ type: "run_event", event });
+      };
+      try {
+        const replay: ReplayResponse | null = await client.operation(path, body, pending.idempotencyKey, onEvent, controller.signal);
+        if (replay) runId = replay.run_id;
+        if (!terminal && runId) void pollRun(runId); // stream dropped or replayed: follow the run instead of re-posting
+        else if (!terminal) dispatch({ type: "run_failed", error: { code: "internal", message: "The stream ended without a result." } });
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        if (resumeOnConflict && error instanceof ApiError && error.activeRunId) {
+          dispatch({ type: "resume_run", runId: error.activeRunId, model: pending.model, gpuType: pending.gpuType, idempotencyKey: pending.idempotencyKey, before: pending.before });
+        } else if (runId && !terminal) {
+          void pollRun(runId);
+        } else {
+          dispatch({ type: "run_failed", error: asErrorBody(error) });
+        }
+      } finally {
+        if (opAbort.current === controller) opAbort.current = null;
+      }
+    },
+    [client, pollRun],
+  );
 
-    const body = {
-      model: state.model,
-      preset: "fastest",
-      objective: "decode",
-      workload: "short",
-      mode: "verify_only",
+  const resourcesFor = useCallback(() => {
+    const selected = state.status?.models.find((m) => m.id === state.model);
+    if (!state.status || !selected) return null;
+    const gpuType = state.gpuType ?? selected.requirements.gpu_type;
+    return {
+      gpuType,
       resources: {
         target_id: state.status.target_id,
         gpu_type: gpuType,
         gpu_count: selected.requirements.gpu_count,
         same_node: selected.requirements.same_node,
       },
-      constraints: { allow_sampling_change: true },
     };
+  }, [state.status, state.model, state.gpuType]);
 
-    const controller = new AbortController();
-    opAbort.current = controller;
-    let runId: string | null = null;
-    let terminal = false;
-    const onEvent = (event: RunEvent) => {
-      if (event.type === "start" && !runId) {
-        runId = event.run_id;
-        void save(KEYS.pendingRun, { ...pending, runId });
-      }
-      if (event.type === "done" || event.type === "error") terminal = true;
-      dispatch({ type: "run_event", event });
-    };
+  const optimize = useCallback(async () => {
+    const target = resourcesFor();
+    if (!client || !state.status || !target) return;
+    const idempotencyKey = newIdempotencyKey();
+    // Only a config for the same model is a meaningful "before" for the changes fallback.
+    const before = state.status.current_config?.model === state.model ? state.status.current_config : null;
+    const pending: PendingRun = { runId: null, model: state.model, gpuType: target.gpuType, idempotencyKey, before };
+    dispatch({ type: "optimize_start", idempotencyKey, before });
+    await save(KEYS.pendingRun, pending);
+    await streamRun(
+      "/optimize",
+      {
+        model: state.model,
+        preset: "fastest",
+        objective: "decode",
+        workload: "short",
+        mode: "verify_only",
+        resources: target.resources,
+        constraints: { allow_sampling_change: true },
+      },
+      pending,
+      true,
+    );
+  }, [client, state.status, state.model, resourcesFor, streamRun]);
 
-    try {
-      const replay: ReplayResponse | null = await client.operation("/optimize", body, idempotencyKey, onEvent, controller.signal);
-      if (replay) runId = replay.run_id;
-      if (!terminal && runId) void pollRun(runId); // stream dropped or replayed: follow the run instead of re-posting
-      else if (!terminal) dispatch({ type: "run_failed", error: { code: "internal", message: "The optimize stream ended without a result." } });
-    } catch (error) {
-      if (controller.signal.aborted) return;
-      if (error instanceof ApiError && error.activeRunId) {
-        dispatch({ type: "resume_run", runId: error.activeRunId, model: state.model, gpuType, idempotencyKey, before });
-      } else if (runId && !terminal) {
-        void pollRun(runId);
-      } else {
-        dispatch({ type: "run_failed", error: asErrorBody(error) });
-      }
-    } finally {
-      if (opAbort.current === controller) opAbort.current = null;
-    }
-  }, [client, state.status, state.model, state.gpuType, pollRun]);
+  /** Starts the untouched default (contract 2.1 `apply_default`) so its live speed can be compared. */
+  const runDefault = useCallback(async () => {
+    const target = resourcesFor();
+    if (!client || !target) return;
+    const idempotencyKey = newIdempotencyKey();
+    const pending: PendingRun = { runId: null, model: state.model, gpuType: target.gpuType, idempotencyKey, before: null, kind: "default" };
+    dispatch({ type: "default_start", idempotencyKey });
+    await save(KEYS.pendingRun, pending);
+    await streamRun(
+      "/action",
+      { action: "apply_default", params: { model: state.model, resources: target.resources } },
+      pending,
+      false,
+    );
+  }, [client, state.model, resourcesFor, streamRun]);
 
   const onArrived = useCallback(() => dispatch({ type: "animation_ready" }), []);
 
@@ -224,6 +268,10 @@ export function App() {
   useEffect(() => {
     if (state.phase === "error") void remove(KEYS.pendingRun);
   }, [state.phase]);
+
+  useEffect(() => {
+    if (Object.keys(state.baselines).length) void save(KEYS.baselines, state.baselines);
+  }, [state.baselines]);
 
   // ---------------------------------------------------------------- live speed
   const tuned = state.phase === "optimized" || state.phase === "live_speed" || state.phase === "reverting";
@@ -292,6 +340,18 @@ export function App() {
     }
   }, [client, state.result]);
 
+  // Escape hides the desktop widget unless a dropdown or text field has it.
+  useEffect(() => {
+    if (!desktop) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "Escape" || event.defaultPrevented) return;
+      if (document.querySelector(".pselect.is-open") || document.activeElement instanceof HTMLInputElement) return;
+      desktop?.hide();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   // ---------------------------------------------------------------- render
   const clearToast = useCallback(() => dispatch({ type: "clear_toast" }), []);
   const checklist = useMemo(() => {
@@ -325,6 +385,9 @@ export function App() {
     case "optimizing":
       screen = <PitstopScreen key={state.run?.idempotencyKey} look={look} items={checklist} detail={detail} onArrived={onArrived} />;
       break;
+    case "starting_default":
+      screen = <DefaultScreen look={look} modelKey={modelId} config={null} detail={detail} waitingText="" onOptimize={() => void optimize()} onStop={() => void revert()} stopping={false} stopError={null} />;
+      break;
     case "optimized":
     case "reverting":
     case "live_speed":
@@ -336,9 +399,27 @@ export function App() {
             decode={state.live.decode}
             prefill={state.live.prefill}
             active={state.live.active}
+            kind={state.result?.kind ?? "tuned"}
+            look={look}
+            baseline={state.result?.kind === "tuned" ? state.baselines[modelId] ?? null : null}
+            onOptimize={() => void optimize()}
             reverting={reverting}
             revertError={state.revertError}
             onRevert={() => void revert()}
+          />
+        );
+      } else if (state.result?.kind === "default") {
+        screen = (
+          <DefaultScreen
+            look={look}
+            modelKey={modelId}
+            config={state.result.config}
+            detail={null}
+            waitingText={state.liveUnavailable ?? "Run the model in your terminal…"}
+            onOptimize={() => void optimize()}
+            onStop={() => void revert()}
+            stopping={reverting}
+            stopError={state.revertError}
           />
         );
       } else {
@@ -361,7 +442,7 @@ export function App() {
         <ErrorScreen
           error={state.error}
           retryLabel={state.status ? "TRY AGAIN" : "RETRY CONNECTION"}
-          onRetry={() => (state.status ? void optimize() : void bootstrap())}
+          onRetry={() => (!state.status ? void bootstrap() : state.run?.kind === "default" ? void runDefault() : void optimize())}
           onBack={state.status ? () => dispatch({ type: "back_to_select" }) : null}
         />
       );
@@ -378,12 +459,14 @@ export function App() {
           onGpu={(type) => dispatch({ type: "select_gpu", gpuType: type })}
           onModel={(model) => dispatch({ type: "select_model", model })}
           onOptimize={() => void optimize()}
+          onRunDefault={() => void runDefault()}
         />
       );
   }
 
   return (
     <div className="app">
+      <DesktopBar />
       {screen}
       <Toast message={state.toast} onDone={clearToast} />
     </div>

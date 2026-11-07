@@ -39,4 +39,5 @@ export const KEYS = {
   apiBase: "nova.apiBase",
   tuned: "nova.tunedResult",
   pendingRun: "nova.pendingRun",
+  baselines: "nova.baselines",
 } as const;

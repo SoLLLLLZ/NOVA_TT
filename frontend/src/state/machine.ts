@@ -19,22 +19,31 @@ export type Phase =
   | "detecting_gpu"
   | "select_model"
   | "optimizing"
+  | "starting_default"
   | "optimized"
   | "live_speed"
   | "reverting"
   | "error";
 
-/** What the widget remembers about the applied tuned profile. */
+export type RunKind = "tuned" | "default";
+
+/** What the widget remembers about the retained service: the tuned profile or the untouched default. */
 export type TunedResult = {
+  kind: RunKind;
   model: string;
   runId: string;
   rollbackId: string | null;
   changes: Change[];
   confidence: Confidence;
   gpuType: string;
+  config: Config | null;
 };
 
+/** Live decode/prefill measured while the untouched default was running, per model. */
+export type Baseline = { decode: number; prefill: number | null };
+
 export type RunState = {
+  kind: RunKind;
   runId: string | null;
   model: string;
   gpuType: string;
@@ -70,6 +79,7 @@ export type State = {
   run: RunState | null;
   result: TunedResult | null;
   live: LiveState;
+  baselines: Record<string, Baseline>;
   liveUnavailable: string | null;
   error: ErrorBody | null;
   /** Inline error shown on the optimized/live screens after a failed revert. */
@@ -90,6 +100,7 @@ export const initialState: State = {
   run: null,
   result: null,
   live: { decode: null, prefill: null, requestId: null, active: false },
+  baselines: {},
   liveUnavailable: null,
   error: null,
   revertError: null,
@@ -106,10 +117,12 @@ export type Action =
   | { type: "select_gpu"; gpuType: string }
   | { type: "select_model"; model: string }
   | { type: "optimize_start"; idempotencyKey: string; before: Config | null }
+  | { type: "default_start"; idempotencyKey: string }
+  | { type: "baselines_loaded"; baselines: Record<string, Baseline> }
   | { type: "run_event"; event: RunEvent }
   | { type: "run_snapshot"; snapshot: RunSnapshot }
   | { type: "run_failed"; error: ErrorBody }
-  | { type: "resume_run"; runId: string; model: string; gpuType: string; idempotencyKey: string; before: Config | null }
+  | { type: "resume_run"; runId: string; model: string; gpuType: string; idempotencyKey: string; before: Config | null; kind?: RunKind }
   | { type: "animation_ready" }
   | { type: "resume_tuned"; result: TunedResult }
   | { type: "live_event"; event: LiveEvent }
@@ -122,8 +135,16 @@ export type Action =
 
 const emptyLive: LiveState = initialState.live;
 
-function newRun(model: string, gpuType: string, idempotencyKey: string, before: Config | null, runId: string | null): RunState {
+function newRun(
+  kind: RunKind,
+  model: string,
+  gpuType: string,
+  idempotencyKey: string,
+  before: Config | null,
+  runId: string | null,
+): RunState {
   return {
+    kind,
     runId,
     model,
     gpuType,
@@ -139,8 +160,35 @@ function newRun(model: string, gpuType: string, idempotencyKey: string, before: 
   };
 }
 
+/** A default run is ready as soon as the backend has the untouched service up. */
+function settleDefault(state: State): State {
+  const run = state.run;
+  if (state.phase !== "starting_default" || !run?.done) return state;
+  if (!run.done.applied) {
+    return { ...state, phase: "error", error: { code: "internal", message: "The default run finished without starting a service.", retryable: true } };
+  }
+  return {
+    ...state,
+    phase: "optimized",
+    live: emptyLive,
+    liveUnavailable: null,
+    revertError: null,
+    result: {
+      kind: "default",
+      model: run.model,
+      runId: run.done.run_id,
+      rollbackId: run.done.rollback_id,
+      changes: [],
+      confidence: "none",
+      gpuType: run.gpuType,
+      config: run.done.config ?? null,
+    },
+  };
+}
+
 /** Moves to "optimized" once the backend is done and the car is in the bay. */
 function settle(state: State): State {
+  if (state.phase === "starting_default") return settleDefault(state);
   const run = state.run;
   if (state.phase !== "optimizing" || !run?.done || !run.animationReady) return state;
   const done = run.done;
@@ -163,19 +211,29 @@ function settle(state: State): State {
     liveUnavailable: null,
     revertError: null,
     result: {
+      kind: "tuned",
       model: run.model,
       runId: done.run_id,
       rollbackId: done.rollback_id,
       changes,
       confidence: done.evidence?.confidence ?? run.confidence ?? "none",
       gpuType: run.gpuType,
+      config: done.config ?? null,
     },
   };
 }
 
+const inRun = (state: State) => state.phase === "optimizing" || state.phase === "starting_default";
+
+/** Records what the untouched default measured, for the tuned screen's comparison. */
+function recordBaseline(state: State, decode: number | null, prefill: number | null): Record<string, Baseline> {
+  if (state.result?.kind !== "default" || decode === null || decode <= 0) return state.baselines;
+  return { ...state.baselines, [state.result.model]: { decode, prefill } };
+}
+
 function applyRunEvent(state: State, event: RunEvent): State {
   const run = state.run;
-  if (!run || state.phase !== "optimizing") return state;
+  if (!run || !inRun(state)) return state;
   if (run.runId && event.run_id !== run.runId) return state;
   if (event.sequence <= run.lastSequence) return state; // replayed or duplicate
   const next: RunState = { ...run, runId: event.run_id, lastSequence: event.sequence };
@@ -231,23 +289,33 @@ export function reducer(state: State, action: Action): State {
         phase: "optimizing",
         error: null,
         result: null,
-        run: newRun(state.model, state.gpuType ?? "L40", action.idempotencyKey, action.before, null),
+        run: newRun("tuned", state.model, state.gpuType ?? "L40", action.idempotencyKey, action.before, null),
       };
+    case "default_start":
+      return {
+        ...state,
+        phase: "starting_default",
+        error: null,
+        result: null,
+        run: newRun("default", state.model, state.gpuType ?? "L40", action.idempotencyKey, null, null),
+      };
+    case "baselines_loaded":
+      return { ...state, baselines: { ...action.baselines, ...state.baselines } };
     case "resume_run":
       return {
         ...state,
-        phase: "optimizing",
+        phase: action.kind === "default" ? "starting_default" : "optimizing",
         model: action.model,
         gpuType: action.gpuType,
         error: null,
-        run: newRun(action.model, action.gpuType, action.idempotencyKey, action.before, action.runId),
+        run: newRun(action.kind ?? "tuned", action.model, action.gpuType, action.idempotencyKey, action.before, action.runId),
       };
     case "run_event":
       return applyRunEvent(state, action.event);
     case "run_snapshot": {
       const run = state.run;
       const snap = action.snapshot;
-      if (!run || state.phase !== "optimizing" || (run.runId && run.runId !== snap.run_id)) return state;
+      if (!run || !inRun(state) || (run.runId && run.runId !== snap.run_id)) return state;
       const next: RunState = {
         ...run,
         runId: snap.run_id,
@@ -288,6 +356,7 @@ export function reducer(state: State, action: Action): State {
           return {
             ...state,
             phase: "live_speed",
+            baselines: recordBaseline(state, event.decode_tps, event.prefill_tps ?? state.live.prefill),
             live: {
               requestId: event.request_id,
               active: true,
@@ -299,6 +368,7 @@ export function reducer(state: State, action: Action): State {
           return {
             ...state,
             phase: "live_speed",
+            baselines: recordBaseline(state, event.measurement.decode_tps, event.measurement.prefill_tps),
             live: {
               requestId: event.request_id,
               active: false,
@@ -324,7 +394,7 @@ export function reducer(state: State, action: Action): State {
         run: null,
         live: emptyLive,
         liveUnavailable: null,
-        toast: "Defaults restored",
+        toast: state.result?.kind === "default" ? "Default run stopped" : "Defaults restored",
       };
     case "revert_failed":
       return {

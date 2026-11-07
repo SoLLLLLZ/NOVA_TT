@@ -19,9 +19,10 @@ type Props = {
   onGpu: (type: string) => void;
   onModel: (id: string) => void;
   onOptimize: () => void;
+  onRunDefault: () => void;
 };
 
-export function SelectScreen({ status, offline, clusterId, gpuType, model, onCluster, onGpu, onModel, onOptimize }: Props) {
+export function SelectScreen({ status, offline, clusterId, gpuType, model, onCluster, onGpu, onModel, onOptimize, onRunDefault }: Props) {
   const detecting = status === null;
   const catalog = status?.models ?? [];
   const selected = catalog.find((m) => m.id === model);
@@ -86,6 +87,9 @@ export function SelectScreen({ status, offline, clusterId, gpuType, model, onClu
       >
         PITSTOP · OPTIMIZE
       </PixelButton>
+      <button type="button" className="secondary-run" disabled={!canOptimize} onClick={onRunDefault}>
+        or run with default settings first
+      </button>
       <p className="helper">{detecting ? "Detecting GPU…" : "Changing the model changes your car."}</p>
     </main>
   );

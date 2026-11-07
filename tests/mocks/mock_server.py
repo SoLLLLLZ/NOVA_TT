@@ -15,7 +15,7 @@ Environment:
     MOCK_AUTO_INFERENCE_SECONDS  if set, fake a terminal run N s after a successful optimize
 
 Mock-only route (not part of the contract):
-    POST /mock/inference {"model": "<id>"}   pretend the student ran the model in a terminal
+    POST /mock/inference {"model": "<id>"}   pretend the student ran the model in a terminal (default or tuned)
 """
 
 from __future__ import annotations
@@ -92,6 +92,7 @@ CATALOG = {
         "fallback": {"config_id": "cfg_aee1c8396d18230b", "label": "Production · MTP3",
                      "overrides": {"draft_tokens": 3, "temperature": 1.0}},
         "live": {"decode": 138.0, "prefill": 1805.0},
+        "live_default": {"decode": 21.5, "prefill": 1240.0},
     },
     "qwen3.8-flash-next": {
         "display_name": "Qwen 3.8 Flash Next",
@@ -120,6 +121,7 @@ CATALOG = {
         },
         "fallback": None,
         "live": {"decode": 88.0, "prefill": 960.0},
+        "live_default": {"decode": 19.6, "prefill": 1610.0},
     },
     "muse-glimmer": {
         "display_name": "Muse Glimmer 30B",
@@ -147,6 +149,7 @@ CATALOG = {
         "fallback": {"config_id": "cfg_91cf36411e6d4895", "label": "Production · DFlash11",
                      "overrides": {"draft_tokens": 11, "temperature": 1.0}},
         "live": {"decode": 172.0, "prefill": 1740.0},
+        "live_default": {"decode": 18.9, "prefill": 1960.0},
     },
 }
 
@@ -335,7 +338,8 @@ class State:
         self.active_run_id: str | None = None
         self.current_config: dict | None = None
         self.is_tuned = False
-        self.tuned_model: str | None = None
+        # Model whose retained service (tuned or untouched default) is running.
+        self.service_model: str | None = None
         self.service: dict | None = None
         self.rollbacks: dict[str, dict | None] = {}
         self.live_subscribers: dict[str, list[queue.Queue]] = {}
@@ -358,16 +362,20 @@ def live_publish(target_model: str, event_type: str, **fields) -> None:
 
 
 def fake_terminal_inference(model: str) -> str:
-    """Pretend the student sent one request to the tuned service."""
+    """Pretend the student sent one request to the retained (tuned or default) service."""
     entry = CATALOG[model]
+    tuned = STATE.is_tuned
+    rates = entry["live"] if tuned else entry["live_default"]
+    engine = "llama.cpp" if tuned else "ollama"
+    convention = "llama.cpp (n-1)/decode_seconds" if tuned else "ollama n/decode_seconds"
     request_id = f"req_{uuid.uuid4().hex[:10]}"
     service_id = STATE.service["id"] if STATE.service else None
     prompt_tokens = 412
 
     def run():
         live_publish(model, "inference_started", request_id=request_id, model=model, service_id=service_id,
-                     prompt_tokens=prompt_tokens)
-        target, prefill = entry["live"]["decode"], entry["live"]["prefill"]
+                     engine=engine, tuned=tuned, prompt_tokens=prompt_tokens)
+        target, prefill = rates["decode"], rates["prefill"]
         prefill_tps = round(prefill * random.uniform(0.97, 1.03), 1)
         output_tokens, decode_tps = 0, 0.0
         for tick in range(1, 17):
@@ -376,12 +384,13 @@ def fake_terminal_inference(model: str) -> str:
             decode_tps = round(target * ramp * random.uniform(0.97, 1.03), 1)
             output_tokens += max(1, int(decode_tps * 0.25))
             live_publish(model, "metrics", request_id=request_id, decode_tps=decode_tps, prefill_tps=prefill_tps,
-                         output_tokens=output_tokens, timing_convention="llama.cpp (n-1)/decode_seconds")
+                         output_tokens=output_tokens, timing_convention=convention)
         decode_seconds = round(output_tokens / decode_tps, 3)
         prefill_seconds = round(prompt_tokens / prefill_tps, 3)
         live_publish(model, "inference_done", request_id=request_id, measurement=measurement(
             model, "live-terminal", decode_tps, prefill_tps, prompt_tokens, output_tokens, decode_seconds,
-            prefill_seconds, purpose="throughput", run_id=None))
+            prefill_seconds, purpose="throughput", run_id=None, engine=engine,
+            profile_id=None if tuned else f"mock-default-ollama-{model}"))
 
     threading.Thread(target=run, daemon=True).start()
     return request_id
@@ -535,7 +544,7 @@ def run_optimize(run: Run, body: dict) -> None:
             STATE.rollbacks[rollback_id] = copy.deepcopy(current) if current else None
             STATE.current_config = effective
             STATE.is_tuned = True
-            STATE.tuned_model = model
+            STATE.service_model = model
             STATE.service = service
 
         speedup = None
@@ -564,22 +573,63 @@ def run_optimize(run: Run, body: dict) -> None:
         finish_active(run)
 
 
+def run_default(run: Run, body: dict) -> None:
+    """apply_default: start and retain the untouched default Ollama service."""
+    model = body["model"]
+    started = time.time()
+    current = copy.deepcopy(STATE.current_config) if STATE.current_config else None
+    try:
+        run.emit("start", operation=run.operation, mode="apply_default", started_at=run.started_at,
+                 deadline_at=run.deadline_at)
+        step(run, "detect_gpu", "running", 0.1, "Reading the Slurm allocation")
+        pause(0.6)
+        step(run, "detect_gpu", "done", 0.25, f"Found {len(GPUS)} × L40 · 48 GB on n03")
+        step(run, "load_model", "running", 0.35, "Starting untouched Ollama with its defaults")
+        pause(1.4)
+        step(run, "load_model", "done", 0.8, "Default Ollama is serving the model")
+        config = default_config(model)
+        step(run, "apply", "running", 0.9, "Keeping the default service for your terminal")
+        pause(0.4)
+        step(run, "apply", "done", 1.0, "Default service is ready")
+        rollback_id = f"rb_{uuid.uuid4().hex[:10]}"
+        service = {"id": f"svc_{uuid.uuid4().hex[:8]}", "state": "running", "allocation_id": "mock-alloc-266901",
+                   "expires_at": later_iso(3600)}
+        with STATE.lock:
+            STATE.rollbacks[rollback_id] = current
+            STATE.current_config = config
+            STATE.is_tuned = False
+            STATE.service_model = model
+            STATE.service = service
+        run.emit("done", status="success", mode="apply_default", applied=True, config=config, evidence=None,
+                 validation=None, before=None, after=None, speedup=None,
+                 comparison={"available": False, "mode": "apply_default", "baseline_run_id": None,
+                             "reason": "Default run makes no comparison", "conditions_differ": []},
+                 reason="Untouched default Ollama is running.", repairs=[],
+                 elapsed_seconds=round(time.time() - started, 2), service=service, rollback_id=rollback_id,
+                 repro_command=None, repro_ref=None)
+    except Cancelled:
+        run.emit("error", error={"code": "cancelled", "message": "Default run was cancelled.", "diagnosable": False,
+                                 "retryable": True}, cleanup=cleanup_obj("completed"), last_verified_profile_id=None)
+    finally:
+        finish_active(run)
+
+
 def run_revert(run: Run, rollback_id: str) -> None:
     started = time.time()
     try:
         run.emit("start", operation=run.operation, mode="revert", started_at=run.started_at, deadline_at=run.deadline_at)
-        step(run, "rollback", "running", 0.2, "Stopping the tuned service")
+        step(run, "rollback", "running", 0.2, "Stopping the running service")
         pause(0.8)
         with STATE.lock:
             prior = STATE.rollbacks.pop(rollback_id, None)
-            model = STATE.tuned_model
+            model = STATE.service_model
         step(run, "rollback", "running", 0.6, "Restoring the previous configuration")
         pause(0.7)
         restored = prior or (default_config(model) if model else None)
         with STATE.lock:
             STATE.current_config = restored
             STATE.is_tuned = False
-            STATE.tuned_model = None
+            STATE.service_model = None
             STATE.service = None
         step(run, "rollback", "done", 1.0, "Defaults restored")
         run.emit("done", status="success", restored=True, config=restored, service=None,
@@ -630,7 +680,7 @@ RESOURCE_FIELDS = {"target_id", "allocation_id", "gpu_type", "gpu_count", "gpu_i
 CONSTRAINT_FIELDS = {"min_context_tokens", "quant", "allow_quant_change", "allow_sampling_change",
                      "allow_experimental", "fixed_settings", "min_free_gpu_memory_mib", "max_gpu_count",
                      "runtime_requirements", "allow_cpu_offload"}
-ACTIONS = {"apply_config", "revert", "lower_context", "switch_quantization", "run_benchmark"}
+ACTIONS = {"apply_config", "revert", "lower_context", "switch_quantization", "run_benchmark", "apply_default"}
 
 
 class ApiError(Exception):
@@ -665,7 +715,7 @@ def model_payload(model_id: str) -> dict:
         reasons.append(f"No active GPU allocation; optimizing will request {need} × L40")
     elif len(alloc["gpu_ids"]) < need:
         reasons.append(f"Needs {need} × L40 on one node")
-    loaded = STATE.is_tuned and STATE.tuned_model == model_id
+    loaded = STATE.service_model == model_id
     return {
         "id": model_id, "display_name": entry["display_name"], "quant": entry["quant"],
         "artifact_id": f"mock-{model_id}-target", "installed": True, "loaded": loaded,
@@ -914,8 +964,8 @@ class Handler(BaseHTTPRequestHandler):
         if model not in CATALOG:
             raise ApiError(404, "model_not_found", f"Unknown model '{model}'.", field="model")
         with STATE.lock:
-            if not (STATE.is_tuned and STATE.tuned_model == model):
-                raise ApiError(404, "not_found", "No optimized service is running for this model.")
+            if STATE.service_model != model:
+                raise ApiError(404, "not_found", "No service is running for this model.")
             q: queue.Queue = queue.Queue()
             STATE.live_subscribers.setdefault(model, []).append(q)
             service_id = STATE.service["id"] if STATE.service else None
@@ -934,10 +984,10 @@ class Handler(BaseHTTPRequestHandler):
                     event = q.get(timeout=10)
                 except queue.Empty:
                     with STATE.lock:
-                        still_tuned = STATE.is_tuned and STATE.tuned_model == model
+                        still_tuned = STATE.service_model == model
                     if not still_tuned:
                         send({"type": "error", "at": now_iso(), "error": {
-                            "code": "not_found", "message": "The optimized service was stopped.",
+                            "code": "not_found", "message": "The service was stopped.",
                             "diagnosable": False, "retryable": False}})
                         return
                     self.sse_comment("heartbeat")
@@ -1002,6 +1052,9 @@ class Handler(BaseHTTPRequestHandler):
             raise ApiError(404, "model_not_found", "params.model must be a catalog model.", field="params.model")
         if action == "run_benchmark":
             return self.launch(key, body, "action", action, run_benchmark, params)
+        if action == "apply_default":
+            reject_unknown(params, {"model", "resources"}, "params")
+            return self.launch(key, body, "action", action, run_default, params)
         return self.launch(key, body, "action", "verify_only", run_optimize,
                            {"model": params["model"], "mode": "verify_only"})
 
@@ -1047,11 +1100,11 @@ class Handler(BaseHTTPRequestHandler):
 
     def post_mock_inference(self) -> None:
         body = self.read_body()
-        model = body.get("model") or STATE.tuned_model
+        model = body.get("model") or STATE.service_model
         if model not in CATALOG:
             raise ApiError(404, "model_not_found", "Pass a catalog model.", field="model")
-        if not (STATE.is_tuned and STATE.tuned_model == model):
-            raise ApiError(404, "not_found", "Optimize this model first; no tuned service is running.")
+        if STATE.service_model != model:
+            raise ApiError(404, "not_found", "Start a default run or optimize this model first.")
         request_id = fake_terminal_inference(model)
         self.send_json(202, {"ok": True, "request_id": request_id})
 
