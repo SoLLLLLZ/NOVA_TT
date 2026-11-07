@@ -1,6 +1,6 @@
 # NOVA API Contract v2.1
 
-Updated November 7, 2026. v2.1 adds the live observation stream to v2.0 without changing existing response shapes. The original v2 contract replaces v0.1. Frontend and backend must both report/use `contract_version: "2.1"`. The endpoint names are retained where practical; the richer configuration and run objects are a breaking schema change. The three-model implementation is now in `backend/src/nova_backend`; see `backend/README.md` for run commands and current adapter limits. ByteShape, Glimmer and Flash execution are enabled. Production Optimize is verify_only for all three; Ollama comparisons are standalone tests.
+Updated November 7, 2026. v2.1 adds the live observation stream (section 9b) and the frontend's `apply_default` action (section 11) to v2.0 without changing existing response shapes. The original v2 contract replaces v0.1. Frontend and backend must both report/use `contract_version: "2.1"`. The endpoint names are retained where practical; the richer configuration and run objects are a breaking schema change. The three-model implementation is now in `backend/src/nova_backend`; see `backend/README.md` for run commands and current adapter limits. ByteShape, Glimmer and Flash execution are enabled. Production Optimize is verify_only for all three; Ollama comparisons are standalone tests.
 
 Repository: https://github.com/SoLLLLLZ/NOVA_TT
 
@@ -321,14 +321,14 @@ Request `{message,history?,model?,run_id?}`. history is an array of role/content
 
 ## 9b. GET /live (streaming, added in v2.1)
 
-Lets the widget reveal real speed once the student runs the tuned model from their own terminal. Query `model` (required, catalog ID). Authenticated like every other route, so clients read it with fetch streaming (EventSource cannot send `X-Pairing-Token`). It reports activity on the backend-retained optimized service for that model; it starts nothing and changes nothing.
+Lets the widget reveal real speed once the student runs the model from their own terminal, both for the untouched default (`apply_default`) and for the tuned profile, so the two can be compared. Query `model` (required, catalog ID). Authenticated like every other route, so clients read it with fetch streaming (EventSource cannot send `X-Pairing-Token`). It reports activity on the backend-retained service for that model, whether that is the tuned profile or the untouched default; it starts nothing and changes nothing.
 
-Before streaming: unknown model returns 404 `model_not_found`; no retained optimized service for that model returns 404 `not_found` ("No optimized service is running for this model."). Otherwise the response is `text/event-stream` and stays open across many requests until the client disconnects. Heartbeats are SSE comments. Events carry `type`, `sequence` (per connection, from 1) and `at`:
+Before streaming: unknown model returns 404 `model_not_found`; no retained service (tuned or default) for that model returns 404 `not_found` ("No service is running for this model."). Otherwise the response is `text/event-stream` and stays open across many requests until the client disconnects. Heartbeats are SSE comments. Events carry `type`, `sequence` (per connection, from 1) and `at`:
 
 | Type | Fields / semantics |
 | --- | --- |
 | `waiting` | model, service_id; sent once on connect while no request is in flight |
-| `inference_started` | request_id, model, service_id, prompt_tokens (nullable); a request reached the tuned service |
+| `inference_started` | request_id, model, service_id, engine, tuned (boolean), prompt_tokens (nullable); a request reached the retained service |
 | `metrics` | request_id, decode_tps, prefill_tps (nullable numbers), output_tokens, timing_convention; running native-engine rates during generation, targeting 5 updates per second (one native sample about every 200 ms; transport delays may reduce delivery frequency) |
 | `inference_done` | request_id, measurement (full measurement object above, origin `live`) |
 | `error` | standard error object; e.g. the service was stopped or reverted. The stream ends after it |
@@ -343,7 +343,7 @@ Use `uv run python scripts/generate.py` after Optimize. This is the supported mo
 
 ## 10. POST /diagnose
 
-Request `{model,run_id?,error_code?,log_tail?}`; prefer server-owned logs and sanitize any user log. Read-only. Returns `{explanation,can_auto_repair,suggested_action}`. suggested_action is null or `{action,params,label,constraint_changes}`. Allowed actions: apply_config, revert, lower_context, switch_quantization, run_benchmark. `constraint_changes` explicitly lists changes needing a fresh user action; diagnose itself never applies them.
+Request `{model,run_id?,error_code?,log_tail?}`; prefer server-owned logs and sanitize any user log. Read-only. Returns `{explanation,can_auto_repair,suggested_action}`. suggested_action is null or `{action,params,label,constraint_changes}`. Allowed actions: apply_config, revert, lower_context, switch_quantization, run_benchmark (diagnose never suggests apply_default). `constraint_changes` explicitly lists changes needing a fresh user action; diagnose itself never applies them.
 
 Auto-repair inside optimize does not require clicking this endpoint. It is already authorized within that run's constraints. Lowering the user's promised minimum context, changing a locked quant or stopping unrelated work is never an automatic repair.
 
@@ -358,8 +358,9 @@ Body `{action,params,budget?}` plus Idempotency-Key. Same validated runner, lock
 | `lower_context` | model, context_per_slot, profile_id, resources?; explicitly revises that constraint; backend computes total context and validates draft/model limits |
 | `switch_quantization` | model, artifact_id, profile_id, resources?, constraints?; installed artifact only by default |
 | `run_benchmark` | model, profile_id, resources?, workload (short/long), purpose (throughput/quality), max_tokens?, seed?; no implicit profile promotion |
+| `apply_default` | model, resources?; starts and retains the untouched default Ollama service for that model (the same lane `sequential_compare` and `/race` use as their baseline), so the student can measure it from a terminal through `GET /live`. Added in v2.1 |
 
-`done` for apply/lower_context/switch_quantization uses the optimize verify_only result (with operation action). Revert uses revert result. Benchmark returns `{status:"success",measurements,validation,applied:false,service,cleanup,elapsed_seconds}`; a failed required quality check terminates with error. Unknown actions return bad_request. Never accept raw commands, arbitrary environment variables or user-supplied executable paths.
+`done` for apply/lower_context/switch_quantization uses the optimize verify_only result (with operation action). `apply_default` uses the same shape with the untouched default config (engine `ollama`), `changes: []`, `evidence: null` and `validation` null or a health-only result: a default run makes no quality or tuning claim. It still returns a `rollback_id`, and status reports `is_tuned: false` with that config as `current_config`. A later `/optimize` on the same model compares against it as the `before` config. Revert uses revert result. Benchmark returns `{status:"success",measurements,validation,applied:false,service,cleanup,elapsed_seconds}`; a failed required quality check terminates with error. Unknown actions return bad_request. Never accept raw commands, arbitrary environment variables or user-supplied executable paths.
 
 ## 12. Validation rules and demo policy
 
@@ -390,12 +391,12 @@ Special conversions: `gpu_layers="53/53 (actual target)"` is observed placement,
 
 ## 14. Migration and implementation checklist
 
-1. Change `/status` and `/health` contract_version to 2.1. Clients must check it before mutations and show an incompatibility message for 0.1; there is no silent mixed-version contract.
+1. Change `/status` and `/health` contract_version to 2.1 (2.0 plus `GET /live` and `apply_default`). Clients must check it before mutations and show an incompatibility message for 0.1; there is no silent mixed-version contract.
 2. Replace flat v0.1 config objects with the full config envelope and settings. `threads` becomes settings.threads_decode; add threads_prefill. `kv_type` becomes distinct kv_type_k/kv_type_v. Boolean flash_attention becomes on/off/auto. Remaining old knobs move into settings; model/quant/engine stay identity fields. Do not accept both old and new spellings ambiguously.
 3. Replace gpu_index with resources allocation/GPU IDs and group requirements. Memory display now uses explicit MiB values. Add installed/loaded/ready distinctions and race availability.
 4. `changed` becomes `changes` with dotted paths and per-change reasons. Return evidence source IDs and independent validation. Measurements contain explicit timing/cache/token metadata; before/speedup can be null in verify_only.
 5. Implement the run store/idempotency/cancel behavior before allowing UI retries. Revert/action are streaming operations in v2. Keep authentication and terminal error handling consistent.
-6. Update frontend mocks and backend validation to the same version in the implementation work. The same FastAPI application supplies an explicitly labeled mock mode through `NOVA_MODE=mock`; backend tests use MockDriver. [DEMO_MODELS.md](../demo/DEMO_MODELS.md) and [OPTIMIZER_AGENT.md](../../backend/prompts/OPTIMIZER_AGENT.md) are updated with this contract.
+6. Update frontend mocks and backend validation to the same version in the implementation work. The same FastAPI application supplies an explicitly labeled mock mode through `NOVA_MODE=mock`; backend tests use MockDriver. A separate stdlib mock at `tests/mocks/mock_server.py` covers all three models and `GET /live` for frontend work without the backend environment. [DEMO_MODELS.md](../demo/DEMO_MODELS.md) and [OPTIMIZER_AGENT.md](../../backend/prompts/OPTIMIZER_AGENT.md) are updated with this contract.
 7. Core demo acceptance: ByteShape candidate can express MTP5/temp0.75/threads2+6; Flash can require 3 L40s and MTP2 on CUDA2; Glimmer can express DFlash15/temp0.75 and reject draft17. Verify unknown settings, insufficient GPUs, failed quality, interrupted stream, duplicate request and cancellation paths. Do not populate live UI metrics from fixtures.
 
 ## 15. Source scope

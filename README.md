@@ -8,6 +8,8 @@ Shared repository: https://github.com/SoLLLLLZ/NOVA_TT
 
 [Latest hardware validation](docs/demo/GLIMMER_FLASH_VALIDATION.md): Glimmer and Flash both passed the real Astra production path, generation and live feed. Flash decoded at 71.33 tokens/s versus the reused standalone Ollama baseline of 15.18 tokens/s (4.70×); see the report for configuration and allocation differences.
 
+The widget frontend (floating desktop widget and Chrome extension) is in [frontend/](frontend/README.md); a standalone stdlib mock for frontend work is in [tests/mocks/](tests/mocks/README.md).
+
 ## Start here
 
 1. Read the [API v2 contract](docs/api/endpoint.md) before connecting frontend and backend.
@@ -54,7 +56,7 @@ Frontend placeholders remain for the partner's implementation. Backend package a
 | Area | Owner / purpose |
 | --- | --- |
 | backend, prompts, profiles, Wright deployment | Taeho: selection, OpenRouter, execution, benchmarking and lifecycle |
-| frontend | Partner: model/GPU selection, progress, live speed, error states and API client |
+| frontend | Partner: model/GPU selection, progress, live speed, default-vs-tuned comparison, error states and API client |
 | API contract and integration mocks | Shared: both sides must use contract version 2.1 |
 | CANON evidence | Shared source of truth; preserve provenance and keep measured hardware distinct |
 
