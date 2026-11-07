@@ -145,3 +145,10 @@ class Benchmark(Strict):
 
 class Empty(Strict):
     pass
+
+
+class Generate(Strict):
+    model: str
+    prompt: Annotated[str, Field(min_length=1, max_length=12000)]
+    max_tokens: Annotated[int, Field(ge=1, le=4096)] = 2048
+    budget: Budget = Field(default_factory=Budget)

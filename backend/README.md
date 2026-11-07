@@ -44,6 +44,28 @@ The backend never relaxes host-key checking. It allocates through account/partit
 
 The default throughput test uses exactly `Write a short essay explaining the causes of the Industrial Revolution`, capped at 256 generated tokens. Basic correctness is checked separately with arithmetic. For the full demo essay, send this same prompt to `/race` with `max_tokens: 2048` so reasoning and the final essay have room to complete. The rehearsal script does this automatically. Historical CANON ledger rates do not predict essay speed. `workload` selects the historical evidence category; the demo probe itself remains the exact prompt above.
 
+## Live speedometer and terminal generation
+
+The backend reports contract **2.1**. After Optimize, the widget can keep an authenticated `GET /live?model=qwen3.8-27b` stream open. It receives `waiting`, `inference_started`, `metrics`, `inference_done`, and terminal `error` events with sequence numbers per connection. Native decode samples are delivered at a target **5 Hz**; no invented rates fill transport gaps. Decode is the running native request average, including reasoning tokens, not a rolling estimate from visible text. The final full measurement uses the same native `(predicted_n - 1) / seconds` convention.
+
+From another terminal in the repository, send the live demo prompt to the already optimized Wright service:
+
+```sh
+uv run python scripts/generate.py
+# Or choose your own prompt:
+uv run python scripts/generate.py --prompt "Explain steam power in two sentences"
+```
+
+This helper reads the pairing token locally without displaying it and calls authenticated `POST /generate`. Use `--state-dir` and `--port` if the backend uses nondefault settings. It streams the visible answer to the terminal while the widget observes real GPU speed. There is no new OpenRouter call, model load or sampling change. Direct requests to private engine ports are outside this monitored route. The helper is run on the Mac with the backend, not inside an unrelated Wright SSH session.
+
+`/live` starts no work. Optimize probes, Race and action benchmarks never populate it. It stays open across terminal requests; observer disconnects do not cancel generation. Revert, replacement, failure or expiry ends the stream, and the widget reconnects after the service is ready. The existing run cancellation API also works for `/generate`. Mock mode explicitly marks samples `simulation:true` and is not hardware evidence.
+
+Opt-in hardware verification (one owned L40; explicit registered ByteShape profile, two completed essays, live SSE, then revert/release):
+
+```sh
+uv run python scripts/check_live_byteshape.py
+```
+
 ## Boundaries
 
 - OpenRouter model: `openai/gpt-6-astra`, high effort, latency routing. No silent model/effort substitution. Priority service is requested first; an explicit unsupported-tier rejection retries the same model at high effort on the default tier. The returned effective tier is recorded. Other API errors remain visible; no model substitution occurs.

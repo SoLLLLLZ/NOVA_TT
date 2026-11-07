@@ -409,8 +409,33 @@ def final_text(text):
     return text.strip()
 
 
-def stream_request(port, path, request, lane, ollama):
+def live_metrics(item):
+    """Native phase counters only; no text/chunk counts or transport wall time."""
+    t = item.get("timings") or {}
+    n, elapsed = t.get("predicted_n"), t.get("predicted_ms")
+    if type(n) is not int or n < 1 or type(elapsed) not in (int, float) or not math.isfinite(elapsed) or elapsed <= 0:
+        return None
+    pn, pt = t.get("prompt_n"), t.get("prompt_ms")
+    prefill = (pn * 1000 / pt if type(pn) is int and pn >= 0 and
+               type(pt) in (int, float) and math.isfinite(pt) and pt > 0 else None)
+    decode = max(0, n - 1) * 1000 / elapsed
+    if not math.isfinite(decode) or (prefill is not None and not math.isfinite(prefill)):
+        return None
+    return {"kind": "metrics", "decode_tps": decode, "prefill_tps": prefill,
+            "output_tokens": n, "timing_convention": "(predicted_n - 1) / predicted_ms"}
+
+
+def worker_event(event):
+    if EVENT_PATH:
+        with EVENT_LOCK:
+            with EVENT_PATH.open("a") as f:
+                f.write(json.dumps(event, allow_nan=False) + "\n")
+
+
+def stream_request(port, path, request, lane, ollama, live=False):
     request["stream"] = True
+    if live and not ollama:
+        request["timings_per_token"] = True
     wire = urllib.request.Request(
         "http://127.0.0.1:" + str(port) + path,
         data=json.dumps(request).encode(),
@@ -420,9 +445,12 @@ def stream_request(port, path, request, lane, ollama):
     visible_sent = 0
     last = {}
     separate_thinking = False
+    last_metric_at = 0
     with urllib.request.urlopen(
         wire, timeout=max(1, ACTIVE_DEADLINE - time.time())
     ) as response:
+        if live:
+            worker_event({"kind": "inference_started", "prompt_tokens": None})
         for line in response:
             check()
             line = line.decode().strip()
@@ -434,6 +462,11 @@ def stream_request(port, path, request, lane, ollama):
                 break
             item = json.loads(line)
             last = item
+            if live:
+                metric = live_metrics(item)
+                if metric and time.monotonic() - last_metric_at >= 0.05:
+                    worker_event(metric)
+                    last_metric_at = time.monotonic()
             text += item.get("response" if ollama else "content", "")
             separate_thinking = separate_thinking or bool(item.get("thinking"))
             # Thinking is always enabled. Native completion may start inside a think block.
@@ -526,7 +559,7 @@ def generate(body):
     request_start = time.time()
     start = time.monotonic()
     r = (
-        stream_request(port, path, request, lane, ollama)
+        stream_request(port, path, request, lane, ollama, live=body.get("live", False))
         if body.get("stream")
         else req(port, path, request)
     )

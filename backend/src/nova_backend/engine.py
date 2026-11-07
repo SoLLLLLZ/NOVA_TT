@@ -3,8 +3,9 @@ import asyncio, copy, time
 from datetime import datetime, timezone
 from .common import Problem, digest, now, uid
 from .catalog import BASELINE, PROFILES, evidence, model_check, profile, resolve
-from .schemas import Optimize, Race, Revert, Benchmark
+from .schemas import Optimize, Race, Revert, Benchmark, Generate
 from .store import TERMINAL
+from .live import LiveFeed
 
 QUALITY_PROMPT = 'A shop starts with 17 notebooks, receives 8, then sells 6. Return only a JSON object with integer keys "remaining" (notebooks left) and "doubled" (twice that number).'
 PROBE_PROMPT = "Write a short essay explaining the causes of the Industrial Revolution"
@@ -25,6 +26,10 @@ class Engine:
         self.generation = 0
         self.verified = {}
         self.recovery_error = None
+        self.live = LiveFeed(simulation=driver.simulated)
+        self.live_monitor = None
+        self.live_ready = False
+        self.submission_revision = 0
 
     async def recover(self):
         try:
@@ -169,6 +174,9 @@ class Engine:
                     "Benchmark requires the current verified profile.",
                     409,
                 )
+        if isinstance(req, Generate):
+            if not self.live_ready or not self.current or self.current["profile_id"] not in self.verified or not self.driver.session:
+                raise Problem("not_found", "No optimized service is running for this model.", 404)
         budget = getattr(req, "budget", None)
         seconds = budget.deadline_seconds if budget else 180
         deadline = time.time() + seconds
@@ -179,6 +187,10 @@ class Engine:
             datetime.fromtimestamp(deadline, timezone.utc).isoformat(),
         )
         rid = s["run_id"]
+        self.submission_revision += 1
+        if not isinstance(req, Generate):
+            self.live_ready = False
+            self.live.close()
         self.active = rid
         self.tasks[rid] = asyncio.create_task(self.run(rid, req, deadline))
         return s, False
@@ -246,6 +258,8 @@ class Engine:
                     result = await self.optimize(rid, req, deadline)
                 elif isinstance(req, Race):
                     result = await self.race(rid, req, deadline)
+                elif isinstance(req, Generate):
+                    result = await self.generate(rid, req, deadline)
                 elif isinstance(req, Revert):
                     result = await self.revert(rid, req, deadline)
                 else:
@@ -264,6 +278,7 @@ class Engine:
                     progress=1,
                     detail=None,
                 )
+            self.live_ready = bool(self.service())
             self.patch(rid, state="succeeded", result=result, progress=1)
             self.emit(rid, "done", **result)
         except (Exception, asyncio.CancelledError) as exc:
@@ -290,7 +305,10 @@ class Engine:
                     progress=None,
                     detail=None,
                 )
+            self.live_ready = False
+            self.live.close("Generation or service operation failed; reconnect after recovery.")
             cleanup = await self.cleanup(prior, rid, prior_headroom)
+            self.live_ready = cleanup["status"] == "completed" and bool(self.service())
             self.patch(
                 rid,
                 state="cancelled" if cancelled else "failed",
@@ -900,7 +918,79 @@ class Engine:
             "cleanup": {"status": "not_needed", "issues": []},
         }
 
+    async def generate(self, rid, req, deadline):
+        config = copy.deepcopy(self.current)
+        service_id = self.service()["id"]
+        mid = uid("measurement")
+
+        def observe(event):
+            kind = event.get("kind")
+            if kind == "inference_started":
+                self.live.publish("inference_started", request_id=rid, model=req.model,
+                                  service_id=service_id, prompt_tokens=event.get("prompt_tokens"))
+            elif kind == "metrics":
+                self.live.publish("metrics", request_id=rid, **{
+                    k: event[k] for k in ("decode_tps", "prefill_tps", "output_tokens", "timing_convention")})
+            else:
+                self.emit(rid, "token", **event)
+
+        raw = await self.driver.generate({
+            "lane": "tuned", "prompt": req.prompt, "max_tokens": req.max_tokens,
+            "purpose": "throughput", "seed": 71430, "fixed_length": False,
+            "measurement_id": mid, "stream": True, "live": True,
+        }, deadline, on_event=observe)
+        measurement, validation = self.record(rid, config, raw, mid, "throughput", "short", req.prompt)
+        if not all(validation[k] is True for k in (
+            "service_healthy", "placement_matches", "context_matches", "memory_guard_pass")):
+            raise Problem("validation_failed", "Retained service failed its post-request checks.")
+        self.live.publish("inference_done", request_id=rid, measurement=measurement)
+        return {"status": "success", "measurement": measurement, "service": self.service(),
+                "cleanup": {"status": "not_needed", "issues": []}}
+
+    def observe_live(self, model):
+        if model not in ("qwen3.8-27b", "qwen3.8-flash-next", "muse-glimmer"):
+            raise Problem("model_not_found", "Unknown model.", 404)
+        service = self.service()
+        operation = self.store.get(self.active)["operation"] if self.active else None
+        if (not self.live_ready or not service or self.current["model"] != model or self.recovery_error
+                or (operation and operation != "generate")
+                or (self.driver.session.get("expires_at", float("inf")) <= time.time())):
+            raise Problem("not_found", "No optimized service is running for this model.", 404)
+        queue = self.live.subscribe(model, service["id"])
+        if self.live_monitor is None or self.live_monitor.done():
+            self.live_monitor = asyncio.create_task(self.monitor_live())
+        return queue
+
+    async def monitor_live(self):
+        while self.live.listeners:
+            await asyncio.sleep(5)
+            if not self.live.listeners:
+                return
+            if not self.service() or self.driver.session.get("expires_at", float("inf")) <= time.time():
+                self.live_ready = False
+                self.live.close("The retained service has stopped or expired.")
+                return
+            if self.active:
+                continue  # Native generation failure is reported by the runner.
+            revision = self.submission_revision
+            try:
+                observed = await self.driver.inspect(time.time() + 10)
+                if revision != self.submission_revision:
+                    continue
+                if not observed.get("services", {}).get("tuned", {}).get("healthy"):
+                    raise Problem("runtime_unavailable", "Retained service is not healthy.", 503)
+            except Exception:
+                if revision != self.submission_revision:
+                    continue
+                self.live_ready = False
+                self.live.close("The retained service is unreachable; reconnect after recovery.")
+                return
+
     async def close(self):
+        self.live.close("Backend is shutting down.")
+        if self.live_monitor:
+            self.live_monitor.cancel()
+            await asyncio.gather(self.live_monitor, return_exceptions=True)
         tasks = list(self.tasks.values())
         for t in tasks:
             t.cancel()

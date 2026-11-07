@@ -36,7 +36,7 @@ def optimize(c, **kw):
 
 
 def test_auth_and_contract(client):
-    assert client.get("/health").json()["contract_version"] == "2.0"
+    assert client.get("/health").json()["contract_version"] == "2.1"
     assert (
         client.get("/status", headers={"X-Pairing-Token": "wrong"}).status_code == 401
     )

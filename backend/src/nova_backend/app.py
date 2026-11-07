@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import ValidationError
 from .common import ROOT, MODEL, VERSION, Problem, now
 from .catalog import PROFILES, REVISION, capabilities, evidence, model_check
-from .schemas import Optimize, Race, Revert, Chat, Diagnose, Action, Benchmark, Empty
+from .schemas import Optimize, Race, Revert, Chat, Diagnose, Action, Benchmark, Empty, Generate
 from .store import Store, TERMINAL
 from .driver import WrightDriver, MockDriver
 from .agent import Agent
@@ -168,6 +168,22 @@ def create_app(state_dir=None, mock=None, driver=None, agent=None):
             "contract_version": VERSION,
             "simulation": simulation,
         }
+
+    @app.get("/live")
+    async def live(model: str):
+        e = engine()
+        queue = e.observe_live(model)
+
+        async def observe():
+            async for event in e.live.events(queue):
+                yield ("data: " + json.dumps(event, allow_nan=False) + "\n\n") if event else ": keepalive\n\n"
+
+        return StreamingResponse(observe(), media_type="text/event-stream",
+            headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+    @app.post("/generate")
+    async def generate(req: Generate, request: Request):
+        return start("generate", req, request)
 
     @app.get("/profiles")
     async def profiles(model: str = MODEL, target_id: str = "wright"):

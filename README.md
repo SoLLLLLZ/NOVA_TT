@@ -53,7 +53,7 @@ Frontend placeholders remain for the partner's implementation. Backend package a
 | --- | --- |
 | backend, prompts, profiles, Wright deployment | Taeho: selection, OpenRouter, execution, benchmarking and lifecycle |
 | frontend | Partner: model/GPU selection, progress, comparison, error states and API client |
-| API contract and integration mocks | Shared: both sides must use contract version 2.0 |
+| API contract and integration mocks | Shared: both sides must use contract version 2.1 |
 | CANON evidence | Shared source of truth; preserve provenance and keep measured hardware distinct |
 
 Keep the normal UI simple. The backend applies the complete supported configuration and reports effective settings; the frontend displays them. Update the API contract, affected examples and implementations together when changing shapes. Match mocks to the same version and label simulated results.

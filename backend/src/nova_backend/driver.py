@@ -262,13 +262,16 @@ class WrightDriver:
                     on_event(json.loads(line))
             seen = len(lines)
 
-        while time.time() < deadline:
-            await drain()
-            result = await self.read_file("result-" + ident + ".json")
+        live_result = None
+        if body and body.get("live") and on_event:
+            live_result = await self.watch_live_rpc(ident, deadline, on_event)
+        while live_result is not None or time.time() < deadline:
+            if live_result is None:
+                await drain()
+            result = live_result or await self.read_file("result-" + ident + ".json")
             if result:
-                await (
-                    drain()
-                )  # include chunks written between the previous read and completion
+                if live_result is None:
+                    await drain()  # include chunks written between the previous read and completion
                 if not result["ok"]:
                     message = result["error"]
                     code = (
@@ -288,6 +291,64 @@ class WrightDriver:
         raise Problem(
             "deadline_exceeded", "Worker operation exceeded its deadline.", 409
         )
+
+    async def watch_live_rpc(self, ident, deadline, on_event):
+        # One persistent, private SSH channel avoids two SSH round trips per
+        # sample. Read-only tail of this RPC's precreated files; no public port.
+        code = """import json,pathlib,time
+root=pathlib.Path(ROOT_VALUE)
+position=0
+pending=''
+while time.time() < DEADLINE_VALUE:
+ with (root / 'EVENT_FILE').open() as f:
+  f.seek(position)
+  pending+=f.read()
+  position=f.tell()
+ lines=pending.split('\\n')
+ pending=lines.pop()
+ for line in lines:
+  if line.strip(): print(json.dumps({'event':json.loads(line)}),flush=True)
+ try:
+  result=json.loads((root / 'RESULT_FILE').read_text())
+ except (ValueError,FileNotFoundError): result=None
+ if result is not None:
+  # Result publication follows all event writes. A second drain includes
+  # the last samples/text before returning the completed measurement.
+  with (root / 'EVENT_FILE').open() as f:
+   f.seek(position)
+   pending+=f.read()
+  for line in pending.splitlines():
+   if line.strip(): print(json.dumps({'event':json.loads(line)}),flush=True)
+  print(json.dumps({'result':result}),flush=True)
+  break
+ time.sleep(0.04)
+"""
+        code = (code.replace("ROOT_VALUE", repr(self.session["root"]))
+                .replace("DEADLINE_VALUE", repr(deadline))
+                .replace("EVENT_FILE", "events-" + ident + ".jsonl")
+                .replace("RESULT_FILE", "result-" + ident + ".json"))
+        proc = await asyncio.create_subprocess_exec(
+            "ssh", "-S", self.socket, "-o", "BatchMode=yes", "-o", "ConnectTimeout=8",
+            "-o", "StrictHostKeyChecking=yes", "-o", "UserKnownHostsFile=" + self.known,
+            self.host, "python3 -u -c " + shlex.quote(code),
+            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.DEVNULL,
+            limit=1024 * 1024)
+        try:
+            async with asyncio.timeout(max(0.1, deadline - time.time())):
+                while line := await proc.stdout.readline():
+                    item = json.loads(line)
+                    if "event" in item:
+                        on_event(item["event"])
+                    if "result" in item:
+                        return item["result"]
+            raise Problem("ssh_unavailable", "Live Wright observation channel closed.", 503, retryable=True)
+        finally:
+            if proc.returncode is None:
+                try:
+                    proc.kill()
+                except ProcessLookupError:
+                    pass
+            await proc.wait()
 
     async def inspect(self, deadline=None):
         if not self.session:
@@ -465,6 +526,11 @@ class MockDriver:
         c = self.services[b.get("lane", "tuned")]["config"]
         o = 16 if b.get("purpose") == "quality" else b["max_tokens"]
         rate = 120 if c["engine"] == "llama.cpp" else 20
+        if b.get("live") and on_event:
+            on_event({"kind": "inference_started", "prompt_tokens": 100})
+            on_event({"kind": "metrics", "decode_tps": rate, "prefill_tps": 1000,
+                      "output_tokens": o, "timing_convention": "SIMULATED"})
+            on_event({"lane": "tuned", "text": "Simulated answer.", "tokens": None, "tps": None})
         return {
             "prompt_tokens": 100,
             "output_tokens": o,
