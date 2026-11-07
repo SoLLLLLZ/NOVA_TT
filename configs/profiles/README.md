@@ -1,7 +1,5 @@
 # Registered inference profiles
 
-Reserved for future validated target/draft/runtime configuration manifests keyed by immutable profile IDs. This folder currently contains no runnable profile files.
+`byteshape.json` contains the conservative MTP3, preferred MTP5 / temperature 0.75, and untouched Ollama baseline profiles. Profile IDs hash the complete configuration. The manifest pins the model hash and runtime/library hashes from the saved Wright receipts. The compute worker verifies these before loading.
 
-Build profiles from the [demo reference](../../docs/demo/DEMO_MODELS.md), [CANON evidence](../../data/canon/) and verified saved runtime receipts. Include model artifact identity, runtime/library identity, full settings, resource requirements and supporting configuration IDs. Follow the [v2 contract](../../docs/api/endpoint.md).
-
-Do not use sample IDs from docs as live registered profiles. Keep host credentials out of manifests; local overrides and run-generated resolved profiles belong in `var/`.
+Only ByteShape execution is enabled. Other model references remain in `docs/demo/DEMO_MODELS.md`. Do not turn descriptive source flags into writable settings without an explicit adapter mapping and validation.

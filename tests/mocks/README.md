@@ -1,7 +1,9 @@
-# Frontend API mock
+# Frontend mock mode
 
-Reserved for a future `mock_server.py` or equivalent implementation of the [v2 API contract](../../docs/api/endpoint.md). No mock server exists yet.
+Use the real API schemas and runner with the simulated driver:
 
-Cover the three [demo models](../../docs/demo/DEMO_MODELS.md), ready/unavailable states, proposed/effective configurations, progress, verification, repair, failure and cancellation. Use fixture profile IDs and unmistakably simulated results; never present canned output as live GPU inference.
+```sh
+NOVA_MODE=mock NOVA_STATE_DIR=var/mock uv run uvicorn nova_backend.app:app --host 127.0.0.1 --port 8000 --workers 1
+```
 
-Document the startup command when the mock is built. Keep its contract version synchronized with the backend and frontend.
+Read `var/mock/pairing-token` locally. All results are explicitly marked simulated. Mock rates are fixtures and must never be displayed as real hardware measurements.

@@ -1,0 +1,274 @@
+{
+  "profiles": [
+    {
+      "label": "ByteShape conservative MTP3",
+      "source_config_ids": [
+        "cfg_aee1c8396d18230b"
+      ],
+      "config": {
+        "model": "qwen3.8-27b",
+        "artifact_id": "byteshape-iq3s-40171062",
+        "quant": "IQ3_S hybrid 3.23bpw",
+        "engine": "llama.cpp",
+        "runtime_id": "llama-l40-b10820",
+        "settings": {
+          "context_tokens": 65536,
+          "context_per_slot": 65536,
+          "parallel_slots_per_process": 1,
+          "replicas": 1,
+          "gpu_layers": 99,
+          "main_gpu": 0,
+          "split_mode": "none",
+          "tensor_split": [],
+          "tensor_overrides": [
+            {
+              "pattern": "token_embd.weight",
+              "buffer": "CUDA0"
+            }
+          ],
+          "batch_size": 2048,
+          "microbatch_size": 512,
+          "threads_decode": 2,
+          "threads_prefill": 6,
+          "kv_type_k": "q8_0",
+          "kv_type_v": "q8_0",
+          "flash_attention": "on",
+          "fit": "off",
+          "speculative_mode": "draft-mtp",
+          "draft_model": null,
+          "draft_device": [
+            "CUDA0"
+          ],
+          "draft_gpu_layers": 99,
+          "draft_tokens": 3,
+          "draft_kv_k": "q8_0",
+          "draft_kv_v": "q8_0",
+          "backend_sampling": true,
+          "mps": false,
+          "prompt_cache_ram_mib": 1024,
+          "checkpoint_min_step": 512,
+          "temperature": 1.0,
+          "top_k": 20,
+          "top_p": 0.95,
+          "min_p": 0.0,
+          "reasoning_effort": "medium",
+          "repeat_penalty": 1.0,
+          "presence_penalty": 0.0,
+          "jinja": true,
+          "reasoning_format": "deepseek",
+          "chat_template_id": "byteshape-embedded",
+          "chat_template_kwargs": {
+            "enable_thinking": true,
+            "reasoning_effort": "medium"
+          },
+          "vision_projector": null
+        },
+        "unresolved_fields": [],
+        "profile_id": "profile_e3ff607f68dd7ceaa58d8deb"
+      }
+    },
+    {
+      "label": "ByteShape MTP5 temperature 0.75",
+      "source_config_ids": [
+        "cfg_549fe546f2fd44a6"
+      ],
+      "config": {
+        "model": "qwen3.8-27b",
+        "artifact_id": "byteshape-iq3s-40171062",
+        "quant": "IQ3_S hybrid 3.23bpw",
+        "engine": "llama.cpp",
+        "runtime_id": "llama-l40-b10820",
+        "settings": {
+          "context_tokens": 65536,
+          "context_per_slot": 65536,
+          "parallel_slots_per_process": 1,
+          "replicas": 1,
+          "gpu_layers": 99,
+          "main_gpu": 0,
+          "split_mode": "none",
+          "tensor_split": [],
+          "tensor_overrides": [
+            {
+              "pattern": "token_embd.weight",
+              "buffer": "CUDA0"
+            }
+          ],
+          "batch_size": 2048,
+          "microbatch_size": 512,
+          "threads_decode": 2,
+          "threads_prefill": 6,
+          "kv_type_k": "q8_0",
+          "kv_type_v": "q8_0",
+          "flash_attention": "on",
+          "fit": "off",
+          "speculative_mode": "draft-mtp",
+          "draft_model": null,
+          "draft_device": [
+            "CUDA0"
+          ],
+          "draft_gpu_layers": 99,
+          "draft_tokens": 5,
+          "draft_kv_k": "q8_0",
+          "draft_kv_v": "q8_0",
+          "backend_sampling": true,
+          "mps": false,
+          "prompt_cache_ram_mib": 1024,
+          "checkpoint_min_step": 512,
+          "temperature": 0.75,
+          "top_k": 20,
+          "top_p": 0.95,
+          "min_p": 0.0,
+          "reasoning_effort": "medium",
+          "repeat_penalty": 1.0,
+          "presence_penalty": 0.0,
+          "jinja": true,
+          "reasoning_format": "deepseek",
+          "chat_template_id": "byteshape-embedded",
+          "chat_template_kwargs": {
+            "enable_thinking": true,
+            "reasoning_effort": "medium"
+          },
+          "vision_projector": null
+        },
+        "unresolved_fields": [],
+        "profile_id": "profile_fc0784b84a8a540b58b19171"
+      }
+    },
+    {
+      "label": "Untouched Ollama baseline",
+      "source_config_ids": [
+        "cfg_66cefe35fcd0a30a"
+      ],
+      "config": {
+        "model": "qwen3.8-27b",
+        "artifact_id": "byteshape-iq3s-40171062",
+        "quant": "IQ3_S hybrid 3.23bpw",
+        "engine": "ollama",
+        "runtime_id": "ollama-0.40.13",
+        "settings": {
+          "context_tokens": 32768,
+          "context_per_slot": 32768,
+          "parallel_slots_per_process": 1,
+          "replicas": 1,
+          "temperature": 1.0,
+          "top_p": 0.95,
+          "top_k": 20,
+          "min_p": 0.0,
+          "speculative_mode": "none"
+        },
+        "unresolved_fields": [],
+        "profile_id": "profile_e5cfd82624a3408021949617"
+      }
+    }
+  ],
+  "llama_argv": [
+    "--model",
+    "/home/taeholee/inference/models/ByteShape-Qwen3.8-27B-IQ3_S-3.23bpw.gguf",
+    "--alias",
+    "byteshape-qwen3.8-27b-iq3-s-3agent-separate",
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "8081",
+    "--ctx-size",
+    "65536",
+    "--parallel",
+    "1",
+    "--n-gpu-layers",
+    "99",
+    "--split-mode",
+    "none",
+    "--main-gpu",
+    "0",
+    "--fit",
+    "off",
+    "--override-tensor",
+    "token_embd.weight=CUDA0",
+    "--threads",
+    "2",
+    "--threads-batch",
+    "6",
+    "--batch-size",
+    "2048",
+    "--ubatch-size",
+    "512",
+    "--flash-attn",
+    "on",
+    "--cache-type-k",
+    "q8_0",
+    "--cache-type-v",
+    "q8_0",
+    "--cache-ram",
+    "1024",
+    "--jinja",
+    "--reasoning-format",
+    "deepseek",
+    "--reasoning-effort",
+    "medium",
+    "--chat-template-kwargs",
+    "{\"enable_thinking\":true,\"reasoning_effort\":\"medium\"}",
+    "--temp",
+    "1.0",
+    "--top-p",
+    "0.95",
+    "--top-k",
+    "20",
+    "--min-p",
+    "0.0",
+    "--repeat-penalty",
+    "1.0",
+    "--presence-penalty",
+    "0.0",
+    "--metrics",
+    "--slots",
+    "--verbosity",
+    "4",
+    "--spec-type",
+    "draft-mtp",
+    "--spec-draft-n-max",
+    "3",
+    "--cache-type-k-draft",
+    "q8_0",
+    "--cache-type-v-draft",
+    "q8_0",
+    "--spec-draft-ngl",
+    "99",
+    "--spec-draft-device",
+    "CUDA0",
+    "--no-mmproj",
+    "--backend-sampling",
+    "--checkpoint-min-step",
+    "512"
+  ],
+  "asset_root": "/home/export/taeholee/nova/byteshape-20261103/assets",
+  "artifact": {
+    "id": "byteshape-iq3s-40171062",
+    "model": "qwen3.8-27b",
+    "kind": "target",
+    "quant": "IQ3_S hybrid 3.23bpw",
+    "files": [
+      {
+        "name": "ByteShape-Qwen3.8-27B-IQ3_S-3.23bpw.gguf",
+        "size_bytes": 11035354496,
+        "sha256": "40171062abb191d5fb8a04b19efea377a16daebf1fd17d5e8b25808537aa782f"
+      }
+    ]
+  },
+  "runtime_features": {
+    "cuda_graphs_build": true,
+    "force_mmq_build": false,
+    "force_cublas_build": false
+  },
+  "runtime_hashes": {
+    "libggml-base.so.0.23.0": "8a891840a43680d72742767df78f986679a2ce4b910e3cfb7dd552d774814fa1",
+    "libggml-cpu.so.0.23.0": "16f35bac24a6f837aa8fc1b3dac7096b89aaf0d7c1e7b9cc6389a6bfa0ca80f7",
+    "libggml-cuda.so.0.23.0": "9d9491cf0f1e4a32c18900dc84aeef8b395de18bf081fc03bdbdedc4eeda3267",
+    "libggml.so.0.23.0": "4b407c1eb9e06dc609bfb526f709ba848f596fc4f80a177e0dd2e8b06bb4e3cd",
+    "libllama.so.0.4.0": "50b5180749e38ea815a1bf61be6aee7b9bdc45701f3c80cadc3f524a0ec6905f",
+    "libllama-common.so.0.4.0": "4ce94587a2bcbae8aaeaff5970d562a67d1e94f77f1ec6ed294c7d862f3d88d5",
+    "libmtmd.so.0.4.0": "3126f325b04cb4666ea9bd2a4051b4481a67400a614f76919bf190d464fbb57b",
+    "libllama-server-impl.so": "2d852ba67f59907a93a12d8f7c12592ba33ea0415f21fa107fcb75e9ea795739",
+    "llama-server": "97e81fb144ffd1ca974de7e2c6bec6afd55220b86749a2171dcead64111c71f7",
+    "ollama": "ac31348ce57115579d57d16c7d914829199dfb281b5d43b943817cfe82f19fc1"
+  }
+}

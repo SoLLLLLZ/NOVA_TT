@@ -1,6 +1,6 @@
 # NOVA API Contract v2.0
 
-Updated November 7, 2026. This replaces v0.1. Frontend and backend must both report/use `contract_version: "2.0"`. The endpoint names are retained where practical; the richer configuration and run objects are a breaking schema change. This is the implementation contract, not a claim that its endpoints already run.
+Updated November 7, 2026. This replaces v0.1. Frontend and backend must both report/use `contract_version: "2.0"`. The endpoint names are retained where practical; the richer configuration and run objects are a breaking schema change. The ByteShape implementation is now in `backend/src/nova_backend`; see `backend/README.md` for run commands and current adapter limits. Glimmer and Flash execution remain deferred.
 
 Repository: https://github.com/SoLLLLLZ/NOVA_TT
 
@@ -240,7 +240,7 @@ Request example:
 
 Required: model. Defaults: preset `fastest`, objective `decode`, workload `short`, mode `verify_only`, resources selected compatible backend target/profile, constraints preserve model/quant and required context, profile_id null, empty overrides, budget 180 seconds/two repairs, baseline_run_id null. `preset` supports fastest/balanced/quality as selection policies, not fixed engine parameters; caller constraints always win. `objective` currently supports decode; unsupported objectives return 422. `workload` supports short/long, corresponding to the CANON examples. `min_context_tokens` is per request slot, not process total.
 
-`allow_sampling_change` defaults false; true permits a tested preset's declared temperature/top-k/top-p/min-p/reasoning changes, all shown in changed/effective config. `allow_quant_change` and `allow_experimental` default false. When no active profile exists, use the registered model's baseline sampler as the preserved reference. Constraints may include `fixed_settings` (partial settings that cannot change), `min_free_gpu_memory_mib` (per-device floor, cannot weaken backend guard), `max_gpu_count`, `runtime_requirements`, and `allow_cpu_offload` (default false). Preserve the current/profile context if no minimum is supplied. Overrides are fixed requested values, not suggestions; reject conflicts with fixed_settings instead of silently deciding precedence. Precedence: host/resource policy and user constraints > explicit profile/overrides > agent selection > defaults.
+`allow_sampling_change` defaults true (project owner authorization, November 7); true permits a tested preset's declared temperature/top-k/top-p/min-p/reasoning changes, all shown in changed/effective config. `allow_quant_change` and `allow_experimental` default false. When no active profile exists, use the registered model's baseline sampler as the preserved reference. Constraints may include `fixed_settings` (partial settings that cannot change), `min_free_gpu_memory_mib` (per-device floor, cannot weaken backend guard), `max_gpu_count`, `runtime_requirements`, and `allow_cpu_offload` (default false). Preserve the current/profile context if no minimum is supplied. Overrides are fixed requested values, not suggestions; reject conflicts with fixed_settings instead of silently deciding precedence. Precedence: host/resource policy and user constraints > explicit profile/overrides > agent selection > defaults.
 
 `overrides` permits `artifact_id`, `quant`, `engine`, `runtime_id`, and a partial settings object. Artifact changes must match the selected model/quant and constraints. `profile_id` selects a base profile; null lets the agent choose. Explicit unsupported values produce field-level errors. A profile not registered on this host cannot be applied solely from an ID in CANON.
 
@@ -306,7 +306,7 @@ The backend owns both lane configurations: untouched default Ollama and the veri
 Use shared start/step/error envelope, with these additional events:
 
 - `start` additionally supplies `lanes: ["default","tuned"]`, `mode`, and `lane_resources` map with allocated GPU IDs per lane.
-- `token`: lane, text, cumulative `tokens`, nullable running `tps`; counts are backend token counts, not string lengths. Deliver parsed user-visible final text; do not forward hidden reasoning or native channel markers.
+- `token`: lane, text, cumulative `tokens`, nullable running `tps`; `tokens` is also nullable while a runtime does not supply incremental counts. Final native counts arrive in lane_done; never substitute string lengths or chunk counts. Deliver parsed user-visible final text; do not forward hidden reasoning or native channel markers.
 - `lane_done`: lane, measurement and validation status (a race prompt is not automatically a correctness test).
 - `done`: status success, mode, measurements map, winner (`default`, `tuned`, `tie` or null), speedup (nullable), comparison, elapsed_seconds and cleanup. Compare measured decode rates; round only for display. A lane failure terminates with error and partial measurements, not a fabricated winner.
 
@@ -384,7 +384,7 @@ Special conversions: `gpu_layers="53/53 (actual target)"` is observed placement,
 3. Replace gpu_index with resources allocation/GPU IDs and group requirements. Memory display now uses explicit MiB values. Add installed/loaded/ready distinctions and race availability.
 4. `changed` becomes `changes` with dotted paths and per-change reasons. Return evidence source IDs and independent validation. Measurements contain explicit timing/cache/token metadata; before/speedup can be null in verify_only.
 5. Implement the run store/idempotency/cancel behavior before allowing UI retries. Revert/action are streaming operations in v2. Keep authentication and terminal error handling consistent.
-6. Update frontend mocks and backend validation to the same version in the implementation work. At this contract revision, `tests/mocks/mock_server.py` is absent from the shared repository; this documentation change does not invent a working mock/backend. [DEMO_MODELS.md](../demo/DEMO_MODELS.md) and [OPTIMIZER_AGENT.md](../../backend/prompts/OPTIMIZER_AGENT.md) are updated with this contract.
+6. Update frontend mocks and backend validation to the same version in the implementation work. The same FastAPI application supplies an explicitly labeled mock mode through `NOVA_MODE=mock`; backend tests use MockDriver. [DEMO_MODELS.md](../demo/DEMO_MODELS.md) and [OPTIMIZER_AGENT.md](../../backend/prompts/OPTIMIZER_AGENT.md) are updated with this contract.
 7. Core demo acceptance: ByteShape candidate can express MTP5/temp0.75/threads2+6; Flash can require 3 L40s and MTP2 on CUDA2; Glimmer can express DFlash15/temp0.75 and reject draft17. Verify unknown settings, insufficient GPUs, failed quality, interrupted stream, duplicate request and cancellation paths. Do not populate live UI metrics from fixtures.
 
 ## 15. Source scope

@@ -1,5 +1,3 @@
 # Developer scripts
 
-Reserved for future local setup, validation, data packaging and demo preparation commands. Add a short usage note and required dependencies with each script.
-
-Place reusable backend logic in `backend/src/` and Wright Slurm/service launchers in `deploy/wright/`. No executable scripts are present here yet. Scripts must not download large models or start GPU jobs merely on import.
+`live_byteshape.py` runs the actual API against Wright: default Ollama, an OpenRouter-selected optimized profile, sequential race, and rollback/release. It writes private receipts under `var/live-byteshape/`. `--profile-only` bypasses OpenRouter and requests the registered MTP5 profile explicitly. Run only when GPU work is intended; see `backend/README.md`.

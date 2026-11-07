@@ -1,8 +1,5 @@
-# Tests and integration fixtures
+# Backend validation
 
-Reserved for future backend behavior, API-contract and frontend integration tests. No test suite or runner is implemented yet.
+Run `uv run pytest -q`. Tests cover authentication, strict settings, idempotency, profile selection, context and sampling constraints, quality failure, resource locking, cancellation, rollback, race and actions using an explicitly simulated driver. They do not claim GPU performance.
 
-- `fixtures/`: small sanitized inputs, expected answers and API response fixtures; label synthetic measurements as mock.
-- [mocks/](mocks/): future frontend mock server implementing [API v2](../docs/api/endpoint.md).
-
-Keep large benchmark outputs in `var/`. Use real inference only in explicit integration checks with an owned allocation; ordinary tests should not consume GPUs or OpenRouter credit implicitly.
+`scripts/live_byteshape.py` is the opt-in real Wright rehearsal. It runs ByteShape only; Glimmer and Flash are deferred. Test output goes to ignored `var/`.
