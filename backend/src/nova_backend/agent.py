@@ -12,11 +12,19 @@ class Agent:
         self.mock = mock
         self.available = None
         self.effective_tier = None
+        self._cached_key = None
+        self._key_lock = asyncio.Lock()
 
     async def key(self):
         key = os.environ.get("OPENROUTER_API_KEY")
         if key:
             return key
+        async with self._key_lock:
+            if self._cached_key is None:
+                self._cached_key = await self._read_keychain()
+            return self._cached_key
+
+    async def _read_keychain(self):
         proc = await asyncio.create_subprocess_exec(
             "/usr/bin/security",
             "find-generic-password",
@@ -48,7 +56,10 @@ class Agent:
                 "OpenRouter Keychain item is unavailable. Allow backend access in Keychain.",
                 503,
             )
-        return out.decode().strip()
+        key = out.decode().strip()
+        if not key:
+            raise Problem("ai_unavailable", "OpenRouter Keychain item is empty.", 503)
+        return key
 
     async def completion(self, messages, deadline, tools=None):
         import time
@@ -118,6 +129,8 @@ class Agent:
         key = None
         if r.status_code >= 400:
             self.available = False
+            if r.status_code == 401:
+                self._cached_key = None
             raise Problem(
                 "ai_unavailable",
                 f"OpenRouter rejected the request (HTTP {r.status_code}); check model/account availability.",
