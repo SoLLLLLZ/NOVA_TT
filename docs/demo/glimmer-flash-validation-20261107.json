@@ -203,7 +203,7 @@
     ]
   },
   "flash": {
-    "status": "blocked",
+    "status": "passed",
     "gpu_count": 3,
     "standalone_ollama": {
       "prompt_tokens": 63,
@@ -245,20 +245,267 @@
       "memory_guard_pass": true,
       "warnings": []
     },
-    "preparation_seconds": 331.63942691730335,
-    "optimized": null,
+    "optimized": {
+      "prompt_tokens": 21,
+      "output_tokens": 640,
+      "cached_tokens": 0,
+      "decode_timed_tokens": 639,
+      "prefill_seconds": 1.619915,
+      "decode_seconds": 8.958197,
+      "wall_seconds": 10.74453723616898,
+      "request_started_at": "2026-11-07T18:27:24.237934+00:00",
+      "request_finished_at": "2026-11-07T18:27:34.982473+00:00",
+      "load_seconds": 19.36835848353803,
+      "load_timing_source": "service_startup_wall",
+      "decode_tps": 71.33131812126926,
+      "prefill_tps": 12.963643154116111,
+      "timing_convention": "(predicted_n - 1) / predicted_ms",
+      "output_cap": 2048,
+      "stop_reason": "eos",
+      "completed": true,
+      "gpu_ids": [
+        "GPU-b88255ea-7355-ce97-d8c1-82a5beadfabe",
+        "GPU-a02edcc1-86e5-c351-cdf7-e89c8a1d1e83",
+        "GPU-e7716227-6a9f-318d-c437-0b162a6704dd"
+      ],
+      "min_free_gpu_memory_mib": {
+        "GPU-b88255ea-7355-ce97-d8c1-82a5beadfabe": 11506.0,
+        "GPU-a02edcc1-86e5-c351-cdf7-e89c8a1d1e83": 14438.0,
+        "GPU-e7716227-6a9f-318d-c437-0b162a6704dd": 11740.0
+      },
+      "peak_temperature_c": {
+        "GPU-b88255ea-7355-ce97-d8c1-82a5beadfabe": 32.0,
+        "GPU-a02edcc1-86e5-c351-cdf7-e89c8a1d1e83": 32.0,
+        "GPU-e7716227-6a9f-318d-c437-0b162a6704dd": 34.0
+      },
+      "warnings": [],
+      "measurement_id": "measurement_c3eb89a10060eb0732a0",
+      "run_id": "run_2c2996ebb8da1d5e4c17",
+      "profile_id": "profile_e2faa2ae2dc646404a56a088",
+      "origin": "live",
+      "purpose": "throughput",
+      "workload": "short",
+      "prompt_hash": "56c4a433270d7aad3a7d4a8125456adf4d4d40d653d18a5b60787943e75be041",
+      "engine": "llama.cpp",
+      "runtime_id": "llama-l40-b10820",
+      "rate_scope": "per_request",
+      "cache_state": "uncached",
+      "settings_hash": "c6e0f5e6475e5cf9ce7c4d008e56c37044ba7aca4f4fdc23db828e61c1b492bc",
+      "sample_count": 1,
+      "simulation": false
+    },
+    "decode_ratio": 4.699883424920541,
     "agent": {
       "model": "openai/gpt-6-astra",
+      "available": true,
+      "effective_tier": "priority",
       "reasoning_effort": "high",
-      "request_status": 403,
-      "selected_configuration": false
+      "web_tools": false
     },
-    "blocker": "OpenRouter API key total spending limit reached. User chose to finish with the Astra test blocked.",
-    "receipt_sha256": "a090ecddc958afc8ca6df40a1a379eedbb39d2afe8647f9b0bf33fc75991b377",
+    "config": {
+      "model": "qwen3.8-flash-next",
+      "artifact_id": "flash-udq4-44481862",
+      "quant": "UD-Q4_K_XL",
+      "engine": "llama.cpp",
+      "runtime_id": "llama-l40-b10820",
+      "settings": {
+        "context_tokens": 131072,
+        "context_per_slot": 131072,
+        "parallel_slots_per_process": 1,
+        "replicas": 1,
+        "batch_size": 2048,
+        "microbatch_size": 1024,
+        "threads_decode": 8,
+        "threads_prefill": 12,
+        "draft_tokens": 2,
+        "draft_gpu_layers": 99,
+        "prompt_cache_ram_mib": 4096,
+        "kv_type_k": "f16",
+        "kv_type_v": "f16",
+        "flash_attention": "on",
+        "fit": "on",
+        "speculative_mode": "draft-mtp",
+        "draft_kv_k": "f16",
+        "draft_kv_v": "f16",
+        "split_mode": "layer",
+        "reasoning_effort": "medium",
+        "temperature": 1.0,
+        "top_p": 0.95,
+        "min_p": 0.0,
+        "top_k": 20,
+        "draft_device": [
+          "CUDA2"
+        ],
+        "fit_target_mib": [
+          1024,
+          1024,
+          4096
+        ],
+        "backend_sampling": true,
+        "force_mmq_runtime": true,
+        "load_mode": "none",
+        "lazy_mode": "on",
+        "draft_probability_min": 0.5,
+        "draft_model": "flash-draft-5ff54097",
+        "repeat_penalty": 1.0,
+        "presence_penalty": 0.0,
+        "jinja": true,
+        "reasoning_format": "deepseek",
+        "reasoning_preserve": true,
+        "mps": false,
+        "tensor_split": [],
+        "chat_template_id": "qwen3.8-flash-next-embedded",
+        "chat_template_kwargs": {
+          "enable_thinking": true,
+          "reasoning_effort": "medium"
+        },
+        "vision_projector": "flash-projector-1f7b7f0b",
+        "gpu_layers": "auto",
+        "main_gpu": 0,
+        "tensor_overrides": []
+      },
+      "unresolved_fields": [],
+      "profile_id": "profile_e2faa2ae2dc646404a56a088"
+    },
+    "selection_reason": "Select the complete registered Flash Next MTP2 profile sourced from cfg_22bd103c1aadb59c, the compatible CANON-backed configuration measured on three same-node L40s for single-request short-input decode. Preserve UD-Q4_K_XL, 131072-token context, one slot, MTP2 with draft on allocation-local CUDA2, f16 target/draft KV, temperature 1.0/top_p 0.95/top_k 20/min_p 0, medium reasoning, 8 decode and 12 prefill threads, batch/microbatch 2048/1024, and fit reserves 1024/1024/4096 MiB; no overrides or CPU offload. Historical evidence is a representative uncached 4036-input/512-output-token ledger observation: decode 90.065 tok/s using (n-1)/time and prefill 967.58 tok/s, plus one completed correct ledger check\u2014not a predicted essay speed or fresh result. No compatible registered fallback is supplied; do not substitute Ollama or fewer GPUs. Backend must resolve an active owned Slurm allocation/device mask, verify staged artifacts/runtime and all-GPU placement/headroom, then apply and verify with a naturally completed correct arithmetic answer and separate uncached capped essay timing probe within the deadline. Mode remains verify_only, with before and speedup null.",
+    "validation": {
+      "status": "passed",
+      "completed_answer": true,
+      "answer_correct": true,
+      "service_healthy": true,
+      "placement_matches": true,
+      "context_matches": true,
+      "memory_guard_pass": true,
+      "configured_context_per_slot": 131072,
+      "tested_prompt_tokens": 56,
+      "checked_at": "2026-11-07T18:27:17.568738+00:00",
+      "scope": "Short arithmetic completed-answer check only.",
+      "issues": []
+    },
+    "optimization_seconds": 40.20983016677201,
+    "preparation_seconds": 258.900351874996,
+    "live": {
+      "metrics_count": 44,
+      "delivery_hz": 4.768232724550698,
+      "final_measurement_matches_generate": true,
+      "revert_and_stream_closure_passed": true
+    },
+    "baseline_reused": true,
+    "baseline_receipt_sha256": "a090ecddc958afc8ca6df40a1a379eedbb39d2afe8647f9b0bf33fc75991b377",
+    "receipt_sha256": "e7955a918583d0e9e7d169a6df6fc78210442989463e703d196fbd98a89a020f",
+    "tested_code_commit": "5a3c105a90de676b82f2a720785e511b548f7728",
+    "allocation_id": "268033",
+    "node_id": "n03",
+    "shared_gpu_ids": [
+      "GPU-e7716227-6a9f-318d-c437-0b162a6704dd"
+    ],
+    "repairs": [],
+    "artifact_verified": true,
+    "verified_model_files": [
+      {
+        "name": "Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+        "size_bytes": 10946624,
+        "sha256": "4448186216b3af4cc558bbce2c3213f01608f8f8b2e5267a9767971dd3ec8082",
+        "role": "target"
+      },
+      {
+        "name": "Qwen3.8-Flash-Next-UD-Q4_K_XL-00002-of-00004.gguf",
+        "size_bytes": 49859583136,
+        "sha256": "3f342f1c1580473f1ee94ddd5b28206e8c07a70fa1a366f59d1d6c922919a6c9",
+        "role": "target"
+      },
+      {
+        "name": "Qwen3.8-Flash-Next-UD-Q4_K_XL-00003-of-00004.gguf",
+        "size_bytes": 49376141504,
+        "sha256": "56758f40269cad5cd9b0d3d6fbae0f40f6d5be6de49e4ab392dbe83157d9cbd3",
+        "role": "target"
+      },
+      {
+        "name": "Qwen3.8-Flash-Next-UD-Q4_K_XL-00004-of-00004.gguf",
+        "size_bytes": 12087983520,
+        "sha256": "753bda48b98ba4f1636134a90a967de1b2d3908a236c026e464777342e53510a",
+        "role": "target"
+      },
+      {
+        "name": "mmproj-F16.gguf",
+        "size_bytes": 904004000,
+        "sha256": "1f7b7f0b984cf065c604360c29c8098362ed61b290db0ff12c6f360bb1a8a980",
+        "role": "projector"
+      },
+      {
+        "name": "mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf",
+        "size_bytes": 2786568256,
+        "sha256": "5ff54097406a905cf3a724c709124ceb0e3e10235ee862298969e91c96fa96e6",
+        "role": "draft"
+      }
+    ],
+    "runtime_hashes": {
+      "libggml-base.so.0.23.0": "8a891840a43680d72742767df78f986679a2ce4b910e3cfb7dd552d774814fa1",
+      "libggml-cpu.so.0.23.0": "16f35bac24a6f837aa8fc1b3dac7096b89aaf0d7c1e7b9cc6389a6bfa0ca80f7",
+      "libggml-cuda.so.0.23.0": "9d9491cf0f1e4a32c18900dc84aeef8b395de18bf081fc03bdbdedc4eeda3267",
+      "libggml.so.0.23.0": "4b407c1eb9e06dc609bfb526f709ba848f596fc4f80a177e0dd2e8b06bb4e3cd",
+      "libllama.so.0.4.0": "50b5180749e38ea815a1bf61be6aee7b9bdc45701f3c80cadc3f524a0ec6905f",
+      "libllama-common.so.0.4.0": "4ce94587a2bcbae8aaeaff5970d562a67d1e94f77f1ec6ed294c7d862f3d88d5",
+      "libmtmd.so.0.4.0": "3126f325b04cb4666ea9bd2a4051b4481a67400a614f76919bf190d464fbb57b",
+      "libllama-server-impl.so": "2d852ba67f59907a93a12d8f7c12592ba33ea0415f21fa107fcb75e9ea795739",
+      "llama-server": "97e81fb144ffd1ca974de7e2c6bec6afd55220b86749a2171dcead64111c71f7"
+    },
+    "execution_audit": {
+      "operations": [
+        {
+          "op": "inspect",
+          "engine": null,
+          "lane": null
+        },
+        {
+          "op": "load",
+          "engine": "llama.cpp",
+          "lane": "tuned"
+        },
+        {
+          "op": "generate",
+          "engine": null,
+          "lane": "tuned"
+        },
+        {
+          "op": "generate",
+          "engine": null,
+          "lane": "tuned"
+        },
+        {
+          "op": "generate",
+          "engine": null,
+          "lane": "tuned"
+        }
+      ],
+      "ollama_log_exists": false,
+      "placement_log": [
+        "0.02.583.437 I load_tensors: offloaded 49/49 layers to GPU",
+        "0.02.583.442 I load_tensors:        CUDA0 model buffer size = 27624.06 MiB",
+        "0.02.583.443 I load_tensors:        CUDA1 model buffer size = 25557.39 MiB",
+        "0.02.583.444 I load_tensors:        CUDA2 model buffer size = 24875.01 MiB",
+        "0.02.583.445 I load_tensors:    CUDA_Host model buffer size =   644.14 MiB",
+        "0.02.583.446 I load_tensors:   CPU_Mapped model buffer size = 27465.95 MiB",
+        "0.17.375.092 I load_tensors: offloaded 50/50 layers to GPU",
+        "0.17.375.095 I load_tensors:        CUDA2 model buffer size =  2647.04 MiB",
+        "0.18.091.523 I spec common_specu: - gpu_layers=99, cache_k=f16, cache_v=f16, ctx_tgt=yes, ctx_dft=yes, devices=[CUDA2]"
+      ]
+    },
+    "prior_attempts": [
+      {
+        "status": "blocked",
+        "blocker": "OpenRouter API key total spending limit reached. User chose to finish with the Astra test blocked.",
+        "receipt_sha256": "a090ecddc958afc8ca6df40a1a379eedbb39d2afe8647f9b0bf33fc75991b377",
+        "preparation_seconds": 331.63942691730335
+      }
+    ],
     "notes": [
-      "All six installed assets and runtime hashes passed Slurm compute-node verification.",
-      "Default Ollama target offload and device placement passed on all three assigned L40s.",
-      "No optimized Flash throughput or live-speed result is claimed."
+      "Successful retry after the user raised the key spending limit. Actual OpenRouter Astra high returned priority tier.",
+      "No explicit profile override; Astra selected the registered Flash MTP2 profile.",
+      "The earlier completed Ollama baseline was reused byte-for-byte; no Ollama process was launched in this retry.",
+      "The same node and model family were tested with different three-GPU allocations, sharing one physical GPU. This is a whole-configuration single-run comparison, not a simultaneous or identical-allocation causal trial.",
+      "Standalone Ollama context was 262144 versus optimized 131072; templates, sampling and output lengths differ.",
+      "Optional startup preparation, all-three-GPU placement checks, generation, live observation and revert passed on hardware."
     ]
   },
   "validation": {
@@ -266,8 +513,10 @@
     "owned_test_allocations_released": [
       "268030",
       "268031",
-      "268032"
+      "268032",
+      "268033"
     ],
-    "final_squeue_own_jobs_empty": true
+    "final_squeue_own_jobs_empty": true,
+    "flash_receipt_arithmetic_and_provenance_passed": true
   }
 }

@@ -6,7 +6,7 @@ Shared repository: https://github.com/SoLLLLLZ/NOVA_TT
 
 **Current status:** The Python FastAPI backend, explicit frontend mock mode, registered profiles for all three models and Wright Slurm worker are implemented. Start with [backend setup and usage](backend/README.md). All three models are enabled; Glimmer uses one L40 and its patched runtime, and Flash requires three L40s on one node.
 
-[Latest hardware validation](docs/demo/GLIMMER_FLASH_VALIDATION.md): Glimmer passed the real Astra production path and live feed. Flash's separate Ollama baseline passed; its Astra/optimized test remains blocked by the OpenRouter key spending limit.
+[Latest hardware validation](docs/demo/GLIMMER_FLASH_VALIDATION.md): Glimmer and Flash both passed the real Astra production path, generation and live feed. Flash decoded at 71.33 tokens/s versus the reused standalone Ollama baseline of 15.18 tokens/s (4.70×); see the report for configuration and allocation differences.
 
 ## Start here
 
