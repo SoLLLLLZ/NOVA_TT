@@ -85,4 +85,5 @@ Keep the normal UI simple. The backend applies the complete supported configurat
 Update local references after pulling this change. The four CANON evidence files were moved without changing their contents. No GPU job or application is launched by this reorganization.
 
 Copy-paste demo sequence: [Terminal commands](docs/demo/DEMO_COMMANDS.md).
+
 Slideshow: https://docs.google.com/presentation/d/1ckAvTTJuQe9frd0-zeAPZLQVpUeJGSsX/edit?usp=sharing&ouid=117463019846993731974&rtpof=true&sd=true 
