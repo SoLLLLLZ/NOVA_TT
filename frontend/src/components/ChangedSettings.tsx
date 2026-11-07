@@ -6,9 +6,9 @@ function Rows({ rows, valuesOnly }: { rows: ChangeRow[]; valuesOnly: boolean }) 
   return (
     <>
       {rows.map((row) => (
-        <tr key={row.key} title={row.reason || undefined}>
+        <tr key={row.key} title={row.reason || undefined} className={row.changed === false ? "changes__unchanged" : undefined}>
           <th scope="row">{row.label}</th>
-          {!valuesOnly && (
+          {!valuesOnly && row.changed !== false && (
             <>
               <td className="changes__from">{row.from}</td>
               <td className="changes__arrow" aria-hidden="true">
@@ -16,7 +16,7 @@ function Rows({ rows, valuesOnly }: { rows: ChangeRow[]; valuesOnly: boolean }) 
               </td>
             </>
           )}
-          <td className={valuesOnly ? "changes__value" : "changes__to"}>{row.to}</td>
+          <td colSpan={!valuesOnly && row.changed === false ? 3 : undefined} className={valuesOnly || row.changed === false ? "changes__value" : "changes__to"}>{row.to}</td>
         </tr>
       ))}
     </>
@@ -41,15 +41,17 @@ export function ChangedSettings({ rows, valuesOnly = false, title = "Changed set
         <span>{title}</span>
         <span className="changes__rule" aria-hidden="true" />
       </h2>
+      {rows.some((row) => row.changed !== undefined) && <p className="changes__hint">{key.length} key settings · arrows mark changes · scroll for more</p>}
       {rows.length === 0 ? (
         <p className="changes__empty">The backend kept your current settings.</p>
       ) : (
-        <div className="changes__scroll">
+        <div className="changes__scroll" tabIndex={0} role="region" aria-label={title}>
           <table className="changes__table">
             <thead className="sr-only">
               <tr>
                 <th scope="col">Setting</th>
                 {!valuesOnly && <th scope="col">Before</th>}
+                {!valuesOnly && <th scope="col"><span className="sr-only">Change</span></th>}
                 <th scope="col">{valuesOnly ? "Value" : "After"}</th>
               </tr>
             </thead>

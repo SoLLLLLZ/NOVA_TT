@@ -7,7 +7,7 @@ import { desktop } from "./lib/desktop";
 import { PairingForm } from "./components/PairingForm";
 import { Toast } from "./components/Toast";
 import { CONTRACT_MAJOR, DEFAULT_API_BASE, LIVE_MIN_MINOR } from "./config";
-import { changeRows } from "./lib/changes";
+import { importantConfigRows } from "./lib/changes";
 import { gpuLabel } from "./lib/format";
 import { KEYS, load, remove, save } from "./lib/storage";
 import { lookFor } from "./models";
@@ -416,7 +416,7 @@ export function App() {
             look={look}
             modelKey={modelId}
             confidence={state.result?.confidence ?? "none"}
-            rows={changeRows(state.result?.changes ?? [])}
+            rows={importantConfigRows(state.result?.config ?? null, state.result?.changes ?? [])}
             waitingText={state.liveUnavailable ?? "Waiting for terminal command…"}
             reverting={reverting}
             revertError={state.revertError}

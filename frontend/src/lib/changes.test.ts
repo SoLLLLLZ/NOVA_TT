@@ -1,5 +1,27 @@
 import { describe, expect, it } from "vitest";
-import { changeRows, configRows, diffConfigs } from "./changes";
+import { changeRows, configRows, diffConfigs, importantConfigRows } from "./changes";
+import rehearsal from "../../../docs/demo/widget-integration-validation-20261107.json";
+
+describe("importantConfigRows", () => {
+  it("shows 20 active settings while highlighting only actual changes", () => {
+    const rows = importantConfigRows(rehearsal.optimization.config, [
+      { path: "settings.draft_tokens", from: 3, to: 5 },
+      { path: "settings.temperature", from: 1, to: 0.75 },
+    ]);
+    expect(rows).toHaveLength(20);
+    expect(rows.filter((item) => item.changed).map((item) => item.label)).toEqual(["Draft tokens", "Temperature"]);
+    expect(rows.find((item) => item.key === "quant")?.to).toBe("IQ3_S hybrid 3.23bpw");
+    expect(rows.find((item) => item.key === "settings.context_per_slot")?.to).toBe("64K");
+    expect(rows.find((item) => item.key === "settings.threads_prefill")?.to).toBe("6");
+  });
+
+  it("uses the applied value over a stale proposed value and preserves unknowns", () => {
+    const config = { ...rehearsal.optimization.config, settings: { draft_tokens: 3 } };
+    const rows = importantConfigRows(config, [{ path: "settings.draft_tokens", from: 3, to: 5 }]);
+    expect(rows.find((item) => item.key === "settings.draft_tokens")).toMatchObject({ to: "3", changed: false });
+    expect(rows.find((item) => item.key === "settings.temperature")).toMatchObject({ to: "—", changed: false });
+  });
+});
 
 describe("changeRows", () => {
   const changes = [

@@ -2,6 +2,8 @@
 
 The TuneIt Electron widget connects to the real local Python backend, which calls OpenRouter Astra high and deploys a verified llama.cpp profile under Slurm on Wright. Default Ollama is **outside the tool** for all three models.
 
+For the complete copy-paste terminal sequence, including SSH recovery and verbose timing, see [Demo commands](DEMO_COMMANDS.md).
+
 ## Start the widget
 
 From the repository root, prepare dependencies once:
@@ -30,7 +32,7 @@ This is an explicitly labeled Wright launcher: it starts the **real `ollama serv
 Wait for **READY**. In a second terminal, from the repo root:
 
 ```sh
-./scripts/ollama-wright run qwen3.8-27b
+./scripts/ollama-wright run qwen3.8-27b --verbose
 ```
 
 At `>>>`, type:
@@ -53,7 +55,7 @@ The changed settings compare against the registered native reference, not an aut
 ## 3. Select the optimized model and type the prompt in Terminal
 
 ```sh
-./scripts/tuneit run qwen3.8-27b
+./scripts/tuneit run qwen3.8-27b --verbose
 ```
 
 This prints the actual model, engine, profile, draft/temperature and Wright job before the `>>>` prompt. Type the same Industrial Revolution prompt. It streams the final answer through the real `/generate` endpoint while the widget receives `/live` timing updates. The terminal and widget final decode rates must agree (the widget rounds to an integer). Receipts are saved under `var/terminal/`.

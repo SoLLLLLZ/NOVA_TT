@@ -1096,11 +1096,27 @@ input {
 }
 
 .changes__scroll {
-  max-height: 340px;
+  max-height: 230px;
   overflow-y: auto;
+  scrollbar-gutter: stable;
   scrollbar-width: thin;
   scrollbar-color: var(--cyan-dim) transparent;
 }
+
+.changes__hint {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.changes__unchanged .changes__value {
+  text-align: right;
+  color: var(--text);
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.changes__table th { white-space: normal; padding-right: 8px; }
 
 .changes__more {
   display: block;

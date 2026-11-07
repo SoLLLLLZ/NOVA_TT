@@ -2,7 +2,7 @@ import type { Change, Config } from "../api/types";
 import { formatTokens } from "./format";
 
 /** `advanced` rows are backend internals (templates, tensor placement…) shown only on request. */
-export type ChangeRow = { key: string; label: string; from: string; to: string; reason: string; advanced: boolean };
+export type ChangeRow = { key: string; label: string; from: string; to: string; reason: string; advanced: boolean; changed?: boolean };
 
 type Field = { label: string; format?: (value: unknown) => string };
 
@@ -42,6 +42,8 @@ const FIELDS: Record<string, Field> = {
   "settings.min_p": { label: "Min-p" },
   "settings.reasoning_effort": { label: "Reasoning effort" },
   "settings.gpu_layers": { label: "GPU layers" },
+  "settings.split_mode": { label: "GPU split" },
+  "settings.parallel_slots_per_process": { label: "Parallel slots" },
 };
 const ORDER = Object.keys(FIELDS);
 
@@ -135,4 +137,29 @@ const CONFIG_SUMMARY = new Set([
 export function configRows(config: Config): ChangeRow[] {
   const empty: Config = { ...config, engine: "", quant: null, settings: {} };
   return changeRows(diffConfigs(empty, config)).filter((row) => CONFIG_SUMMARY.has(row.key));
+}
+
+const IMPORTANT_SETTINGS = [
+  "engine", "quant", "settings.context_per_slot", "settings.gpu_layers", "settings.split_mode",
+  "settings.parallel_slots_per_process", "settings.threads_decode", "settings.threads_prefill",
+  "settings.batch_size", "settings.microbatch_size", "settings.kv_type_k", "settings.kv_type_v",
+  "settings.flash_attention", "settings.speculative_mode", "settings.draft_tokens",
+  "settings.temperature", "settings.top_k", "settings.top_p", "settings.min_p", "settings.reasoning_effort",
+];
+
+/** Read current values from the applied config, not from the sparse change list. */
+export function importantConfigRows(config: Config | null, changes: Change[]): ChangeRow[] {
+  if (!config) return changeRows(changes);
+  const byPath = new Map(changes.map((change) => [change.path, change]));
+  const rows = IMPORTANT_SETTINGS.map((path) => {
+    const value = path.startsWith("settings.") ? config.settings[path.slice(9)] : config[path as "engine" | "quant"];
+    const change = byPath.get(path);
+    return {
+      ...row({ path, from: change?.from, to: value, reason: change?.reason }),
+      changed: !!change && value !== undefined && JSON.stringify(change.from) !== JSON.stringify(value),
+    };
+  });
+  // Keep less common backend changes inspectable without crowding the main panel.
+  return [...rows, ...changeRows(changes.filter((change) => !IMPORTANT_SETTINGS.includes(change.path)))
+    .map((item) => ({ ...item, advanced: true, changed: true }))];
 }

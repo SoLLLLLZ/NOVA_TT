@@ -14,6 +14,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--prompt", default=PROBE_PROMPT)
     parser.add_argument("--interactive", action="store_true", help="Select the retained model, then type a prompt")
+    parser.add_argument("--verbose", action="store_true", help="Print native prefill/decode token counts and phase durations")
     parser.add_argument("--model", default=MODEL, choices=[MODEL, "muse-glimmer", "qwen3.8-flash-next"])
     parser.add_argument("--max-tokens", type=int, default=2048)
     parser.add_argument("--port", type=int, default=8000)
@@ -53,6 +54,10 @@ def main():
                     m = event["measurement"]
                     private_json(ROOT / "var/terminal" / (event["run_id"] + ".json"), receipt)
                     print(f"\nDecode: {m['decode_tps']:.2f} tok/s; output: {m['output_tokens']} tokens; completed: {m['completed']}", file=sys.stderr)
+                    if args.verbose:
+                        print(f"Prefill: {m['prefill_tps']:.2f} tok/s; {m['prompt_tokens']} tokens / {m['prefill_seconds']:.6f} s", file=sys.stderr)
+                        print(f"Decode: {m['decode_timed_tokens']} timed tokens / {m['decode_seconds']:.6f} s", file=sys.stderr)
+                        print(f"Timing convention: {m['timing_convention']}; wall: {m['wall_seconds']:.3f} s", file=sys.stderr)
                     return 0
                 elif event["type"] == "error":
                     print(event["error"]["message"], file=sys.stderr)

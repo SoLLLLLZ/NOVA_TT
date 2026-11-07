@@ -83,3 +83,5 @@ Keep the normal UI simple. The backend applies the complete supported configurat
 | `CANON.csv`, `CANON_GUIDE.md`, `CANON_VALIDATION.json`, `qualitative_lessons.json` | `data/canon/` with the same filenames |
 
 Update local references after pulling this change. The four CANON evidence files were moved without changing their contents. No GPU job or application is launched by this reorganization.
+
+Copy-paste demo sequence: [Terminal commands](docs/demo/DEMO_COMMANDS.md).

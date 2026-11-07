@@ -69,7 +69,7 @@ async def serve(model):
         print('Ollama stopped. Owned Slurm allocation released.', flush=True)
 
 
-async def run(model):
+async def run(model, verbose=False):
     request_lock = lock('request.lock')
     try:
         if not (STATE/'ready.json').exists():
@@ -101,6 +101,10 @@ async def run(model):
         private_json(STATE/(ident+'.json'),{'model':model,'prompt':prompt,'measurement':result,'deployment':driver.session})
         print(f"\n\nDefault Ollama decode: {result['decode_tps']:.2f} tok/s")
         print(f"Prefill: {result['prefill_tps']:.2f} tok/s | output: {result['output_tokens']} | completed: {result['completed']}")
+        if verbose:
+            print(f"Decode: {result['decode_timed_tokens']} timed tokens / {result['decode_seconds']:.6f} s")
+            print(f"Prefill: {result['prompt_tokens']} tokens / {result['prefill_seconds']:.6f} s")
+            print(f"Timing convention: {result['timing_convention']}; wall: {result['wall_seconds']:.3f} s")
         print(f'Receipt: var/ollama-demo/{ident}.json')
         if not all(result[k] for k in ('service_healthy','placement_matches','context_matches','memory_guard_pass')):
             raise RuntimeError('Baseline validation failed; do not use this rate.')
@@ -112,9 +116,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('command', choices=['serve','run'])
     parser.add_argument('model', nargs='?', default=MODEL, choices=[MODEL,'muse-glimmer','qwen3.8-flash-next'])
+    parser.add_argument('--verbose', action='store_true', help='Print native token counts and phase durations as well as decode speed')
     args = parser.parse_args()
     try:
-        asyncio.run(serve(args.model) if args.command=='serve' else run(args.model))
+        asyncio.run(serve(args.model) if args.command=='serve' else run(args.model, args.verbose))
     except (Exception, KeyboardInterrupt) as error:
         print(f'\nStopped: {error}')
         return 1
