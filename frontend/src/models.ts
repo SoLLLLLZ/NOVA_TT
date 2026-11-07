@@ -22,7 +22,7 @@ export type ModelLook = {
 
 export const MODEL_LOOKS: Record<string, ModelLook> = {
   "qwen3.8-27b": {
-    name: "ByteShape Qwen3.8 27B",
+    name: "Qwen3.8 27B",
     car: byteshapeCar,
     accent: "#C6F432",
     accentInk: "#0B1405",

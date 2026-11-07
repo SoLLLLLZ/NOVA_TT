@@ -32,12 +32,6 @@ export function SelectScreen({ status, offline, clusterId, gpuType, model, onClu
   // installed may be null (not checked yet); only an explicit false blocks Optimize.
   const canOptimize = !detecting && !offline && !!selected && selected.installed !== false && !!gpuType && clusterSupported;
 
-  let note: string | null = null;
-  if (selected && selected.installed === false) note = "This model isn't installed on the backend.";
-  else if (selected && !selected.ready && selected.readiness_reasons.length) note = selected.readiness_reasons[0];
-  else if (selected && gpuType && selected.requirements.gpu_type !== gpuType)
-    note = `Tested on ${selected.requirements.gpu_type}; ${gpuType} has no verified profile.`;
-
   return (
     <main className="screen screen--select" style={{ "--accent": look.accent } as CSSProperties}>
       <Header gpu={gpuType ? gpuLabel(gpuType, status?.all_gpus) : null} connection={offline ? "offline" : detecting ? "detecting" : "connected"} boltColor={look.accent} />
@@ -74,7 +68,6 @@ export function SelectScreen({ status, offline, clusterId, gpuType, model, onClu
       <CarStage look={look} variant="select" modelKey={model} />
       <div className="car-caption">
         <p className="car-caption__name">{look.name}</p>
-        {note && <p className="note">{note}</p>}
       </div>
 
       <PixelButton
@@ -86,7 +79,6 @@ export function SelectScreen({ status, offline, clusterId, gpuType, model, onClu
       >
         PITSTOP · OPTIMIZE
       </PixelButton>
-      <p className="helper">{detecting ? "Detecting GPU…" : "Changing the model changes your car."}</p>
     </main>
   );
 }
