@@ -1645,3 +1645,6 @@ html.is-desktop body {
 .is-desktop .gauge {
   margin-bottom: 16px;
 }
+
+.terminal-command { font-size: 13px; overflow-wrap: anywhere; text-align: center; margin: 8px 0; color: #bfc4cd; }
+.terminal-command code { display: block; user-select: text; color: #c6f432; font-size: 12px; }

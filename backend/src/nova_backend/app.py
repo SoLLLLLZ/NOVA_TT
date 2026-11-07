@@ -74,7 +74,7 @@ def create_app(state_dir=None, mock=None, driver=None, agent=None, prepare_model
     app = FastAPI(title="NOVA Backend", version=VERSION, lifespan=lifespan)
     origins = os.environ.get(
         "NOVA_CORS_ORIGINS",
-        "http://localhost:5173,http://127.0.0.1:5173,tauri://localhost",
+        "http://localhost:5173,http://127.0.0.1:5173,tauri://localhost,app://widget",
     ).split(",")
     app.add_middleware(
         CORSMiddleware,

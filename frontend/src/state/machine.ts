@@ -11,6 +11,7 @@ import type {
   StepEvent,
   StepName,
 } from "../api/types";
+import { gpuTypes } from "../lib/format";
 import { diffConfigs } from "../lib/changes";
 
 export type Phase =
@@ -267,9 +268,7 @@ export function reducer(state: State, action: Action): State {
       return { ...state, phase: "detecting_gpu", pairingError: null };
     case "status_loaded": {
       const status = action.status;
-      const types = status.all_gpus.length
-        ? status.all_gpus.map((gpu) => gpu.label)
-        : status.models.map((model) => model.requirements.gpu_type);
+      const types = gpuTypes(status.all_gpus, status.models.map((model) => model.requirements.gpu_type));
       const gpuType = state.gpuType && types.includes(state.gpuType) ? state.gpuType : types[0] ?? null;
       const model = status.models.some((m) => m.id === state.model) ? state.model : status.models[0]?.id ?? state.model;
       const phase = state.phase === "detecting_gpu" || state.phase === "connecting" ? "select_model" : state.phase;
@@ -350,7 +349,8 @@ export function reducer(state: State, action: Action): State {
           return {
             ...state,
             phase: "live_speed",
-            live: { ...state.live, requestId: event.request_id, active: true },
+            live: { decode: null, prefill: null, requestId: event.request_id, active: true },
+            liveUnavailable: null,
           };
         case "metrics":
           return {
@@ -377,7 +377,7 @@ export function reducer(state: State, action: Action): State {
             },
           };
         case "error":
-          return { ...state, liveUnavailable: event.error.message };
+          return { ...state, live: { ...state.live, active: false }, liveUnavailable: event.error.message };
         default:
           return state;
       }
@@ -394,7 +394,7 @@ export function reducer(state: State, action: Action): State {
         run: null,
         live: emptyLive,
         liveUnavailable: null,
-        toast: state.result?.kind === "default" ? "Default run stopped" : "Defaults restored",
+        toast: state.result?.kind === "default" ? "Default run stopped" : "Setup reverted",
       };
     case "revert_failed":
       return {

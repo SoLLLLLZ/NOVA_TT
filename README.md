@@ -10,6 +10,8 @@ Shared repository: https://github.com/SoLLLLLZ/NOVA_TT
 
 The widget frontend (floating desktop widget and Chrome extension) is in [frontend/](frontend/README.md); a standalone stdlib mock for frontend work is in [tests/mocks/](tests/mocks/README.md).
 
+For the integrated macOS menu-bar app and transparent terminal demo, follow [WIDGET_DEMO.md](docs/demo/WIDGET_DEMO.md). The app auto-starts/pairs with the real local backend; Ollama remains a separate terminal command.
+
 ## Start here
 
 1. Read the [API v2 contract](docs/api/endpoint.md) before connecting frontend and backend.

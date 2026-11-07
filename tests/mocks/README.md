@@ -35,4 +35,6 @@ Environment switches:
 
 Covered: health, status, capabilities, profiles, optimize (verify_only and sequential_compare), runs, cancel, revert, action, chat, diagnose and live. Also covered: idempotent replay and conflicts, one active operation at a time, unknown-field rejection, and 401 without a pairing token.
 
-`/action` also supports `apply_default` (contract v2.1): it retains untouched default Ollama, and simulated terminal runs then report default-level rates. `POST /mock/inference {"model": "<id>"}` is mock-only and not part of the contract. It stands in for the real backend noticing a request on the retained tuned service.
+`POST /mock/inference {"model": "<id>"}` is mock-only and not part of the contract. It stands in for the real backend noticing a request on the retained tuned service.
+
+Default Ollama is outside the tool. `apply_default` is rejected, matching the production backend. Use the standalone Wright terminal launcher for actual baseline demonstrations.

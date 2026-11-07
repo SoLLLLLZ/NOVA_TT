@@ -1,0 +1,213 @@
+{
+  "date": "2026-11-07",
+  "model": "qwen3.8-27b",
+  "prompt": "Write a short essay explaining the causes of the Industrial Revolution",
+  "status": "passed_with_terminal_ui_limitation",
+  "frontend_source": "origin/main merge 68faf71 (partner frontend-widget 01801ed)",
+  "shell": "Electron 45.2.3 local TuneIt.app",
+  "baseline": {
+    "prompt_tokens": 63,
+    "output_tokens": 278,
+    "cached_tokens": 0,
+    "decode_timed_tokens": 278,
+    "prefill_seconds": 1.723065,
+    "decode_seconds": 10.242393,
+    "wall_seconds": 11.983523327857256,
+    "request_started_at": "2026-11-07T18:40:06.206285+00:00",
+    "request_finished_at": "2026-11-07T18:40:18.189811+00:00",
+    "load_seconds": 26.80813821218908,
+    "load_timing_source": "preload_wall",
+    "queue_seconds": null,
+    "decode_tps": 27.14209462573834,
+    "prefill_tps": 36.56275300119264,
+    "timing_convention": "eval_count / eval_duration",
+    "output_cap": 2048,
+    "stop_reason": "stop",
+    "completed": true,
+    "quality_pass": null,
+    "gpu_ids": [
+      "GPU-b88255ea-7355-ce97-d8c1-82a5beadfabe"
+    ],
+    "min_free_gpu_memory_mib": {
+      "GPU-b88255ea-7355-ce97-d8c1-82a5beadfabe": 32676.0
+    },
+    "peak_temperature_c": {
+      "GPU-b88255ea-7355-ce97-d8c1-82a5beadfabe": 40.0
+    },
+    "request_hash": "5420ba13dd67dc9d320933b2265cfc08639b916b364cab23159cec63161caeb4",
+    "service_healthy": true,
+    "placement_matches": true,
+    "context_matches": true,
+    "configured_context_per_slot": 32768,
+    "memory_guard_pass": true,
+    "warnings": []
+  },
+  "optimized": {
+    "prompt_tokens": 21,
+    "output_tokens": 764,
+    "cached_tokens": 0,
+    "decode_timed_tokens": 763,
+    "prefill_seconds": 0.283746,
+    "decode_seconds": 10.883908,
+    "wall_seconds": 11.438291447237134,
+    "request_started_at": "2026-11-07T18:41:30.409918+00:00",
+    "request_finished_at": "2026-11-07T18:41:41.848211+00:00",
+    "load_seconds": 4.499614879488945,
+    "load_timing_source": "service_startup_wall",
+    "queue_seconds": null,
+    "decode_tps": 70.1034959134164,
+    "prefill_tps": 74.00985388340276,
+    "timing_convention": "(predicted_n - 1) / predicted_ms",
+    "output_cap": 2048,
+    "stop_reason": "eos",
+    "completed": true,
+    "quality_pass": null,
+    "gpu_ids": [
+      "GPU-b88255ea-7355-ce97-d8c1-82a5beadfabe"
+    ],
+    "min_free_gpu_memory_mib": {
+      "GPU-b88255ea-7355-ce97-d8c1-82a5beadfabe": 30350.0
+    },
+    "peak_temperature_c": {
+      "GPU-b88255ea-7355-ce97-d8c1-82a5beadfabe": 46.0
+    },
+    "request_hash": "78cc7dea02d35fe5c73f6881eb9edb0ece905ed2f5a32214d137d3669524f233",
+    "warnings": [],
+    "measurement_id": "measurement_dc260f25e99c5b61d032",
+    "run_id": "run_914d8b2cc3262a0e3bcb",
+    "profile_id": "profile_fc0784b84a8a540b58b19171",
+    "origin": "live",
+    "purpose": "throughput",
+    "workload": "short",
+    "prompt_hash": "56c4a433270d7aad3a7d4a8125456adf4d4d40d653d18a5b60787943e75be041",
+    "engine": "llama.cpp",
+    "runtime_id": "llama-l40-b10820",
+    "rate_scope": "per_request",
+    "cache_state": "uncached",
+    "settings_hash": "cb514b2d23d1aa46f94d393870b1ca024c7132a375bf997f1e782cb13b84d8c2",
+    "artifact_ref": "measurement_dc260f25e99c5b61d032-raw.json",
+    "sample_count": 1,
+    "simulation": false
+  },
+  "decode_ratio": 2.582832934601096,
+  "same_physical_gpu": true,
+  "ollama_outside_optimization": true,
+  "baseline_allocation": "268037",
+  "optimized_allocation": "268038",
+  "astra": {
+    "model": "openai/gpt-6-astra",
+    "reasoning_effort": "high",
+    "requested_service_tier": "priority",
+    "effective_service_tier": "priority",
+    "available": true
+  },
+  "optimization": {
+    "run_id": "run_63cf09ea7cb4b38253f3",
+    "elapsed_seconds": 31.910766042303294,
+    "config": {
+      "model": "qwen3.8-27b",
+      "artifact_id": "byteshape-iq3s-40171062",
+      "quant": "IQ3_S hybrid 3.23bpw",
+      "engine": "llama.cpp",
+      "runtime_id": "llama-l40-b10820",
+      "settings": {
+        "context_tokens": 65536,
+        "context_per_slot": 65536,
+        "parallel_slots_per_process": 1,
+        "replicas": 1,
+        "gpu_layers": 99,
+        "main_gpu": 0,
+        "split_mode": "none",
+        "tensor_split": [],
+        "tensor_overrides": [
+          {
+            "pattern": "token_embd.weight",
+            "buffer": "CUDA0"
+          }
+        ],
+        "batch_size": 2048,
+        "microbatch_size": 512,
+        "threads_decode": 2,
+        "threads_prefill": 6,
+        "kv_type_k": "q8_0",
+        "kv_type_v": "q8_0",
+        "flash_attention": "on",
+        "fit": "off",
+        "speculative_mode": "draft-mtp",
+        "draft_model": null,
+        "draft_device": [
+          "CUDA0"
+        ],
+        "draft_gpu_layers": 99,
+        "draft_tokens": 5,
+        "draft_kv_k": "q8_0",
+        "draft_kv_v": "q8_0",
+        "backend_sampling": true,
+        "mps": false,
+        "prompt_cache_ram_mib": 1024,
+        "checkpoint_min_step": 512,
+        "temperature": 0.75,
+        "top_k": 20,
+        "top_p": 0.95,
+        "min_p": 0.0,
+        "reasoning_effort": "medium",
+        "repeat_penalty": 1.0,
+        "presence_penalty": 0.0,
+        "jinja": true,
+        "reasoning_format": "deepseek",
+        "chat_template_id": "byteshape-embedded",
+        "chat_template_kwargs": {
+          "enable_thinking": true,
+          "reasoning_effort": "medium"
+        },
+        "vision_projector": null
+      },
+      "unresolved_fields": [],
+      "profile_id": "profile_fc0784b84a8a540b58b19171"
+    },
+    "validation": {
+      "status": "passed",
+      "completed_answer": true,
+      "answer_correct": true,
+      "service_healthy": true,
+      "placement_matches": true,
+      "context_matches": true,
+      "memory_guard_pass": true,
+      "configured_context_per_slot": 65536,
+      "tested_prompt_tokens": 56,
+      "checked_at": "2026-11-07T18:41:04.087039+00:00",
+      "scope": "Short arithmetic completed-answer check only.",
+      "issues": []
+    },
+    "repairs": []
+  },
+  "ui_observations": [
+    "Native TuneIt app launched and paired automatically with the real backend.",
+    "Computer use clicked PITSTOP OPTIMIZE for ByteShape Qwen3.8 27B.",
+    "Progress showed Asking AI then Testing configs.",
+    "Verified screen showed draft 3 to 5 and temperature 1 to 0.75.",
+    "During terminal generation the widget showed LIVE SPEED and Generating with changing native decode rates.",
+    "Final display showed 70 tok/s and Completed, matching terminal 70.10 tok/s.",
+    "Computer use clicked REVERT SETUP; widget returned to model selection.",
+    "Hide and Option+Space restored the same widget."
+  ],
+  "computer_use_limit": "macOS Terminal app was explicitly denied by computer-use tooling; terminal commands and interactive prompt entry used exec_command/write_stdin PTYs. No GUI-Terminal automation is claimed.",
+  "receipts": {
+    "baseline_sha256": "4be178dbeb722e9b40139ce71a75eb5a46cc974dd72c4307e54c3bfac8df92e7",
+    "optimized_terminal_sha256": "e63bf54fc5eefd0d589c90e88e37960552f9e0054e798a924d3a4f55ebd28eb0"
+  },
+  "checks": {
+    "frontend_tests": 28,
+    "backend_tests": 68,
+    "mock_tests": 14,
+    "typecheck_and_build": true,
+    "slurm_jobs_released": true,
+    "widget_left_running": true,
+    "retained_model_after_revert": null
+  },
+  "limitations": [
+    "Single whole-configuration comparison; contexts, sampling, prompt tokenization and output lengths differ.",
+    "The UI rounds native decode to whole tokens per second.",
+    "Both engines completed the essay, but only the separate short arithmetic check is programmatically quality-validated."
+  ]
+}

@@ -1,5 +1,5 @@
 // Present only inside the Electron desktop widget (see desktop/preload.cjs).
-export type DesktopBridge = { platform: string; hide: () => void };
+export type DesktopBridge = { platform: string; hide: () => void; connection: () => Promise<{ base: string; token: string }> };
 
 declare global {
   interface Window {

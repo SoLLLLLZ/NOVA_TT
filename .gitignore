@@ -55,3 +55,6 @@ xcuserdata/
 *.log
 *.swp
 *.swo
+
+# Local macOS app bundle
+/frontend/release/

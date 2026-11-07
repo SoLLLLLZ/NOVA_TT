@@ -2,7 +2,7 @@
 
 Owner: partner. One UI, two shells: a **floating desktop widget** (Electron) and a **Chrome Manifest V3 extension**. Built with Vite, React and TypeScript against [API contract v2.1](../docs/api/endpoint.md) and the [demo model catalog](../docs/demo/DEMO_MODELS.md).
 
-Flow: pair → choose cluster, GPU and model (the car changes with the model) → optionally **run with default settings first** (untouched Ollama via `/action apply_default`; run the model in a terminal to see its live speed) → **PITSTOP · OPTIMIZE** (spin → drive → service animation with the live step checklist) → **SETUP OPTIMIZED** (changed settings only, no speeds) → the student runs the model in a terminal → **LIVE SPEED** gauge from `GET /live`, with the default run's speed and the speedup shown beside it when one was measured. **REVERT TO DEFAULTS** is available on both tuned screens.
+Flow: desktop auto-pairs with the private local backend → choose Wright, GPU and model → **PITSTOP · OPTIMIZE** → verified settings → run `./scripts/tuneit run <model>` in Terminal and type the prompt → **LIVE SPEED** from real Wright timings. **REVERT SETUP** returns to the prior configuration or unloads the service. Ollama defaults are a separate terminal demo; no widget action starts them.
 
 ## Run
 
@@ -10,7 +10,8 @@ Requires Node 22+.
 
 ```bash
 cd frontend
-npm install
+npm ci
+node node_modules/electron/install.js
 npm run dev          # http://localhost:5173/widget.html in a normal tab
 npm test             # vitest: SSE parser, gauge scale, change rows, checklist, state machine
 npm run build        # typecheck + build the extension into frontend/dist
@@ -19,11 +20,12 @@ npm run build        # typecheck + build the extension into frontend/dist
 ### Desktop widget (recommended for the demo)
 
 ```bash
-npm run desktop       # build, then open the widget
+npm run desktop:bundle # builds release/TuneIt.app; open it for the menu-bar widget
+npm run desktop       # development launcher
 npm run desktop:dev   # with `npm run dev` running: live-reloading UI
 ```
 
-A 380×740 frameless window floats above every app and every Space. Drag it by the top strip or the header. **Option+Space** shows or hides it from anywhere, and so do the menu-bar bolt and the × button; Escape hides it too. It remembers where you left it, and the menu-bar item can snap it back to the top-right corner. Quit from the menu-bar icon. The packaged UI loads from `app://widget`. `desktop/main.cjs` presents the backend's allowed dev origin for `localhost`/`127.0.0.1` requests, so the backend needs no CORS change.
+A 380×740 frameless window floats above every app and every Space. Drag it by the top strip or the header. **Option+Space** shows or hides it from anywhere, and so do the menu-bar bolt and the × button; Escape hides it too. It remembers where you left it, and the menu-bar item can snap it back to the top-right corner. Quit from the menu-bar icon. The packaged UI loads from `app://widget`. The real backend explicitly allows `app://widget`. The sandboxed renderer obtains only the local pairing token through a restricted IPC call; the OpenRouter key stays in the Python backend. The desktop app starts the project’s `.venv` backend if needed, reuses a matching healthy backend, and stops its own child on quit. The generated local bundle points to this checkout and is not a portable installer.
 
 ### Chrome extension
 
@@ -57,3 +59,5 @@ The product name is a placeholder in `src/config.ts` (`APP_NAME`) and `public/ma
 - Idempotency keys are kept per click. A dropped stream or a replayed key switches to polling `GET /runs/{id}` instead of re-posting. Reopening the widget resumes an active run or a tuned result.
 - Cluster list: Wright is supported. Babel, Bridges-2 and FLAME are listed but disabled until the backend advertises them.
 - `prefers-reduced-motion` replaces the pitstop sequence with the service scene and disables the tweens.
+
+See [the exact terminal/demo sequence](../docs/demo/WIDGET_DEMO.md).

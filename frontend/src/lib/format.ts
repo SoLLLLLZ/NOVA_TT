@@ -21,6 +21,6 @@ export function gpuLabel(type: string, gpus: Gpu[] = []): string {
 
 /** Distinct GPU types available: allocated GPUs first, else what the models need. */
 export function gpuTypes(gpus: Gpu[], modelTypes: string[]): string[] {
-  const types = gpus.length ? gpus.map((gpu) => gpu.label) : modelTypes;
+  const types = gpus.length ? gpus.map((gpu) => modelTypes.find((type) => gpu.name?.includes(type)) ?? gpu.label) : modelTypes;
   return [...new Set(types.filter(Boolean))];
 }

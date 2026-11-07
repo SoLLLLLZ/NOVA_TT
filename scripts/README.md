@@ -6,3 +6,7 @@
 - `check_live_byteshape.py` retains the explicit-profile ByteShape `/live` transport test; it does not call OpenRouter.
 
 GPU tests are opt-in. Ollama runs only in these separate developer/demo comparisons, never in any production optimization pipeline. Prepare large Flash artifacts before the presentation timer. Reused standalone baseline receipts are explicitly identified; they are not fresh measurements.
+
+## Live menu-bar demo
+
+Use `./scripts/ollama-wright serve` and `./scripts/ollama-wright run qwen3.8-27b` for the standalone default baseline. Stop serve with Ctrl+C before optimizing in TuneIt. Then `./scripts/tuneit run qwen3.8-27b` selects the retained optimized model and asks for a prompt. See [WIDGET_DEMO.md](../docs/demo/WIDGET_DEMO.md).

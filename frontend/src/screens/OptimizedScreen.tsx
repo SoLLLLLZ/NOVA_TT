@@ -7,7 +7,7 @@ import type { ChangeRow } from "../lib/changes";
 import type { ModelLook } from "../models";
 
 const BADGES: Record<Confidence, string> = {
-  verified: "Verified on this exact GPU.",
+  verified: "Configuration verified on Wright.",
   inferred: "Based on similar runs.",
   experimental: "Experimental setup.",
   none: "Applied without database evidence.",
@@ -39,13 +39,14 @@ export function OptimizedScreen({ look, modelKey, confidence, rows, waitingText,
         </p>
       </div>
       <ChangedSettings rows={rows} />
+      <p className="terminal-command">In Terminal: <code>./scripts/tuneit run {modelKey}</code></p>
       {revertError && (
         <p className="inline-error" role="alert">
           {revertError}
         </p>
       )}
       <PixelButton variant="outline" icon={<RefreshIcon size={16} />} onClick={onRevert} disabled={reverting} className="pbtn--wide">
-        {reverting ? "RESTORING…" : "REVERT TO DEFAULTS"}
+        {reverting ? "RESTORING…" : "REVERT SETUP"}
       </PixelButton>
       <p className="waiting" role="status">
         <span className="waiting__dot" aria-hidden="true" />
