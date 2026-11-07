@@ -1,0 +1,5 @@
+#!/bin/sh
+# Starts the real Ollama server under Slurm; never uses the Mac's GPU.
+set -eu
+NOVA_ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+exec "$NOVA_ROOT/.venv/bin/python" "$NOVA_ROOT/scripts/ollama_wright.py" "$@"

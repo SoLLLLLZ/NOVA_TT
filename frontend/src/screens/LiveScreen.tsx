@@ -9,6 +9,7 @@ import type { Baseline, RunKind } from "../state/machine";
 type Props = {
   gpu: string | null;
   offline: boolean;
+  unavailable?: string | null;
   decode: number | null;
   prefill: number | null;
   active: boolean;
@@ -23,7 +24,7 @@ type Props = {
   onOptimize: () => void;
 };
 
-export function LiveScreen({ gpu, offline, decode, prefill, active, kind, look, baseline, reverting, revertError, onRevert, onOptimize }: Props) {
+export function LiveScreen({ gpu, offline, unavailable, decode, prefill, active, kind, look, baseline, reverting, revertError, onRevert, onOptimize }: Props) {
   const isDefault = kind === "default";
   const speedup = baseline && decode ? decode / baseline.decode : null;
   return (
@@ -49,7 +50,7 @@ export function LiveScreen({ gpu, offline, decode, prefill, active, kind, look, 
         {isDefault ? "DEFAULT" : "TUNED"}
       </p>
       <p className="live-status" role="status">
-        {active ? "Generating…" : "Waiting for terminal command…"}
+        {unavailable ?? (active ? "Generating…" : "Completed · run another terminal prompt")}
       </p>
       {revertError && (
         <p className="inline-error" role="alert">
@@ -67,7 +68,7 @@ export function LiveScreen({ gpu, offline, decode, prefill, active, kind, look, 
         </>
       ) : (
         <PixelButton variant="outline" onClick={onRevert} disabled={reverting} className="pbtn--small">
-          {reverting ? "RESTORING…" : "REVERT TO DEFAULTS"}
+          {reverting ? "RESTORING…" : "REVERT SETUP"}
         </PixelButton>
       )}
     </main>

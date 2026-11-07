@@ -1085,11 +1085,27 @@ input {
 }
 
 .changes__scroll {
-  max-height: 340px;
+  max-height: 230px;
   overflow-y: auto;
+  scrollbar-gutter: stable;
   scrollbar-width: thin;
   scrollbar-color: var(--cyan-dim) transparent;
 }
+
+.changes__hint {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.changes__unchanged .changes__value {
+  text-align: right;
+  color: var(--text);
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.changes__table th { white-space: normal; padding-right: 8px; }
 
 .changes__more {
   display: block;
@@ -1630,3 +1646,6 @@ html.is-desktop body {
 .is-desktop .gauge {
   margin-bottom: 16px;
 }
+
+.terminal-command { font-size: 13px; overflow-wrap: anywhere; text-align: center; margin: 8px 0; color: #bfc4cd; }
+.terminal-command code { display: block; user-select: text; color: #c6f432; font-size: 12px; }

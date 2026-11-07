@@ -4,9 +4,10 @@
 //   npm run desktop        build the UI, then open the widget
 //   npm run desktop:dev    use the running Vite dev server (npm run dev) instead
 
-const { app, BrowserWindow, Menu, Tray, globalShortcut, ipcMain, nativeImage, net, protocol, screen, session } = require("electron");
+const { app, BrowserWindow, Menu, Tray, globalShortcut, ipcMain, nativeImage, net, protocol, screen } = require("electron");
 const fs = require("node:fs");
 const path = require("node:path");
+const { spawn } = require("node:child_process");
 const { pathToFileURL } = require("node:url");
 
 const SHORTCUT = "Alt+Space";
@@ -15,9 +16,46 @@ const MARGIN = 24;
 const DIST = path.join(__dirname, "..", "dist");
 const DEV_URL = process.env.NOVA_DEV_URL;
 const APP_ORIGIN = "app://widget";
-// The backend's CORS list includes the Vite dev origin; the widget presents as it.
-const BACKEND_ORIGIN = "http://localhost:5173";
-const BACKEND_URLS = ["*://localhost/*", "*://127.0.0.1/*"];
+const PROJECT_ROOT = process.env.NOVA_PROJECT_ROOT || (app.isPackaged
+  ? JSON.parse(fs.readFileSync(path.join(process.resourcesPath, "nova-project.json"), "utf8")).root
+  : path.resolve(__dirname, "../.."));
+const STATE = process.env.NOVA_STATE_DIR || path.join(PROJECT_ROOT, "var/backend");
+const API = "http://127.0.0.1:8000";
+fs.mkdirSync(path.join(PROJECT_ROOT, "var/desktop"), { recursive: true, mode: 0o700 });
+app.setName("TuneIt");
+app.setPath("userData", path.join(PROJECT_ROOT, "var/desktop"));
+let backend = null;
+let connection = null;
+
+async function startBackend() {
+  const healthy = async () => {
+    try {
+      const response = await fetch(API + "/health", { signal: AbortSignal.timeout(1000) });
+      const data = await response.json();
+      return response.ok && data.contract_version === "2.1" && !data.simulation;
+    } catch { return false; }
+  };
+  if (!(await healthy())) {
+    const logfile = fs.openSync(path.join(PROJECT_ROOT, "var/desktop/backend.log"), "a", 0o600);
+    backend = spawn(path.join(PROJECT_ROOT, ".venv/bin/python"),
+      ["-m", "uvicorn", "nova_backend.app:app", "--host", "127.0.0.1", "--port", "8000", "--workers", "1"],
+      { cwd: PROJECT_ROOT, env: { ...process.env, NOVA_MODE: "wright", NOVA_STATE_DIR: STATE }, stdio: ["ignore", logfile, logfile] });
+    fs.closeSync(logfile);
+    let launchError = null;
+    backend.on("error", (error) => { launchError = error; });
+    for (let i = 0; i < 120; i++) {
+      if (launchError || backend.exitCode !== null) throw new Error("Backend could not start. See var/desktop/backend.log.");
+      if (await healthy()) break;
+      await new Promise(resolve => setTimeout(resolve, 250));
+    }
+    if (!(await healthy())) throw new Error("Backend startup timed out. See var/desktop/backend.log.");
+  }
+  // Only the local pairing token reaches our sandboxed renderer. Never read the OpenRouter key here.
+  const token = fs.readFileSync(path.join(STATE, "pairing-token"), "utf8").trim();
+  const status = await fetch(API + "/status", { headers: { "X-Pairing-Token": token }, signal: AbortSignal.timeout(15000) });
+  if (!status.ok) throw new Error("The backend on port 8000 does not match this project's pairing file.");
+  return { base: API, token };
+}
 
 let win = null;
 let tray = null;
@@ -26,7 +64,7 @@ protocol.registerSchemesAsPrivileged([
   { scheme: "app", privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true } },
 ]);
 
-if (!app.requestSingleInstanceLock()) app.quit();
+if (!app.requestSingleInstanceLock()) app.exit(0);
 
 // ------------------------------------------------------------ window position
 const stateFile = () => path.join(app.getPath("userData"), "window-state.json");
@@ -95,6 +133,9 @@ function createWindow() {
       win.hide();
     }
   });
+  win.webContents.on("will-navigate", (event, url) => {
+    if (!(url.startsWith(APP_ORIGIN + "/") || (DEV_URL && url === DEV_URL))) event.preventDefault();
+  });
   // Links never open inside the widget.
   win.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
 }
@@ -109,27 +150,6 @@ function toggleWidget() {
   if (!win) return;
   if (win.isVisible() && win.isFocused()) win.hide();
   else showWidget();
-}
-
-// -------------------------------------------------------------- backend CORS
-// The backend allows the Vite dev origin; requests from the packaged widget
-// carry app://widget, so present the allowed origin and accept the answer.
-function bridgeBackendCors() {
-  if (DEV_URL) return; // the dev server already is that origin
-  const filter = { urls: BACKEND_URLS };
-  session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
-    const headers = { ...details.requestHeaders };
-    if (headers.Origin === APP_ORIGIN) headers.Origin = BACKEND_ORIGIN;
-    callback({ requestHeaders: headers });
-  });
-  session.defaultSession.webRequest.onHeadersReceived(filter, (details, callback) => {
-    const headers = {};
-    for (const [name, value] of Object.entries(details.responseHeaders ?? {})) {
-      if (name.toLowerCase() !== "access-control-allow-origin") headers[name] = value;
-    }
-    headers["Access-Control-Allow-Origin"] = [APP_ORIGIN];
-    callback({ responseHeaders: headers });
-  });
 }
 
 // --------------------------------------------------------------------- tray
@@ -154,11 +174,19 @@ app.whenReady().then(() => {
   protocol.handle("app", (request) => {
     const { pathname } = new URL(request.url);
     const file = path.normalize(path.join(DIST, decodeURIComponent(pathname)));
-    if (!file.startsWith(DIST)) return new Response("Not found", { status: 404 });
+    if (new URL(request.url).host !== "widget" || !file.startsWith(DIST + path.sep)) return new Response("Not found", { status: 404 });
     return net.fetch(pathToFileURL(file).toString());
   });
 
-  bridgeBackendCors();
+  connection = startBackend();
+  connection.catch(() => {}); // forwarded as a visible connection error by the IPC handler
+  ipcMain.handle("backend:connection", (event) => {
+    const source = event.senderFrame?.url ?? "";
+    if (event.sender !== win?.webContents || !(source.startsWith(APP_ORIGIN + "/") || (DEV_URL && source === DEV_URL))) {
+      throw new Error("Untrusted widget sender");
+    }
+    return connection;
+  });
   createWindow();
   createTray();
 
@@ -173,6 +201,7 @@ app.on("second-instance", showWidget);
 app.on("activate", showWidget);
 app.on("before-quit", () => {
   app.isQuitting = true;
+  if (backend && backend.exitCode === null) backend.kill("SIGTERM");
 });
 app.on("will-quit", () => globalShortcut.unregisterAll());
 app.on("window-all-closed", () => {

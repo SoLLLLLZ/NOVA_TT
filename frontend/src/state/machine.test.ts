@@ -123,7 +123,7 @@ describe("reducer", () => {
       { type: "revert_done" },
     ], ready);
     expect(state.phase).toBe("select_model");
-    expect(state.toast).toBe("Defaults restored");
+    expect(state.toast).toBe("Setup reverted");
     expect(state.result).toBeNull();
   });
 
@@ -138,4 +138,10 @@ describe("reducer", () => {
     expect(state.phase).toBe("optimized");
     expect(state.revertError).toBe("nope");
   });
+});
+
+
+it("normalizes per-device L40 labels to the backend GPU type", () => {
+  const observed = { ...status, all_gpus: [{ ...status.all_gpus[0], label: "L40 1" }] };
+  expect(reducer(initialState, {type:"status_loaded", status:observed}).gpuType).toBe("L40");
 });

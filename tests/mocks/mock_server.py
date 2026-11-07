@@ -573,47 +573,6 @@ def run_optimize(run: Run, body: dict) -> None:
         finish_active(run)
 
 
-def run_default(run: Run, body: dict) -> None:
-    """apply_default: start and retain the untouched default Ollama service."""
-    model = body["model"]
-    started = time.time()
-    current = copy.deepcopy(STATE.current_config) if STATE.current_config else None
-    try:
-        run.emit("start", operation=run.operation, mode="apply_default", started_at=run.started_at,
-                 deadline_at=run.deadline_at)
-        step(run, "detect_gpu", "running", 0.1, "Reading the Slurm allocation")
-        pause(0.6)
-        step(run, "detect_gpu", "done", 0.25, f"Found {len(GPUS)} × L40 · 48 GB on n03")
-        step(run, "load_model", "running", 0.35, "Starting untouched Ollama with its defaults")
-        pause(1.4)
-        step(run, "load_model", "done", 0.8, "Default Ollama is serving the model")
-        config = default_config(model)
-        step(run, "apply", "running", 0.9, "Keeping the default service for your terminal")
-        pause(0.4)
-        step(run, "apply", "done", 1.0, "Default service is ready")
-        rollback_id = f"rb_{uuid.uuid4().hex[:10]}"
-        service = {"id": f"svc_{uuid.uuid4().hex[:8]}", "state": "running", "allocation_id": "mock-alloc-266901",
-                   "expires_at": later_iso(3600)}
-        with STATE.lock:
-            STATE.rollbacks[rollback_id] = current
-            STATE.current_config = config
-            STATE.is_tuned = False
-            STATE.service_model = model
-            STATE.service = service
-        run.emit("done", status="success", mode="apply_default", applied=True, config=config, evidence=None,
-                 validation=None, before=None, after=None, speedup=None,
-                 comparison={"available": False, "mode": "apply_default", "baseline_run_id": None,
-                             "reason": "Default run makes no comparison", "conditions_differ": []},
-                 reason="Untouched default Ollama is running.", repairs=[],
-                 elapsed_seconds=round(time.time() - started, 2), service=service, rollback_id=rollback_id,
-                 repro_command=None, repro_ref=None)
-    except Cancelled:
-        run.emit("error", error={"code": "cancelled", "message": "Default run was cancelled.", "diagnosable": False,
-                                 "retryable": True}, cleanup=cleanup_obj("completed"), last_verified_profile_id=None)
-    finally:
-        finish_active(run)
-
-
 def run_revert(run: Run, rollback_id: str) -> None:
     started = time.time()
     try:
@@ -680,7 +639,7 @@ RESOURCE_FIELDS = {"target_id", "allocation_id", "gpu_type", "gpu_count", "gpu_i
 CONSTRAINT_FIELDS = {"min_context_tokens", "quant", "allow_quant_change", "allow_sampling_change",
                      "allow_experimental", "fixed_settings", "min_free_gpu_memory_mib", "max_gpu_count",
                      "runtime_requirements", "allow_cpu_offload"}
-ACTIONS = {"apply_config", "revert", "lower_context", "switch_quantization", "run_benchmark", "apply_default"}
+ACTIONS = {"apply_config", "revert", "lower_context", "switch_quantization", "run_benchmark"}
 
 
 class ApiError(Exception):
@@ -1052,9 +1011,6 @@ class Handler(BaseHTTPRequestHandler):
             raise ApiError(404, "model_not_found", "params.model must be a catalog model.", field="params.model")
         if action == "run_benchmark":
             return self.launch(key, body, "action", action, run_benchmark, params)
-        if action == "apply_default":
-            reject_unknown(params, {"model", "resources"}, "params")
-            return self.launch(key, body, "action", action, run_default, params)
         return self.launch(key, body, "action", "verify_only", run_optimize,
                            {"model": params["model"], "mode": "verify_only"})
 

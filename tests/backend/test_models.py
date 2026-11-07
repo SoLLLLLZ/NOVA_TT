@@ -156,3 +156,14 @@ def test_failed_preparation_releases_allocation(tmp_path):
         with TestClient(app):
             pass
     assert driver.session is None
+
+
+def test_desktop_origin_keeps_pairing_required(tmp_path):
+    app = create_app(tmp_path, mock=True)
+    with TestClient(app) as client:
+        headers = {"Origin":"app://widget", "Access-Control-Request-Method":"GET", "Access-Control-Request-Headers":"X-Pairing-Token"}
+        response = client.options('/status', headers=headers)
+        assert response.headers['access-control-allow-origin']=='app://widget'
+        assert client.get('/status', headers={"Origin":"app://widget"}).status_code==401
+        headers['Origin']='https://untrusted.example'
+        assert 'access-control-allow-origin' not in client.options('/status', headers=headers).headers

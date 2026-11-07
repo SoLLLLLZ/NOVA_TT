@@ -7,7 +7,7 @@ import { desktop } from "./lib/desktop";
 import { PairingForm } from "./components/PairingForm";
 import { Toast } from "./components/Toast";
 import { CONTRACT_MAJOR, DEFAULT_API_BASE, LIVE_MIN_MINOR } from "./config";
-import { changeRows } from "./lib/changes";
+import { importantConfigRows } from "./lib/changes";
 import { gpuLabel } from "./lib/format";
 import { KEYS, load, remove, save } from "./lib/storage";
 import { lookFor } from "./models";
@@ -17,7 +17,7 @@ import { LiveScreen } from "./screens/LiveScreen";
 import { OptimizedScreen } from "./screens/OptimizedScreen";
 import { PitstopScreen } from "./screens/PitstopScreen";
 import { SelectScreen } from "./screens/SelectScreen";
-import { initialState, reducer, type Baseline, type RunKind, type TunedResult } from "./state/machine";
+import { initialState, reducer, type RunKind, type TunedResult } from "./state/machine";
 import { deriveChecklist } from "./state/steps";
 
 type PendingRun = { runId: string | null; model: string; gpuType: string; idempotencyKey: string; before: Config | null; kind?: RunKind };
@@ -43,7 +43,11 @@ export function App() {
 
   // ---------------------------------------------------------------- connect
   const bootstrap = useCallback(async (tokenOverride?: string) => {
-    const base = (await load<string>(KEYS.apiBase)) ?? DEFAULT_API_BASE;
+    let local: { base: string; token: string } | undefined;
+    try { local = await desktop?.connection(); } catch (error) {
+      dispatch({ type: "fatal", error: asErrorBody(error) }); return;
+    }
+    const base = local?.base ?? (await load<string>(KEYS.apiBase)) ?? DEFAULT_API_BASE;
     let version: { major: number; minor: number };
     try {
       const health = await new Client(base, null).health();
@@ -59,7 +63,7 @@ export function App() {
       });
       return;
     }
-    const token = tokenOverride ?? (await load<string>(KEYS.pairing));
+    const token = local?.token ?? tokenOverride ?? (await load<string>(KEYS.pairing));
     if (!token) {
       dispatch({ type: "need_pairing", message: null });
       return;
@@ -69,14 +73,13 @@ export function App() {
     const started = performance.now();
     try {
       const status = await authed.status();
-      await save(KEYS.pairing, token);
+      if (!desktop) await save(KEYS.pairing, token);
       const wait = MIN_DETECT_MS - (performance.now() - started);
       if (wait > 0) await sleep(wait);
       setClient(authed);
       setOffline(false);
       dispatch({ type: "status_loaded", status });
-      const baselines = await load<Record<string, Baseline>>(KEYS.baselines);
-      if (baselines) dispatch({ type: "baselines_loaded", baselines });
+      // Ollama is demonstrated separately in Terminal, never loaded by this UI.
 
       // Pick up where a closed widget left off.
       if (status.active_run_id) {
@@ -91,10 +94,10 @@ export function App() {
           kind: pending?.kind,
         });
       } else if (status.current_config) {
-        // Reopen on the retained service: tuned, or the untouched default run.
+        // Reopen only on the same retained, verified profile.
         const stored = await load<TunedResult>(KEYS.tuned);
         const result = stored ? { ...stored, kind: stored.kind ?? "tuned" } : null;
-        if (result && status.current_config.model === result.model && (result.kind === "tuned") === status.is_tuned) {
+        if (result?.kind === "tuned" && status.current_config.profile_id === result.config?.profile_id && status.is_tuned) {
           dispatch({ type: "resume_tuned", result });
         }
       }
@@ -239,22 +242,6 @@ export function App() {
     );
   }, [client, state.status, state.model, resourcesFor, streamRun]);
 
-  /** Starts the untouched default (contract 2.1 `apply_default`) so its live speed can be compared. */
-  const runDefault = useCallback(async () => {
-    const target = resourcesFor();
-    if (!client || !target) return;
-    const idempotencyKey = newIdempotencyKey();
-    const pending: PendingRun = { runId: null, model: state.model, gpuType: target.gpuType, idempotencyKey, before: null, kind: "default" };
-    dispatch({ type: "default_start", idempotencyKey });
-    await save(KEYS.pendingRun, pending);
-    await streamRun(
-      "/action",
-      { action: "apply_default", params: { model: state.model, resources: target.resources } },
-      pending,
-      false,
-    );
-  }, [client, state.model, resourcesFor, streamRun]);
-
   const onArrived = useCallback(() => dispatch({ type: "animation_ready" }), []);
 
   // Persist the tuned result so a reopened widget lands back on it.
@@ -396,12 +383,13 @@ export function App() {
           <LiveScreen
             gpu={gpuText}
             offline={offline}
+            unavailable={state.liveUnavailable}
             decode={state.live.decode}
             prefill={state.live.prefill}
             active={state.live.active}
             kind={state.result?.kind ?? "tuned"}
             look={look}
-            baseline={state.result?.kind === "tuned" ? state.baselines[modelId] ?? null : null}
+            baseline={null}
             onOptimize={() => void optimize()}
             reverting={reverting}
             revertError={state.revertError}
@@ -428,7 +416,7 @@ export function App() {
             look={look}
             modelKey={modelId}
             confidence={state.result?.confidence ?? "none"}
-            rows={changeRows(state.result?.changes ?? [])}
+            rows={importantConfigRows(state.result?.config ?? null, state.result?.changes ?? [])}
             waitingText={state.liveUnavailable ?? "Waiting for terminal command…"}
             reverting={reverting}
             revertError={state.revertError}
@@ -442,7 +430,7 @@ export function App() {
         <ErrorScreen
           error={state.error}
           retryLabel={state.status ? "TRY AGAIN" : "RETRY CONNECTION"}
-          onRetry={() => (!state.status ? void bootstrap() : state.run?.kind === "default" ? void runDefault() : void optimize())}
+          onRetry={() => (!state.status ? void bootstrap() : void optimize())}
           onBack={state.status ? () => dispatch({ type: "back_to_select" }) : null}
         />
       );
@@ -459,7 +447,6 @@ export function App() {
           onGpu={(type) => dispatch({ type: "select_gpu", gpuType: type })}
           onModel={(model) => dispatch({ type: "select_model", model })}
           onOptimize={() => void optimize()}
-          onRunDefault={() => void runDefault()}
         />
       );
   }
