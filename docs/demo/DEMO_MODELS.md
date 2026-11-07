@@ -2,7 +2,7 @@
 
 Updated November 7, 2026. Repository: https://github.com/SoLLLLLZ/NOVA_TT
 
-Build the model picker and results UI against [endpoint.md](endpoint.md), contract v2.0. This document supplies the three demo model identities, supported Wright layouts and reference configurations. It does not change the API contract or prove that a backend endpoint has been implemented. Use [OPTIMIZER_AGENT.md](OPTIMIZER_AGENT.md) for agent behavior and [CANON.csv](CANON.csv) with [CANON_GUIDE.md](CANON_GUIDE.md) for evidence.
+Build the model picker and results UI against [endpoint.md](../api/endpoint.md), contract v2.0. This document supplies the three demo model identities, supported Wright layouts and reference configurations. It does not change the API contract or prove that a backend endpoint has been implemented. Use [OPTIMIZER_AGENT.md](../../backend/prompts/OPTIMIZER_AGENT.md) for agent behavior and [CANON.csv](../../data/canon/CANON.csv) with [CANON_GUIDE.md](../../data/canon/CANON_GUIDE.md) for evidence.
 
 ## Model picker
 

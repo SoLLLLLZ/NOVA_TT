@@ -1,0 +1,57 @@
+# Secrets and local credentials
+.env
+.env.*
+!.env.example
+!.env.*.example
+.envrc
+*.key
+*.pem
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+credentials.json
+secrets.json
+secrets/
+.credentials/
+
+# Local run state and downloaded model artifacts
+/var/*
+!/var/README.md
+*.gguf
+*.safetensors
+*.ckpt
+pytorch_model*.bin
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+
+# JavaScript / frontend
+node_modules/
+.next/
+.vite/
+coverage/
+
+# Build output (keep dependency lockfiles under version control)
+build/
+dist/
+*.tsbuildinfo
+.build/
+DerivedData/
+xcuserdata/
+*.xcuserstate
+
+# macOS and transient files
+.DS_Store
+*.log
+*.swp
+*.swo

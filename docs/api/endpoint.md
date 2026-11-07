@@ -4,6 +4,8 @@ Updated November 7, 2026. This replaces v0.1. Frontend and backend must both rep
 
 Repository: https://github.com/SoLLLLLZ/NOVA_TT
 
+Repository paths: contract `docs/api/endpoint.md`; model reference `docs/demo/DEMO_MODELS.md`; agent prompt `backend/prompts/OPTIMIZER_AGENT.md`; evidence `data/canon/`. Mock implementations belong in `tests/mocks/`.
+
 The normal UI stays simple: select model and hardware, Optimize, see verification and decode speed. Advanced settings are available through typed capabilities and a details panel; the UI does not need a slider for every field. The backend resolves artifacts, schedules work, calls the agent, applies complete configurations, verifies them and owns rollback.
 
 ## 1. Transport, authentication and versioning
@@ -24,7 +26,7 @@ Error shape: `{"error":{"code":"unsupported_setting","message":"Draft size 17 ex
 
 `config` contains `profile_id` (immutable backend profile ID, null before resolution), `model` (catalog ID), `artifact_id` (registered target artifact), `quant`, `engine` (`ollama` or `llama.cpp`), `runtime_id` (registered binary/library bundle), and `settings` (the fields below). The profile ID resolves the full model/draft/runtime/template/settings combination, not just a CANON row. Overrides produce a new profile revision/ID. Artifact/runtime IDs are returned by the backend catalog; clients never fabricate paths or assume CANON `runtime_ref` is executable.
 
-See [DEMO_MODELS.md](DEMO_MODELS.md) for the three model IDs and concrete v2 config examples. A resolved config also has `unresolved_fields`, an array of `{path,reason}` (empty when fully resolved). A proposed config can omit that array. In any `changes` array, paths are relative to config, such as `settings.draft_tokens`; each entry carries the old value, new value and a short reason. For the ByteShape production-to-candidate transition, show draft_tokens 3 -> 5 and temperature 1 -> 0.75 separately.
+See [DEMO_MODELS.md](../demo/DEMO_MODELS.md) for the three model IDs and concrete v2 config examples. A resolved config also has `unresolved_fields`, an array of `{path,reason}` (empty when fully resolved). A proposed config can omit that array. In any `changes` array, paths are relative to config, such as `settings.draft_tokens`; each entry carries the old value, new value and a short reason. For the ByteShape production-to-candidate transition, show draft_tokens 3 -> 5 and temperature 1 -> 0.75 separately.
 
 `source_config_ids` and `lesson_ids` live in the separate `evidence` object. A source configuration ID is historical provenance, not proof the effective config is identical. Record any deviations. Preserve native runtime provenance and requested/effective settings; never silently clamp a requested value. If the runtime resolves auto/default values, report the resolution and revalidate constraints.
 
@@ -382,7 +384,7 @@ Special conversions: `gpu_layers="53/53 (actual target)"` is observed placement,
 3. Replace gpu_index with resources allocation/GPU IDs and group requirements. Memory display now uses explicit MiB values. Add installed/loaded/ready distinctions and race availability.
 4. `changed` becomes `changes` with dotted paths and per-change reasons. Return evidence source IDs and independent validation. Measurements contain explicit timing/cache/token metadata; before/speedup can be null in verify_only.
 5. Implement the run store/idempotency/cancel behavior before allowing UI retries. Revert/action are streaming operations in v2. Keep authentication and terminal error handling consistent.
-6. Update frontend mocks and backend validation to the same version in the implementation work. At this contract revision, `mock/mock_server.py` is absent from the shared repository; this documentation change does not invent a working mock/backend. DEMO_MODELS.md and OPTIMIZER_AGENT.md are updated with this contract.
+6. Update frontend mocks and backend validation to the same version in the implementation work. At this contract revision, `tests/mocks/mock_server.py` is absent from the shared repository; this documentation change does not invent a working mock/backend. [DEMO_MODELS.md](../demo/DEMO_MODELS.md) and [OPTIMIZER_AGENT.md](../../backend/prompts/OPTIMIZER_AGENT.md) are updated with this contract.
 7. Core demo acceptance: ByteShape candidate can express MTP5/temp0.75/threads2+6; Flash can require 3 L40s and MTP2 on CUDA2; Glimmer can express DFlash15/temp0.75 and reject draft17. Verify unknown settings, insufficient GPUs, failed quality, interrupted stream, duplicate request and cancellation paths. Do not populate live UI metrics from fixtures.
 
 ## 15. Source scope
